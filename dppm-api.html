@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>dppm-api</title>
+<meta name="generator" content="Etherpad">
+<meta name="author" content="Etherpad">
+<meta name="changedby" content="Etherpad">
+<meta charset="utf-8">
+<style>
+* {
+  font-family: arial, sans-serif;
+  font-size: 13px;
+  line-height: 17px;
+}
+ul.indent {
+  list-style-type: none;
+}
+ol {
+  list-style-type: none;
+  padding-left: 0;
+}
+body > ol {
+  counter-reset: first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth;
+}
+ol > li:before {
+  content: counter(first) ". ";
+  counter-increment: first;
+}
+ol > ol > li:before {
+  content: counter(first) "." counter(second) ". ";
+  counter-increment: second;
+}
+ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) ". ";
+  counter-increment: third;
+}
+ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) ". ";
+  counter-increment: fourth;
+}
+ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) ". ";
+  counter-increment: fifth;
+}
+ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) ". ";
+  counter-increment: sixth;
+}
+ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) ". ";
+  counter-increment: seventh;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) "." counter(eighth) ". ";
+  counter-increment: eighth;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) "." counter(eighth) "." counter(ninth) ". ";
+  counter-increment: ninth;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) "." counter(eighth) "." counter(ninth) "." counter(tenth) ". ";
+  counter-increment: tenth;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) "." counter(eighth) "." counter(ninth) "." counter(tenth) "." counter(eleventh) ". ";
+  counter-increment: eleventh;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) "." counter(eighth) "." counter(ninth) "." counter(tenth) "." counter(eleventh) "." counter(twelfth) ". ";
+  counter-increment: twelfth;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) "." counter(eighth) "." counter(ninth) "." counter(tenth) "." counter(eleventh) "." counter(twelfth) "." counter(thirteenth) ". ";
+  counter-increment: thirteenth;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) "." counter(eighth) "." counter(ninth) "." counter(tenth) "." counter(eleventh) "." counter(twelfth) "." counter(thirteenth) "." counter(fourteenth) ". ";
+  counter-increment: fourteenth;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) "." counter(eighth) "." counter(ninth) "." counter(tenth) "." counter(eleventh) "." counter(twelfth) "." counter(thirteenth) "." counter(fourteenth) "." counter(fifteenth) ". ";
+  counter-increment: fifteenth;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > li:before {
+  content: counter(first) "." counter(second) "." counter(third) "." counter(fourth) "." counter(fifth) "." counter(sixth) "." counter(seventh) "." counter(eighth) "." counter(ninth) "." counter(tenth) "." counter(eleventh) "." counter(twelfth) "." counter(thirteenth) "." counter(fourteenth) "." counter(fifteenth) "." counter(sixteenth) ". ";
+  counter-increment: sixteenth;
+}
+ol {
+  text-indent: 0px;
+}
+ol > ol {
+  text-indent: 10px;
+}
+ol > ol > ol {
+  text-indent: 20px;
+}
+ol > ol > ol > ol {
+  text-indent: 30px;
+}
+ol > ol > ol > ol > ol {
+  text-indent: 40px;
+}
+ol > ol > ol > ol > ol > ol {
+  text-indent: 50px;
+}
+ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 60px;
+}
+ol > ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 70px;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 80px;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 90px;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 100px;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 110px;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 120px;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 130px;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 140px;
+}
+ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol > ol {
+  text-indent: 150px;
+}
+
+</style>
+</head>
+<body>
+# The main api root, to allow for separating this API on the same domain behind a reverse proxy<br>&#x2F;api:<br>&nbsp; verbs: OPTIONS<br>&nbsp; returns: this document (roughly) in JSON<br>&nbsp; &#x2F;register: # perhaps don&#x27;t have this, have it be in a config file?<br>&nbsp;&nbsp;&nbsp; verbs: POST<br>&nbsp; &#x2F;sign_in:<br>&nbsp;&nbsp;&nbsp; verbs: POST<br>&nbsp;&nbsp;&nbsp; post body: JSON-encoded login data<br>&nbsp;&nbsp;&nbsp; returns: A JWT which encodes user authentication and an expiry date.<br>&nbsp; # No &#x2F;sign_out necessary, just delete the JWT in the client.<br>&nbsp; &#x2F;app:<br>&nbsp;&nbsp;&nbsp; returns: JSON object mapping app IDs to package names<br>&nbsp;&nbsp;&nbsp; &#x2F;:pkg_name?db={type}&amp;addr={url}&amp;id={app id}&amp;server={server_id}:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; does: Install a package<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; required params: name<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; optional params:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - db<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - addr<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - id (generated if not provided)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - server_id<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns: app ID<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; verbs: PATCH<br>&nbsp;&nbsp;&nbsp; &#x2F;:app_name:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; verbs: DELETE<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; does: removes the package specified by the app id<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#x2F;config:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; verbs: GET<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns: all keys<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#x2F;:key:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; verbs:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GET:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns: the contents of this config item<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; POST:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; post body: the value to be set<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DELETE:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#x2F;service:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; start<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; stop&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; etc...<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#x2F;libs:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; lists dependent library packages<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#x2F;app:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return the base application package<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#x2F;pkg:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns information present in pkg.con as JSON<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &#x2F;logs?stream={bool}:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns: JSON-encoded log data<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; does: if stream is set, attempt to upgrade to a websocket and stream<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; the results.<br><br>&nbsp; &#x2F;service?system={bool}:<br>&nbsp;&nbsp;&nbsp; # list services, including, or not, system ones<br>&nbsp;&nbsp;&nbsp; returns: list of service IDs<br>&nbsp;&nbsp;&nbsp; &#x2F;:svc_id&#x2F;boot:<br>&nbsp;&nbsp;&nbsp; &#x2F;:svc_id&#x2F;reload:<br>&nbsp;&nbsp;&nbsp; &#x2F;:svc_id&#x2F;restart:<br>&nbsp;&nbsp;&nbsp; &#x2F;:svc_id&#x2F;start:<br>&nbsp;&nbsp;&nbsp; &#x2F;status:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns: JSON-encoded mapping of service-ids to each service&#x27;s status<br>&nbsp;&nbsp;&nbsp; &#x2F;:svc_id&#x2F;status:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns: the status of this service like { run: bool, boot: bool, status: text }<br>&nbsp;&nbsp;&nbsp; &#x2F;:svc_id&#x2F;stop:<br><br>&nbsp; &#x2F;pkg:<br>&nbsp;&nbsp;&nbsp; # list built packages<br>&nbsp;&nbsp;&nbsp; verbs:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GET:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns: list of package IDs<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DELETE:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; does: clean unused built packages<br>&nbsp;&nbsp;&nbsp; &#x2F;:id&#x2F;:version:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; required: id<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; optional: version<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; verbs:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GET:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns: JSON-formatted output of `dppm package query :id`<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DELETE:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; does: removes the given package<br>&nbsp;&nbsp;&nbsp; &#x2F;build&#x2F;:package_name&#x2F;:version:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; required: package_name<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; optional: version<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; verbs: POST<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; returns: the ID of the built image<br>&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp; &#x2F;src?type={package_type}:<br>&nbsp;&nbsp;&nbsp; # list all available source packages<br>&nbsp;&nbsp;&nbsp; # the package type is either &quot;app&quot; or &quot;lib&quot;<br><br>
+</body>
+</html>
