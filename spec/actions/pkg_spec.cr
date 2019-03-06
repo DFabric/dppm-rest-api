@@ -28,7 +28,7 @@ module DppmRestApi::Actions::Pkg
   module Build
     describe Build do
       describe "post \#{root_path}/:package" do
-        post "#{root_path}/:package"
+        post root_path + "/:package"
         response.status_code.should eq 200
       end
     end

@@ -1,7 +1,7 @@
 require "../../utils"
 module DppmRestApi::Actions::Pkg
   ALL_PKGS = root_path
-  ONE_PKG = "#{root_path}/:id"
+  ONE_PKG = root_path + "/:id"
   # List built packages
   get ALL_PKGS do |context|
 
@@ -23,7 +23,7 @@ module DppmRestApi::Actions::Pkg
     # message? We could also use server-side events or a websocket to provide the
     # status of this action as it occurs over the API, rather than just returning
     # a result on completion.
-    post "#{root_path}/:package" do |context|
+    post root_path + "/:package" do |context|
 
     end
   end

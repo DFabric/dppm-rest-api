@@ -1,101 +1,101 @@
 module DppmRestApi::Actions::App
   describe DppmRestApi::Actions::App do
-    describe "#{root_path}/:app_name/config/:key" do
+    describe root_path + "/:app_name/config/:key" do
       it "responds with 200 OK" do
-        get "#{root_path}/:app_name/config/:key"
+        get root_path + "/:app_name/config/:key"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/config/:key" do
+    describe root_path + "/:app_name/config/:key" do
       it "responds with 200 OK" do
-        post "#{root_path}/:app_name/config/:key"
+        post root_path + "/:app_name/config/:key"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/config/:keys" do
+    describe root_path + "/:app_name/config/:keys" do
       it "responds with 200 OK" do
-        delete "#{root_path}/:app_name/config/:keys"
+        delete root_path + "/:app_name/config/:keys"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/config" do
+    describe root_path + "/:app_name/config" do
       it "responds with 200 OK" do
-        get "#{root_path}/:app_name/config"
+        get root_path + "/:app_name/config"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/service/boot" do
+    describe root_path + "/:app_name/service/boot" do
       it "responds with 200 OK" do
-        patch "#{root_path}/:app_name/service/boot"
+        patch root_path + "/:app_name/service/boot"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/service/reload" do
+    describe root_path + "/:app_name/service/reload" do
       it "responds with 200 OK" do
-        patch "#{root_path}/:app_name/service/reload"
+        patch root_path + "/:app_name/service/reload"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/service/restart" do
+    describe root_path + "/:app_name/service/restart" do
       it "responds with 200 OK" do
-        patch "#{root_path}/:app_name/service/restart"
+        patch root_path + "/:app_name/service/restart"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/service/start" do
+    describe root_path + "/:app_name/service/start" do
       it "responds with 200 OK" do
-        patch "#{root_path}/:app_name/service/start"
+        patch root_path + "/:app_name/service/start"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/service/status" do
+    describe root_path + "/:app_name/service/status" do
       it "responds with 200 OK" do
-        patch "#{root_path}/:app_name/service/status"
+        patch root_path + "/:app_name/service/status"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/service/stop" do
+    describe root_path + "/:app_name/service/stop" do
       it "responds with 200 OK" do
-        patch "#{root_path}/:app_name/service/stop"
+        patch root_path + "/:app_name/service/stop"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/libs" do
+    describe root_path + "/:app_name/libs" do
       it "responds with 200 OK" do
-        get "#{root_path}/:app_name/libs"
+        get root_path + "/:app_name/libs"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/app" do
+    describe root_path + "/:app_name/app" do
       it "responds with 200 OK" do
-        get "#{root_path}/:app_name/app"
+        get root_path + "/:app_name/app"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/pkg" do
+    describe root_path + "/:app_name/pkg" do
       it "responds with 200 OK" do
-        get "#{root_path}/:app_name/pkg"
+        get root_path + "/:app_name/pkg"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name/logs"  do
+    describe root_path + "/:app_name/logs"  do
       it "responds with 200 OK" do
-        get "#{root_path}/:app_name/logs"
+        get root_path + "/:app_name/logs"
         response.status_code.should eq 200
       end
     end
     pending "ws #{root_path}/:app_name/logs" do
 	  # spec-kemal has no way to test websocket routes
     end
-    describe "#{root_path}/:package_name" do
+    describe root_path + "/:package_name" do
       it "responds with 200 OK" do
-        patch "#{root_path}/:package_name"
+        patch root_path + "/:package_name"
         response.status_code.should eq 200
       end
     end
-    describe "#{root_path}/:app_name" do
+    describe root_path + "/:app_name" do
       it "responds with 200 OK" do
-        delete "#{root_path}/:app_name"
+        delete root_path + "/:app_name"
         response.status_code.should eq 200
       end
     end
