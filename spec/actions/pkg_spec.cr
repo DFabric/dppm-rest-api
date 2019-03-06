@@ -25,6 +25,7 @@ module DppmRestApi::Actions::Pkg
       end
     end
   end
+
   module Build
     describe Build do
       describe "post \#{root_path}/:package" do

@@ -78,14 +78,14 @@ module DppmRestApi::Actions::App
         response.status_code.should eq 200
       end
     end
-    describe root_path + "/:app_name/logs"  do
+    describe root_path + "/:app_name/logs" do
       it "responds with 200 OK" do
         get root_path + "/:app_name/logs"
         response.status_code.should eq 200
       end
     end
     pending "ws #{root_path}/:app_name/logs" do
-	  # spec-kemal has no way to test websocket routes
+      # spec-kemal has no way to test websocket routes
     end
     describe root_path + "/:package_name" do
       it "responds with 200 OK" do

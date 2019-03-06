@@ -1,4 +1,5 @@
 require "kemal"
+
 # Render the given data as JSON to the local `context` variable.
 macro render_data(data)
   context.response.content_type = "application/json"
@@ -8,8 +9,8 @@ end
 macro root_path
   {{
     "/" + @type.stringify
-               .downcase
-               .gsub(/^DppmRestApi::Actions::/, "")
-               .gsub(/::/, "/")
+      .downcase
+      .gsub(/^DppmRestApi::Actions::/, "")
+      .gsub(/::/, "/")
   }}
 end
