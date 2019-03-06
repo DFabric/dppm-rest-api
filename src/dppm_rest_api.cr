@@ -1,4 +1,5 @@
-# TODO: Write documentation for `DppmRestApi`
+require "./dppm_rest_api/actions"
+
 module DppmRestApi
   VERSION = "0.1.0"
 
