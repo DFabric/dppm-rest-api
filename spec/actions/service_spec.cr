@@ -6,45 +6,45 @@ module DppmRestApi::Actions::Service
         response.status_code.should eq 200
       end
     end
-    describe root_path + "/status" do
+    describe root_path "/status" do
       it "responds with OK" do
-        get root_path + "/status"
+        get root_path "/status"
         response.status_code.should eq 200
       end
     end
-    describe root_path + "/:service/boot" do
+    describe root_path "/:service/boot" do
       it "responds with OK" do
-        patch root_path + "/:service/boot"
+        patch root_path "/:service/boot"
         response.status_code.should eq 200
       end
     end
-    describe root_path + "/:service/reload" do
+    describe root_path "/:service/reload" do
       it "responds with OK" do
-        patch root_path + "/:service/reload"
+        patch root_path "/:service/reload"
         response.status_code.should eq 200
       end
     end
-    describe root_path + "/:service/restart" do
+    describe root_path "/:service/restart" do
       it "responds with OK" do
-        patch root_path + "/:service/restart"
+        patch root_path "/:service/restart"
         response.status_code.should eq 200
       end
     end
-    describe root_path + "/:service/start" do
+    describe root_path "/:service/start" do
       it "responds with OK" do
-        patch root_path + "/:service/start"
+        patch root_path "/:service/start"
         response.status_code.should eq 200
       end
     end
-    describe root_path + "/:service/status" do
+    describe root_path "/:service/status" do
       it "responds with OK" do
-        patch root_path + "/:service/status"
+        patch root_path "/:service/status"
         response.status_code.should eq 200
       end
     end
-    describe root_path + "/:service/stop" do
+    describe root_path "/:service/stop" do
       it "responds with OK" do
-        patch root_path + "/:service/stop"
+        patch root_path "/:service/stop"
         response.status_code.should eq 200
       end
     end

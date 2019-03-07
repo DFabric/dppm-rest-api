@@ -1,3 +1,4 @@
+require "./utils"
 require "./dppm_rest_api/actions"
 
 module DppmRestApi

@@ -6,11 +6,11 @@ macro render_data(data)
   IO.copy {{data.id}}, context.response
 end
 
-macro root_path
+macro root_path(route)
   {{
     "/" + @type.stringify
       .downcase
       .gsub(/^DppmRestApi::Actions::/, "")
-      .gsub(/::/, "/")
+      .gsub(/::/, "/") + route
   }}
 end
