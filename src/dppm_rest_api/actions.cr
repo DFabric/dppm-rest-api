@@ -1,4 +1,5 @@
 require "kemal"
+require "./middlewares"
 require "./actions/*"
 
 module DppmRestApi::Actions

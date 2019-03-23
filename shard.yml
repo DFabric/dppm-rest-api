@@ -10,6 +10,8 @@ dependencies:
   spec-kemal:
     github: kemalcr/spec-kemal
     branch: master
+  scrypt:
+    github: ysbaddaden/scrypt-crystal
 
 targets:
   dppm_rest_api:

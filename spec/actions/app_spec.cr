@@ -1,3 +1,4 @@
+require "../spec_helper"
 module DppmRestApi::Actions::App
   describe DppmRestApi::Actions::App do
     describe root_path "/:app_name/config/:key" do

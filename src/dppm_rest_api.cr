@@ -4,5 +4,7 @@ require "./dppm_rest_api/actions"
 module DppmRestApi
   VERSION = "0.1.0"
 
-  # TODO: Put your code here
+  class_property config : Config do
+    Config.from_args ARGV
+  end
 end

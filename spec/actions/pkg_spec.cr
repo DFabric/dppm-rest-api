@@ -1,3 +1,4 @@
+require "../spec_helper"
 module DppmRestApi::Actions::Pkg
   describe DppmRestApi::Actions::Pkg do
     describe "get ALL_PKGS" do

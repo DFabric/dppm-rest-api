@@ -1,3 +1,4 @@
+require "../spec_helper"
 module DppmRestApi::Actions::Service
   describe DppmRestApi::Actions::Service do
     describe root_path do
