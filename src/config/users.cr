@@ -38,9 +38,9 @@ module DppmRestApi
 
     @[Flags]
     enum Access : UInt8
-      Create, Read, Update, Delete, List
+      Create, Read, Update, Delete
 
-      def self.sudo
+      def self.super_user
         Access::All
       end
 
