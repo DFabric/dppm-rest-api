@@ -3,6 +3,11 @@ module DppmRestApi::Actions::Pkg
   ONE_PKG  = root_path "/:id"
   # List built packages
   get ALL_PKGS do |context|
+    app_name = context.params.url["app_name"]
+    if context.current_user? && has_access? context.current_user, app_name, :update
+      # TODO: reload the service
+    end
+    deny_access
   end
   # Clean unused built packages
   delete ALL_PKGS do |context|

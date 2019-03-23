@@ -21,7 +21,7 @@ module AccessControl
   macro finished
     # returns true if the given user has access to the {{@type.id}} named with
     # the given name and permission type
-    def has_access?(user : UserHash, name : String, permission : Access) : Bool
+    def has_access?(user : UserHash, name : String, permission : Symbol) : Bool
       if role = DppmRestApi.config.file.roles.find { |role| role.name == user["role"]? }
         if (user["owned_{{@type.id.downcase}}s"]?.try &.includes?(name) && role.owned.{{@type.id.downcase}}s.{{permission.id}}?) ||
            role.not_owned.{{@type.id.downcase}}s.{{permission.id.downcase}}?

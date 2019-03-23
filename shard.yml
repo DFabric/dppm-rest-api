@@ -12,6 +12,8 @@ dependencies:
     branch: master
   scrypt:
     github: ysbaddaden/scrypt-crystal
+  kemal_jwt_auth:
+    github: dscottboggs/kemal-jwt-auth
 
 targets:
   dppm_rest_api:
