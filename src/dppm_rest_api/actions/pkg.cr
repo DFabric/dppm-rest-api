@@ -1,22 +1,47 @@
+require "../../utils"
+require "../../config"
 module DppmRestApi::Actions::Pkg
+  extend self
   ALL_PKGS = root_path
   ONE_PKG  = root_path "/:id"
   # List built packages
   get ALL_PKGS do |context|
-    app_name = context.params.url["app_name"]
-    if context.current_user? && has_access? context.current_user, app_name, :update
-      # TODO: reload the service
+    if context.current_user? && has_access? context.current_user, Access::Read
+      # TODO: list all built packages
     end
     deny_access
   end
   # Clean unused built packages
   delete ALL_PKGS do |context|
+    if context.current_user? && has_access? context.current_user, Access::Delete
+      # TODO: delete all unused built packages
+    end
+    deny_access
   end
   # Query information about a given package
   get ONE_PKG do |context|
+    if context.current_user? && has_access? context.current_user, Access::Read, context.params.url["id"]?
+      # TODO: Query information about the given package
+    end
+    deny_access
   end
   # Delete a given package
   delete ONE_PKG do |context|
+    if context.current_user? && has_access? context.current_user, Access::Delete, context.params.url["id"]?
+      # TODO: Query information about the given package
+    end
+    deny_access
+  end
+
+  private def has_access?(user, permission, id = nil)
+    if role = DppmRestApi.config.file.roles.find { |r| r.name === user["role"]? }
+      if not_nil_id = id
+        return true if role.owned.pkg.includes?(permission) &&
+                       user["owned_pkgs"]?.try &.includes?(not_nil_id)
+      end
+      true if role.not_owned.pkg.includes? permission
+    end
+    false
   end
 
   module Build

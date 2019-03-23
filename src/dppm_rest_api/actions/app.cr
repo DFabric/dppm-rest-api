@@ -2,7 +2,7 @@ require "../../utils"
 
 module DppmRestApi::Actions::App
   extend self
-  include AccessControl
+
   get root_path "/:app_name/config/:key" do |context|
     app_name = context.params.url["app_name"]
     if context.current_user? && has_access? context.current_user, app_name, :read
@@ -145,4 +145,17 @@ module DppmRestApi::Actions::App
     end
     deny_access
   end
+
+  # returns true if the given user has access to the {{@type.id}} named with
+  # the given name and permission type
+  private def has_access?(user : UserHash, name : String, permission : Symbol) : Bool
+    if role = DppmRestApi.config.file.roles.find { |role| role.name == user["role"]? }
+      if (user["owned_apps"]?.try &.includes?(name) && role.owned.app.{{permission.id}}?) ||
+         role.not_owned.app.{{permission.id.downcase}}?
+        true
+      end
+    end
+    false
+  end
+
 end
