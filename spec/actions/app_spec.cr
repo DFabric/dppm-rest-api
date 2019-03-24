@@ -28,37 +28,37 @@ module DppmRestApi::Actions::App
     end
     describe (root_path "/:app_name/service/boot") do
       it "responds with 401 Forbidden" do
-        patch root_path "/some-app/service/boot"
+        put (pp! root_path "/some_app/service/boot")
         response.status_code.should eq 401
       end
     end
     describe (root_path "/:app_name/service/reload") do
       it "responds with 401 Forbidden" do
-        patch root_path "/some-app/service/reload"
+        put (pp! root_path "/some_app/service/reload")
         response.status_code.should eq 401
       end
     end
     describe (root_path "/:app_name/service/restart") do
       it "responds with 401 Forbidden" do
-        patch root_path "/some-app/service/restart"
+        put (pp! root_path "/some-app/service/restart")
         response.status_code.should eq 401
       end
     end
     describe (root_path "/:app_name/service/start") do
       it "responds with 401 Forbidden" do
-        patch root_path "/some-app/service/start"
+        put (pp! root_path "/some-app/service/start")
         response.status_code.should eq 401
       end
     end
     describe (root_path "/:app_name/service/status") do
       it "responds with 401 Forbidden" do
-        patch root_path "/some-app/service/status"
+        put (pp! root_path "/some-app/service/status")
         response.status_code.should eq 401
       end
     end
     describe (root_path "/:app_name/service/stop") do
       it "responds with 401 Forbidden" do
-        patch root_path "/some-app/service/stop"
+        put (pp! root_path "/some-app/service/stop")
         response.status_code.should eq 401
       end
     end
@@ -91,7 +91,7 @@ module DppmRestApi::Actions::App
     end
     describe (root_path "/:package_name") do
       it "responds with 401 Forbidden" do
-        patch root_path "/some-pkg"
+        put root_path "/some-pkg"
         response.status_code.should eq 401
       end
     end

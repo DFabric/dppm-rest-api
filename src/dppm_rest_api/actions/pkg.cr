@@ -10,31 +10,31 @@ module DppmRestApi::Actions::Pkg
     if context.current_user? && has_access? context.current_user, Access::Read
       # TODO: list all built packages
     end
-    deny_access
+    deny_access! to: context
   end
   # Clean unused built packages
   delete ALL_PKGS do |context|
     if context.current_user? && has_access? context.current_user, Access::Delete
       # TODO: delete all unused built packages
     end
-    deny_access
+    deny_access! to: context
   end
   # Query information about a given package
   get ONE_PKG do |context|
     if context.current_user? && has_access? context.current_user, Access::Read, context.params.url["id"]?
       # TODO: Query information about the given package
     end
-    deny_access
+    deny_access! to: context
   end
   # Delete a given package
   delete ONE_PKG do |context|
     if context.current_user? && has_access? context.current_user, Access::Delete, context.params.url["id"]?
       # TODO: Query information about the given package
     end
-    deny_access
+    deny_access! to: context
   end
 
-  private def has_access?(user, permission, id = nil)
+  protected def self.has_access?(user, permission, id = nil)
     if role = DppmRestApi.config.file.roles.find { |role| role.name === user["role"]? }
       if not_nil_id = id
         return true if role.owned.pkgs.includes?(permission) &&
@@ -52,6 +52,11 @@ module DppmRestApi::Actions::Pkg
     # status of this action as it occurs over the API, rather than just returning
     # a result on completion.
     post (root_path "/:package") do |context|
+      pkg_id = context.params.url["package"]?
+      if context.current_user? && Pkg.has_access? context.current_user, Access::Create, pkg_id
+        # TODO: build the package based on the submitted configuration
+      end
+      deny_access! to: context
     end
   end
 end

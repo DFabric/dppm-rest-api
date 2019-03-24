@@ -30,9 +30,9 @@ module DppmRestApi::Actions::Pkg
 
   module Build
     describe Build do
-      describe "post \#{root_path}/:package" do
+      describe "post root_path \"/:package\"" do
         it "responds with 401 Forbidden" do
-          post root_path "/:package"
+          post root_path "/some-package"
           response.status_code.should eq 401
         end
       end

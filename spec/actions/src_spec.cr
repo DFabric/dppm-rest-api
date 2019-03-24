@@ -8,13 +8,13 @@ module DppmRestApi::Actions::Src
         response.status_code.should eq 401
       end
     end
-    ["lib", "app"].each do |type|
-      describe "get \#{root_path}/#{type}" do
-        it "responds with 401 Forbidden" do
-          get "get #{root_path}/#{type}"
-          response.status_code.should eq 401
-        end
-      end
-    end
+    # {% for src_type in ["lib", "app"] %}
+    # describe "get #{root_path {{src_type}}}" do
+    #   it "responds with 401 Forbidden" do
+    #     get root_path {{src_type}}
+    #     response.status_code.should eq 401
+    #   end
+    # end
+    # {% end %}
   end
 end

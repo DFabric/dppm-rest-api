@@ -17,7 +17,7 @@ macro root_path(route = nil, &block)
   }}
 end
 
-macro deny_access
+def deny_access!(to context)
   context.response.status_code = 401
   context.response.write "Forbidden.".to_slice
   context.response.flush

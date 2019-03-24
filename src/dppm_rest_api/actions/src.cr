@@ -7,14 +7,14 @@ module DppmRestApi::Actions::Src
     if context.current_user? && has_access? context.current_user
       # TODO: List all available source packages
     end
-    deny_access
+    deny_access! to: context
   end
   # List all available source packages, of either the *lib* or *app* type.
   get (root_path "/:type") do |context|
     if context.current_user? && has_access? context.current_user, context.params.url["type"]
       # TODO: List available source packages
     end
-    deny_access
+    deny_access! to: context
   end
 
   private def has_access?(user, id = nil) : Bool
