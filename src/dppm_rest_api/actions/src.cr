@@ -10,7 +10,7 @@ module DppmRestApi::Actions::Src
     deny_access
   end
   # List all available source packages, of either the *lib* or *app* type.
-  get root_path "/:type" do |context|
+  get (root_path "/:type") do |context|
     if context.current_user? && has_access? context.current_user, context.params.url["type"]
       # TODO: List available source packages
     end
@@ -18,10 +18,12 @@ module DppmRestApi::Actions::Src
   end
 
   private def has_access?(user, id = nil) : Bool
-    if role = DppmRestApi.config.file.roles.find { |r| r.name === user["role"]? }
+    if role_data = DppmRestApi.config.file.roles.find { |name, r| name === user["role"]? }
+      role_name, role = role_data
       if not_nil_id = id
-        return true if role.owned.src.includes?(permission) &&
-                       user["owned_srcs"]?.try(&.includes?(not_nil_id))
+        return true if role.owned.src.includes?(Access::Read) &&
+                       (owned_srcs = user["owned_srcs"]?).try(&.is_a?(String)) &&
+                       owned_srcs.as(String).split(',').map { |e| Base64.decode e }.includes?(not_nil_id)
       end
       true if role.not_owned.src.includes? Access::Read
     end

@@ -5,26 +5,26 @@ class DppmRestApi::Config
   module Defaults
     extend self
 
-    def file_loc
+    def file_loc : String
       conf_dir = if confdir = ENV["XDG_CONFIG_DIRS"]?
                    confdir
                  elsif home = ENV["HOME"]?
-                   File.join home, ".config"
+                   ::File.join home, ".config"
                  else
                    "/root/.config"
                  end
-      File.join conf_dir, "dppm", "server.con"
+      ::File.join conf_dir, "dppm", "server.con"
     end
 
-    def host
+    def host : String
       ENV["HOST"]? || "127.0.0.1"
     end
 
-    def port
+    def port : UInt16
       (ENV["PORT"]?.try &.to_i || 3000).to_u16
     end
 
-    def public_host
+    def public_host : String?
       ENV["PUBLIC_HOST"]?
     end
   end
@@ -57,11 +57,12 @@ class DppmRestApi::Config
     OptionParser.parse args do |op|
       op.on("--file_loc", "The location of the config file") { |v| file_loc = v }
       op.on("--host", "The hostname of this server") { |v| host = v }
-      op.on("--port", "The port the server will listen on") { |v| port = v }
+      op.on("--port", "The port the server will listen on") { |v| port = v.to_u16 }
       op.on "--public_host", "The publicly accessible hostname of this server, if different. This is for if the server is being published behind a reverse proxy" do |v|
         public_host = v
       end
     end
-    new file_loc || Defaults.file_loc, host || Defaults.host, port || Defaults.port, public_host
+
+    new (file_loc || Defaults.file_loc).not_nil!, (host || Defaults.host).not_nil!, (port || Defaults.port).not_nil!, public_host
   end
 end

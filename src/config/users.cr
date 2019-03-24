@@ -1,7 +1,43 @@
 require "json"
-require "scrypt"
+require "../ext/scrypt"
 
 module DppmRestApi
+  @[Flags]
+  enum Access : UInt8
+    Create, Read, Update, Delete
+
+    def self.super_user
+      Access::All
+    end
+
+    def self.deny
+      Access::None
+    end
+
+    def self.new(pull : JSON::PullParser)
+      from_value pull.read_int
+    end
+
+    def to_json
+      value
+    end
+
+    def self.from_json(value : Number)
+      from_value number
+    end
+
+    def self.from_value(value : Number)
+      {% begin %}
+      case value
+        {% for variant in @type.constants %}
+      when {{variant.id}}.value then {{variant.id}}
+        {% end %}
+      else raise "invalid variant Access recieved: #{value}"
+      end
+      {% end %}
+    end
+  end
+
   struct User
     include JSON::Serializable
     property api_key_hash : Scrypt::Password
@@ -14,9 +50,10 @@ module DppmRestApi
     def to_h : UserHash
       {% begin %}
       UserHash{
-        "role" => role,
-        {% for owned in @type.methods.select &.starts_with?("owned") %}
-        "{{owned.id}}" => {{owned.id}}, {% end %} }
+        {% for owned in @type.methods.select { |m| m.name.starts_with?("owned") && !m.name.ends_with?("=") } %}
+        "{{owned.name.id}}" => {{owned.name.id}}.map { |e| Base64.urlsafe_encode(e) }.join(','), {% end %}
+        "role" => role
+      }
       {% end %}
     end
   end
@@ -30,38 +67,10 @@ module DppmRestApi
 
     struct AccessControlList
       include JSON::Serializable
-      property app = Access.deny
-      property pkg = Access.deny
-      property service = Access.deny
-      property src = Access.deny
-    end
-
-    @[Flags]
-    enum Access : UInt8
-      Create, Read, Update, Delete
-
-      def self.super_user
-        Access::All
-      end
-
-      def self.deny
-        Access::None
-      end
-
-      def to_json
-        value
-      end
-
-      def self.from_json(value : Number)
-        {% begin %}
-        case value
-          {% for variant in @type.constants %}
-        when {{variant.id}}.value then {{variant.id}}
-          {% end %}
-        else raise "invalid variant Access recieved: #{value}"
-        end
-        {% end %}
-      end
+      property app = DppmRestApi::Access.deny
+      property pkg = DppmRestApi::Access.deny
+      property service = DppmRestApi::Access.deny
+      property src = DppmRestApi::Access.deny
     end
   end
 end

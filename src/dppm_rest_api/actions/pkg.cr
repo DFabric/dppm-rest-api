@@ -1,5 +1,6 @@
 require "../../utils"
 require "../../config"
+
 module DppmRestApi::Actions::Pkg
   extend self
   ALL_PKGS = root_path
@@ -34,10 +35,12 @@ module DppmRestApi::Actions::Pkg
   end
 
   private def has_access?(user, permission, id = nil)
-    if role = DppmRestApi.config.file.roles.find { |r| r.name === user["role"]? }
+    if role_data = DppmRestApi.config.file.roles.find { |name, r| name === user["role"]? }
+      role_name, role = role_data
       if not_nil_id = id
         return true if role.owned.pkg.includes?(permission) &&
-                       user["owned_pkgs"]?.try &.includes?(not_nil_id)
+                       (owned_pkgs = user["owned_pkgs"]?).try &.is_a?(String) &&
+                       owned_pkgs.as(String).split(',').map { |e| Base64.decode e }.includes?(not_nil_id)
       end
       true if role.not_owned.pkg.includes? permission
     end
@@ -49,7 +52,7 @@ module DppmRestApi::Actions::Pkg
     # message? We could also use server-side events or a websocket to provide the
     # status of this action as it occurs over the API, rather than just returning
     # a result on completion.
-    post root_path "/:package" do |context|
+    post (root_path "/:package") do |context|
     end
   end
 end

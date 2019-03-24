@@ -8,18 +8,18 @@ macro render_data(data)
   IO.copy {{data.id}}, context.response
 end
 
-macro root_path(route)
+macro root_path(route = nil, &block)
   {{
     "/" + @type.stringify
       .downcase
       .gsub(/^DppmRestApi::Actions::/, "")
-      .gsub(/::/, "/") + route
+      .gsub(/::/, "/") + (route || "")
   }}
 end
 
 macro deny_access
-  context.response.status = 401
-  context.response.write "Forbidden."
+  context.response.status_code = 401
+  context.response.write "Forbidden.".to_slice
   context.response.flush
   context
 end
