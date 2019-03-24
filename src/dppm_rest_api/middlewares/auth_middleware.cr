@@ -33,5 +33,7 @@ module DppmRestApi::Actions
     end
   end
 
-  add_handler KemalJWTAuth::Handler(Users, User).new users: Users.new DppmRestApi.config.file.users
+  def self.auth_handler
+    @@handler ||= KemalJWTAuth::Handler(Users, User).new users: Users.new DppmRestApi.config.file.users
+  end
 end
