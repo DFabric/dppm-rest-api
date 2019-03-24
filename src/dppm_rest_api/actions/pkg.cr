@@ -35,14 +35,13 @@ module DppmRestApi::Actions::Pkg
   end
 
   private def has_access?(user, permission, id = nil)
-    if role_data = DppmRestApi.config.file.roles.find { |name, r| name === user["role"]? }
-      role_name, role = role_data
+    if role = DppmRestApi.config.file.roles.find { |role| role.name === user["role"]? }
       if not_nil_id = id
-        return true if role.owned.pkg.includes?(permission) &&
+        return true if role.owned.pkgs.includes?(permission) &&
                        (owned_pkgs = user["owned_pkgs"]?).try &.is_a?(String) &&
                        owned_pkgs.as(String).split(',').map { |e| Base64.decode e }.includes?(not_nil_id)
       end
-      true if role.not_owned.pkg.includes? permission
+      true if role.not_owned.pkgs.includes? permission
     end
     false
   end

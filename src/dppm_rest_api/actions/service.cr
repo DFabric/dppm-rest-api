@@ -60,14 +60,13 @@ module DppmRestApi::Actions::Service
   end
 
   private def has_access?(user : UserHash, permission : Access, id = nil)
-    if role_data = DppmRestApi.config.file.roles.find { |name, r| name === user["role"]? }
-      role_name, role = role_data
+    if role = DppmRestApi.config.file.roles.find { |role| role.name === user["role"]? }
       if not_nil_id = id
-        return true if role.owned.service.includes?(permission) &&
+        return true if role.owned.services.includes?(permission) &&
                        (owned_services = user["owned_services"]?).try(&.is_a?(String)) &&
                        owned_services.as(String).split(',').map { |e| Base64.decode e }.includes?(not_nil_id)
       end
-      true if role.not_owned.service.includes? permission
+      true if role.not_owned.services.includes? permission
     end
     false
   end

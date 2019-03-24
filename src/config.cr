@@ -6,12 +6,12 @@ class DppmRestApi::Config
     extend self
 
     def file_loc : String
-      conf_dir = if confdir = ENV["XDG_CONFIG_DIRS"]?
+      conf_dir = if confdir = ENV["XDG_CONFIG_HOME"]?
                    confdir
                  elsif home = ENV["HOME"]?
                    ::File.join home, ".config"
                  else
-                   "/root/.config"
+                   "/etc"
                  end
       ::File.join conf_dir, "dppm", "server.con"
     end
@@ -54,12 +54,34 @@ class DppmRestApi::Config
     host = nil
     port = nil
     public_host = nil
-    OptionParser.parse args do |op|
-      op.on("--file_loc", "The location of the config file") { |v| file_loc = v }
-      op.on("--host", "The hostname of this server") { |v| host = v }
-      op.on("--port", "The port the server will listen on") { |v| port = v.to_u16 }
-      op.on "--public_host", "The publicly accessible hostname of this server, if different. This is for if the server is being published behind a reverse proxy" do |v|
-        public_host = v
+    while arg = args.shift?
+      case arg
+      when .starts_with? "--file-loc"
+        file_loc = if arg[11] == '='
+                     arg[11..-1]
+                   else
+                     args.shift
+                   end
+      when .starts_with? "--host"
+        host = if arg[7] == '='
+                 arg[7..-1]
+               else
+                 args.shift
+               end
+      when .starts_with? "--port"
+        port = if arg[7] == '='
+                 arg[7..-1]
+               else
+                 args.shift
+               end.to_u16
+      when .starts_with? "--public-host"
+        public_host = if arg[14] == '='
+                        arg[14..-1]
+                      else
+                        args.shift
+                      end
+      else
+        puts "unrecognized argument #{arg}"
       end
     end
 

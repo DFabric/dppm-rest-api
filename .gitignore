@@ -2,4 +2,4 @@
 /bin/
 /.shards/
 *.dwarf
-test-data
+*.api_key

@@ -132,9 +132,8 @@ module DppmRestApi::Actions::App
   # Install the given package
   put (root_path "/:package_name") do |context|
     pkg_name = context.params.url["package_name"]
-    if context.current_user? && (role_data = DppmRestApi.config.file.roles.find { |name, role| name === context.current_user["role"]? })
-      role_name, role = role_data
-      if role.not_owned.app.create?
+    if context.current_user? && (role = DppmRestApi.config.file.roles.find { |role| role.name === context.current_user["role"]? })
+      if role.not_owned.apps.create?
         # TODO: install the package and return its name
       end
     end
@@ -152,14 +151,13 @@ module DppmRestApi::Actions::App
   # returns true if the given user has access to the {{@type.id}} named with
   # the given name and permission type
   private def has_access?(user : UserHash, name : String, permission : Access) : Bool
-    if role_data = DppmRestApi.config.file.roles.find { |name, role| name == user["role"]? }
-      role_name, role = role_data
-      if role.owned.app.includes?(permission) &&
+    if role = DppmRestApi.config.file.roles.find { |role| role.name == user["role"]? }
+      if role.owned.apps.includes?(permission) &&
          (owned_apps = user["owned_apps"]?).try &.is_a?(String) &&
          owned_apps.as(String).split(',').map { |e| Base64.decode e }.includes?(name)
         true
       end
-      true if role.not_owned.app.includes? permission
+      true if role.not_owned.apps.includes? permission
     end
     false
   end
