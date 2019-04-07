@@ -1,8 +1,40 @@
 version: 1.0
 shards:
+  clicr:
+    github: j8r/clicr
+    version: 0.5.1
+
+  con:
+    github: j8r/con
+    commit: 2000932bd51135fd4f6e60ff2bb89105cf101b81
+
+  cossack:
+    github: crystal-community/cossack
+    version: 0.1.4
+
+  db:
+    github: crystal-lang/crystal-db
+    version: 0.5.1
+
+  dppm:
+    github: DFabric/dppm
+    commit: 6680829573febdc6770271d4de8b0132c0665bb9
+
+  dynany:
+    github: j8r/dynany
+    version: 0.2.1
+
   exception_page:
     github: crystal-loot/exception_page
     version: 0.1.2
+
+  exec:
+    github: j8r/exec.cr
+    version: 0.4.0
+
+  inotify:
+    github: petoem/inotify.cr
+    version: 1.0.0
 
   jwt:
     github: crystal-community/jwt
@@ -20,6 +52,14 @@ shards:
     github: jeromegn/kilt
     version: 0.4.0
 
+  libcrown:
+    github: j8r/libcrown
+    version: 0.1.1
+
+  mysql:
+    github: crystal-lang/crystal-mysql
+    commit: 9a838e37e19d6aa28bb40a3f474411a42a265584
+
   radix:
     github: luislavena/radix
     version: 0.3.9
@@ -28,7 +68,15 @@ shards:
     github: ysbaddaden/scrypt-crystal
     version: 0.2.2
 
+  semantic_compare:
+    github: j8r/semantic_compare
+    version: 0.4.0
+
   spec-kemal:
     github: kemalcr/spec-kemal
     commit: 64b89c719234ceb92c0a14762dce3afc6257fffc
+
+  tail:
+    github: j8r/tail
+    version: 0.2.2
 
