@@ -23,3 +23,10 @@ def deny_access!(to context)
   context.response.flush
   context
 end
+
+macro throw(message, *format, status_code = 500)
+  context.response.status_code = {{status_code.id}}
+  context.response.puts sprintf {{message}}, {{format.splat.id}}
+  context.response.flush
+  context
+end

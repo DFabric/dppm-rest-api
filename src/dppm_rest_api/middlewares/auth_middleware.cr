@@ -16,9 +16,18 @@ module DppmRestApi::Actions
   class Users
     private property internal : Array(User)
 
-    def initialize(@internal); end
+    # Initialize from an array of User. I.E.
+    #
+    # ```
+    # @users = Users.new array: [some, users]
+    # # The Users can be authenticated with find_and_authenticate!
+    # @users.find_and_authenticate! context.request.body
+    # # They can also be iterated over as an Array(User)
+    # @users.find { |user| user.name == expected }
+    # ```
+    def initialize(array @internal : Array(User)); end
 
-    forward_missing_to :internal
+    forward_missing_to @internal
 
     def find_and_authenticate!(body) : User?
       data = RecvdUser.from_json body
@@ -32,8 +41,8 @@ module DppmRestApi::Actions
       nil
     end
   end
-
+  property configured_users : Users { Users.new DppmRestApi.config.file.users }
   def self.auth_handler
-    @@handler ||= KemalJWTAuth::Handler(Users, User).new users: Users.new DppmRestApi.config.file.users
+    @@handler ||= KemalJWTAuth::Handler(Users, User).new users: configured_users
   end
 end
