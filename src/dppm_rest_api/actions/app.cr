@@ -9,32 +9,55 @@ module DppmRestApi::Actions::App
   macro prefix
     context.params.query["prefix"]? || CLI.default_prefix
   end
-
+  # returns true if the given user has access to the {{@type.id}} named with
+  # the given name and permission type
+  private def has_access?(user : UserHash, name : String, permission : Access) : Bool
+    if role = DppmRestApi.config.file.roles.find { |role| role.name == user["role"]? }
+      if role.owned.apps.includes?(permission) &&
+         (owned_apps = user["owned_apps"]?).try &.is_a?(String) &&
+         owned_apps.as(String).split(',').map { |e| Base64.decode e }.includes?(name)
+        true
+      end
+      true if role.not_owned.apps.includes? permission
+    end
+    false
+  end
+  # gather the appropriate configuration option from the context and set it to
+  # the app named `app_name`
+  private def set_config(context, key, app_name)
+    if posted = context.request.body
+      Prefix.new(prefix).new_app(app_name).set_config key, posted.gets_to_end
+    else
+      throw "setting config data requires a request body"
+    end
+  end
+  # dump a JSON output of all of the configuration options.
+  private def dump_config(context, app)
+    JSON.build context.response do |json|
+      json.object do
+        json.field "data" do
+          json.object do
+            app.each_config_key do |key|
+              json.field name: key, value: app.get_config key
+            end
+          end
+        end
+        json.field "errors" do
+          json.array { }
+        end
+      end
+    end
+    context.response.flush
+  end
   get (root_path "/:app_name/config/:key") do |context|
     app_name = context.params.url["app_name"]
     key = context.params.url["key"]
     if context.current_user? && has_access? context.current_user, app_name, Access::Read
       app = Prefix.new(prefix).new_app app_name
-      if config = app.config
-        if key == "."
-          JSON.build context.response do |json|
-            json.object do
-              json.field "data" do
-                json.object do
-                  app.each_config_key do |key|
-                    json.field name: key, value: app.get_config key
-                  end
-                end
-              end
-              json.field "errors" do
-                json.array { }
-              end
-            end
-          end
-          context.response.flush
-        else
-          context.response.puts({"data" => app.get_config(key), "errors" => [] of Nil}.to_json)
-        end
+      if key == "."
+          dump_config context, app
+      elsif config = app.get_config(key)
+        context.response.puts({"data" => config, "errors" => [] of Nil}.to_json)
       else
         throw "no config with app named '%s' found", app_name, status_code: 404
       end
@@ -46,25 +69,22 @@ module DppmRestApi::Actions::App
     app_name = context.params.url["app_name"]
     key = context.params.url["key"]
     if context.current_user? && has_access? context.current_user, app_name, Access::Create
-      if posted = context.request.body
-        Prefix.new(prefix).new_app(app_name).set_config key, posted.gets_to_end
-      else
-        throw "setting config data requires a request body"
-      end
+      set_config context, key, app_name
     end
     deny_access! to: context
   end
   put (root_path "/:app_name/config/:key") do |context|
     app_name = context.params.url["app_name"]
     if context.current_user? && has_access? context.current_user, app_name, Access::Update
-      # TODO: update config data for given key for given app name
+      set_config context, key, app_name
     end
     deny_access! to: context
   end
-  delete (root_path "/:app_name/config/:keys") do |context|
+  delete (root_path "/:app_name/config/:key") do |context|
     app_name = context.params.url["app_name"]
+    key = context.params.url["key"]
     if context.current_user? && has_access? context.current_user, app_name, Access::Delete
-      # TODO: delete config data for given key for given app name
+      Prefix.new(prefix).new_app(app_name).del_config key
     end
     deny_access! to: context
   end
@@ -72,7 +92,7 @@ module DppmRestApi::Actions::App
   get (root_path "/:app_name/config") do |context|
     app_name = context.params.url["app_name"]
     if context.current_user? && has_access? context.current_user, app_name, Access::Read
-      # TODO: get config data
+      dump_config context, Prefix.new(prefix).new_app(app_name)
     end
     deny_access! to: context
   end
@@ -184,19 +204,5 @@ module DppmRestApi::Actions::App
       # TODO: delete the app
     end
     deny_access! to: context
-  end
-
-  # returns true if the given user has access to the {{@type.id}} named with
-  # the given name and permission type
-  private def has_access?(user : UserHash, name : String, permission : Access) : Bool
-    if role = DppmRestApi.config.file.roles.find { |role| role.name == user["role"]? }
-      if role.owned.apps.includes?(permission) &&
-         (owned_apps = user["owned_apps"]?).try &.is_a?(String) &&
-         owned_apps.as(String).split(',').map { |e| Base64.decode e }.includes?(name)
-        true
-      end
-      true if role.not_owned.apps.includes? permission
-    end
-    false
   end
 end
