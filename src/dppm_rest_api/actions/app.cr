@@ -7,8 +7,9 @@ module DppmRestApi::Actions::App
   # Pull the context from the context's query parameter or use the default
   # provided by the CLI.
   macro prefix
-    context.params.query["prefix"]? || CLI.default_prefix
+    context.params.query["prefix"]? || DPPM.default_prefix
   end
+
   # returns true if the given user has access to the {{@type.id}} named with
   # the given name and permission type
   private def has_access?(user : UserHash, name : String, permission : Access) : Bool
@@ -22,6 +23,7 @@ module DppmRestApi::Actions::App
     end
     false
   end
+
   # gather the appropriate configuration option from the context and set it to
   # the app named `app_name`
   private def set_config(context, key, app_name)
@@ -31,6 +33,7 @@ module DppmRestApi::Actions::App
       throw "setting config data requires a request body"
     end
   end
+
   # dump a JSON output of all of the configuration options.
   private def dump_config(context, app)
     JSON.build context.response do |json|
@@ -49,13 +52,14 @@ module DppmRestApi::Actions::App
     end
     context.response.flush
   end
+
   get (root_path "/:app_name/config/:key") do |context|
     app_name = context.params.url["app_name"]
     key = context.params.url["key"]
     if context.current_user? && has_access? context.current_user, app_name, Access::Read
       app = Prefix.new(prefix).new_app app_name
       if key == "."
-          dump_config context, app
+        dump_config context, app
       elsif config = app.get_config(key)
         context.response.puts({"data" => config, "errors" => [] of Nil}.to_json)
       else
@@ -76,7 +80,7 @@ module DppmRestApi::Actions::App
   put (root_path "/:app_name/config/:key") do |context|
     app_name = context.params.url["app_name"]
     if context.current_user? && has_access? context.current_user, app_name, Access::Update
-      set_config context, key, app_name
+      set_config context, context.params.url["key"], app_name
     end
     deny_access! to: context
   end

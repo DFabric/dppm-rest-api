@@ -41,8 +41,10 @@ module DppmRestApi::Actions
       nil
     end
   end
-  property configured_users : Users { Users.new DppmRestApi.config.file.users }
+
+  class_property configured_users : Users { Users.new DppmRestApi.config.file.users }
+
   def self.auth_handler
-    @@handler ||= KemalJWTAuth::Handler(Users, User).new users: configured_users
+    @@handler ||= KemalJWTAuth::Handler(Users, User).new users: self.configured_users
   end
 end

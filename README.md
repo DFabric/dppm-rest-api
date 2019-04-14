@@ -6,8 +6,9 @@ Crystal API docs: https://dfabric.github.io/dppm_rest_api/
 
 ## Installation
 
-Download a binary from the releases page, or clone the repository and run
-`crystal build src/dppm_rest_api.cr` in the repo dir.
+Clone the repository and run:
+
+`shards build`
 
 ## Usage
 

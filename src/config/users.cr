@@ -1,5 +1,4 @@
 require "json"
-require "../ext/scrypt"
 
 module DppmRestApi
   @[Flags]
@@ -97,7 +96,8 @@ module DppmRestApi
       property pkgs = DppmRestApi::Access.deny
       property services = DppmRestApi::Access.deny
       property srcs = DppmRestApi::Access.deny
-      def initialize;end
+
+      def initialize; end
     end
   end
 end

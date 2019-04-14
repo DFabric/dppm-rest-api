@@ -19,7 +19,7 @@ dependencies:
 
 targets:
   dppm_rest_api:
-    main: src/dppm_rest_api.cr
+    main: src/cli.cr
 
 crystal: 0.27.2
 

@@ -1,7 +1,7 @@
 require "./users"
 
 module DppmRestApi
-  class Config
+  struct Config
     struct File
       include JSON::Serializable
       property roles : Array(Role)
