@@ -1,5 +1,5 @@
 require "../../utils"
-require "dppm"
+require "dppm/prefix"
 
 module DppmRestApi::Actions::App
   extend self

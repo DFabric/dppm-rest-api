@@ -1,4 +1,6 @@
-# dppm_rest_api
+[![Build Status](https://cloud.drone.io/api/badges/DFabric/dppm-rest-api/status.svg)](https://cloud.drone.io/DFabric/dppm-rest-api)
+
+# DPPM REST API
 
 WIP: at this stage, just a scaffold. TODO everything.
 
