@@ -1,49 +1,38 @@
-require "../../utils"
-require "../../config"
-
 module DppmRestApi::Actions::Pkg
   extend self
-  ALL_PKGS = root_path
-  ONE_PKG  = root_path "/:id"
+  ALL_PKGS = ""
+  ONE_PKG  = "/:id"
   # List built packages
-  get ALL_PKGS do |context|
-    if context.current_user? && has_access? context.current_user, Access::Read
+  relative_get ALL_PKGS do |context|
+    if context.current_user? && has_access? context, Access::Read
       # TODO: list all built packages
+      next context
     end
     deny_access! to: context
   end
   # Clean unused built packages
-  delete ALL_PKGS do |context|
-    if context.current_user? && has_access? context.current_user, Access::Delete
+  relative_delete ALL_PKGS do |context|
+    if context.current_user? && has_access? context, Access::Delete
       # TODO: delete all unused built packages
+      next context
     end
     deny_access! to: context
   end
   # Query information about a given package
-  get ONE_PKG do |context|
-    if context.current_user? && has_access? context.current_user, Access::Read, context.params.url["id"]?
+  relative_get ONE_PKG do |context|
+    if context.current_user? && has_access? context, Access::Read
       # TODO: Query information about the given package
+      next context
     end
     deny_access! to: context
   end
   # Delete a given package
-  delete ONE_PKG do |context|
-    if context.current_user? && has_access? context.current_user, Access::Delete, context.params.url["id"]?
+  relative_delete ONE_PKG do |context|
+    if context.current_user? && has_access? context, Access::Delete
       # TODO: Query information about the given package
+      next context
     end
     deny_access! to: context
-  end
-
-  protected def self.has_access?(user, permission, id = nil)
-    if role = DppmRestApi.config.file.roles.find { |role| role.name === user["role"]? }
-      if not_nil_id = id
-        return true if role.owned.pkgs.includes?(permission) &&
-                       (owned_pkgs = user["owned_pkgs"]?).try &.is_a?(String) &&
-                       owned_pkgs.as(String).split(',').map { |e| Base64.decode e }.includes?(not_nil_id)
-      end
-      true if role.not_owned.pkgs.includes? permission
-    end
-    false
   end
 
   module Build
@@ -51,9 +40,9 @@ module DppmRestApi::Actions::Pkg
     # message? We could also use server-side events or a websocket to provide the
     # status of this action as it occurs over the API, rather than just returning
     # a result on completion.
-    post (root_path "/:package") do |context|
+    relative_post "/:package" do |context|
       pkg_id = context.params.url["package"]?
-      if context.current_user? && Pkg.has_access? context.current_user, Access::Create, pkg_id
+      if context.current_user? && has_access? context, Access::Create
         # TODO: build the package based on the submitted configuration
       end
       deny_access! to: context

@@ -20,5 +20,7 @@ steps:
 
 - name: test
   image: jrei/crystal-alpine
+  environment:
+    KEMAL_ENV: test
   commands:
   - crystal spec

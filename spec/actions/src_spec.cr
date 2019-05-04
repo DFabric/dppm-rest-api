@@ -3,15 +3,15 @@ require "../spec_helper"
 module DppmRestApi::Actions::Src
   describe DppmRestApi::Actions::Src do
     describe "get root path" do
-      it "responds with 401 Forbidden" do
-        get root_path
+      pending "responds with 401 Forbidden" do
+        get fmt_route
         response.status_code.should eq 401
       end
     end
     # {% for src_type in ["lib", "app"] %}
-    # describe "get #{root_path {{src_type}}}" do
+    # describe "get #{fmt_route {{src_type}}}" do
     #   it "responds with 401 Forbidden" do
-    #     get root_path {{src_type}}
+    #     get fmt_route {{src_type}}
     #     response.status_code.should eq 401
     #   end
     # end

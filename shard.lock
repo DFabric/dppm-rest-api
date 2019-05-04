@@ -18,7 +18,7 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: c1d0d8987399d802554808b7fb531b4bb3a1926c
+    commit: e508760c55f9c8cd2f2de6e4422ef4acfc29f170
 
   dynany:
     github: j8r/dynany
@@ -58,7 +58,7 @@ shards:
 
   mysql:
     github: crystal-lang/crystal-mysql
-    commit: 9a838e37e19d6aa28bb40a3f474411a42a265584
+    commit: cbc52ae9b14230d79062e15dbcc26dc27fe599f6
 
   radix:
     github: luislavena/radix

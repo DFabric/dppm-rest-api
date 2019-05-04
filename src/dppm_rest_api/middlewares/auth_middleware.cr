@@ -1,6 +1,5 @@
 require "kemal"
 require "kemal_jwt_auth"
-require "../../config"
 require "json"
 
 module DppmRestApi::Actions
@@ -32,11 +31,8 @@ module DppmRestApi::Actions
     def find_and_authenticate!(body) : User?
       data = RecvdUser.from_json body
       if key = data.auth?
-        if found = DppmRestApi.config.file.users.find { |user| user.api_key_hash == key }
-          found.to_h
-        end
+        DppmRestApi.config.file.users.find { |user| user.api_key_hash == key }
       end
-      nil
     rescue JSON::ParseException
       nil
     end

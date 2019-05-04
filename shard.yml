@@ -1,5 +1,5 @@
 name: dppm_rest_api
-version: 0.1.0
+version: 0.2.0
 
 authors:
   - D. Scott Boggs <scott@tams.tech>
@@ -21,6 +21,6 @@ targets:
   dppm_rest_api:
     main: src/cli.cr
 
-crystal: 0.27.2
+crystal: 0.28.0
 
 license: MIT
