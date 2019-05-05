@@ -56,8 +56,8 @@ module DppmRestApi
 
     # Yields each Group to the block for which the user is a member of.
     def each_group : Nil
-      groups.each do |id|
-        if group = DppmRestApi.config.file.groups[id]?
+      @groups.each do |id|
+        if group = DppmRestApi.config.file.groups.find { |group| group.id === id }
           yield group
         else
           DppmRestApi.config.logger.warn "user #{name} is a member of an invalid group ##{id}"
