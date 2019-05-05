@@ -4,9 +4,6 @@ require "./middlewares"
 require "./actions/*"
 
 module DppmRestApi::Actions
-  API_DOCUMENT = "#{__DIR__}/api-options.json"
-  add_handler Actions.auth_handler
-
   include Pkg
   include App
   include Service
@@ -14,5 +11,10 @@ module DppmRestApi::Actions
 
   options("/api") { |context| File.open(API_DOCUMENT) { |file| render_data file } }
 
-  Kemal.run port: DppmRestApi.config.port.to_i
+  def self.throw_error(context : HTTP::Server::Context, message : String, status_code = 500)
+    context.response.status_code = status_code
+    context.response.printf message + '\n'
+    context.response.flush
+    context
+  end
 end

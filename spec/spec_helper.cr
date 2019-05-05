@@ -1,7 +1,9 @@
 require "spec"
 require "spec-kemal"
-require "./fixtures"
 require "../src/dppm_rest_api"
+
+CRLF             = "\r\n"
+NormalUserAPIKey = __DIR__ + "/normal_user.api_key"
 
 def new_test_context(verb = "GET", path = "/api/test")
   backing_io = IO::Memory.new
@@ -9,3 +11,5 @@ def new_test_context(verb = "GET", path = "/api/test")
   response = HTTP::Server::Response.new backing_io
   {backing_io, HTTP::Server::Context.new(request, response)}
 end
+
+DppmRestApi.run Socket::IPAddress::LOOPBACK, Prefix.default_dppm_config.port, __DIR__

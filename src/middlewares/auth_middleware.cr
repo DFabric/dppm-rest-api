@@ -31,14 +31,14 @@ module DppmRestApi::Actions
     def find_and_authenticate!(body) : User?
       data = RecvdUser.from_json body
       if key = data.auth?
-        DppmRestApi.config.file.users.find { |user| user.api_key_hash == key }
+        DppmRestApi.permissions_config.users.find { |user| user.api_key_hash == key }
       end
     rescue JSON::ParseException
       nil
     end
   end
 
-  class_property configured_users : Users { Users.new DppmRestApi.config.file.users }
+  class_property configured_users : Users { Users.new DppmRestApi.permissions_config.users }
 
   def self.auth_handler
     @@handler ||= KemalJWTAuth::Handler(Users, User).new users: self.configured_users

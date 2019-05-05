@@ -1,7 +1,9 @@
+require "../spec_helper"
+
 describe DppmRestApi::Group do
   describe "super user" do
     it "has access to everything" do
-      group = DppmRestApi.config.file.group(named: "super user").not_nil!
+      group = DppmRestApi.permissions_config.group(named: "super user").not_nil!
       group.can_access?(
         "/literally/any/path",
         HTTP::Params.new({"and" => ["query", "parameters"]}),

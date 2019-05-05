@@ -1,3 +1,5 @@
+require "../spec_helper"
+
 TestParams = {"namespace" => ["test-namespace"]}
 describe DppmRestApi::Route do
   it "works as expected" do

@@ -2,7 +2,7 @@ require "dppm/cli"
 require "./dppm_rest_api"
 
 module DppmRestApi::CLI
-  def self.run_server(config, port, host, **args)
+  def self.run_server(config, host, port, data_dir, **args)
     if port.is_a? String
       port = port.to_i
     end
@@ -11,14 +11,20 @@ module DppmRestApi::CLI
       port ||= dppm_config.port
       host ||= dppm_config.host
     end
-    DppmRestApi.run port, host
+    DppmRestApi.run host, port, data_dir
   end
 end
 
 # DPPM CLI isn't namespaced yet
 CLI.run(
   server: {
-    info:     "DPPM REST API server",
+    info:      "DPPM REST API server",
+    variables: {
+      data_dir: {
+        info:    "data directory",
+        default: DppmRestApi::DEFAULT_DATA_DIR,
+      },
+    },
     commands: {
       run: {
         info:      "Run the server",

@@ -17,7 +17,7 @@ module DppmRestApi::Actions::App
     if posted = context.request.body
       Prefix.new(prefix).new_app(app_name).set_config key, posted.gets_to_end
     else
-      throw "setting config data requires a request body"
+      Actions.throw_error context, "setting config data requires a request body"
     end
   end
 
@@ -50,7 +50,7 @@ module DppmRestApi::Actions::App
       elsif config = app.get_config(key)
         context.response.puts({"data" => config, "errors" => [] of Nil}.to_json)
       else
-        throw "no config with app named '%s' found", app_name, status_code: 404
+        Actions.throw_error context, "no config with app named '#{app_name}' found", status_code: 404
       end
       next context
     end

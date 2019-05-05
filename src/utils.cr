@@ -1,7 +1,7 @@
 require "kemal"
 require "kemal_jwt_auth"
-require "./config/user"
-require "./config/route"
+require "./user"
+require "./route"
 
 # Render the given data as JSON to the local `context` variable.
 macro render_data(data)
@@ -39,13 +39,6 @@ end
 
 alias JWTCompatibleHash = Hash(String, String | Int32 | Bool?)
 
-macro throw(message, *format, status_code = 500)
-  context.response.status_code = {{status_code.id}}
-  context.response.printf "{{message.id}}\n", {{format.splat.id}}
-  context.response.flush
-  context
-end
-
 macro fmt_route(route = "", namespace = false)
   {{ "/" + @type.stringify
        .downcase
@@ -58,7 +51,7 @@ end
 {% for method in %w(get post put delete ws) %}
 macro relative_{{method.id}}(route, &block)
   {{method.id}} fmt_route(\{{route}}) do |\{{block.args.splat}}|
-    namespace = \{{block.args[-1]}}.params.query["namespace"]? || DppmRestApi.default_namespace
+    namespace = \{{block.args[-1]}}.params.query["namespace"]? || Prefix.default_group
     \{{block.body}}
   end
 end
