@@ -1,18 +1,26 @@
-require "../spec/fixtures"
-require "./errors/**"
-require "./dppm_rest_api/utils"
-require "./dppm_rest_api/config"
-require "./dppm_rest_api/actions"
+require "kemal"
+require "./errors/*"
+require "./config"
+require "./actions"
 
 module DppmRestApi
-  VERSION = "0.2.0"
+  DEFAULT_DATA_DIR = "./data/"
+  PERMISSIONS_FILE = "permissions.json"
+  API_DOCUMENT     = DEFAULT_DATA_DIR + "api-options.json"
 
-  class_property default_namespace : String { config.default_namespace }
-  class_property config : Config { Config.from_args }
+  class_getter permissions_config : Config do
+    raise "no permissions file is defined!"
+  end
 
-  def self.run(port : Int32, host : String)
+  def self.run(host : String, port : Int32, data_dir : String)
+    ::File.open data_dir + '/' + PERMISSIONS_FILE do |data|
+      @@permissions_config = Config.from_json data
+    end
+
     # Kemal doesn't like IPV6 brackets
     Kemal.config.host_binding = host.lchop('[').rchop(']')
     Kemal.run port: port
+
+    add_handler Actions.auth_handler
   end
 end

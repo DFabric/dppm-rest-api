@@ -4,7 +4,7 @@ module DppmRestApi::Actions::Pkg
   ONE_PKG  = "/:id"
   # List built packages
   relative_get ALL_PKGS do |context|
-    if context.current_user? && has_access? context, Access::Read
+    if context.current_user? && Config.has_access? context, Access::Read
       # TODO: list all built packages
       next context
     end
@@ -12,7 +12,7 @@ module DppmRestApi::Actions::Pkg
   end
   # Clean unused built packages
   relative_delete ALL_PKGS do |context|
-    if context.current_user? && has_access? context, Access::Delete
+    if context.current_user? && Config.has_access? context, Access::Delete
       # TODO: delete all unused built packages
       next context
     end
@@ -20,7 +20,7 @@ module DppmRestApi::Actions::Pkg
   end
   # Query information about a given package
   relative_get ONE_PKG do |context|
-    if context.current_user? && has_access? context, Access::Read
+    if context.current_user? && Config.has_access? context, Access::Read
       # TODO: Query information about the given package
       next context
     end
@@ -28,7 +28,7 @@ module DppmRestApi::Actions::Pkg
   end
   # Delete a given package
   relative_delete ONE_PKG do |context|
-    if context.current_user? && has_access? context, Access::Delete
+    if context.current_user? && Config.has_access? context, Access::Delete
       # TODO: Query information about the given package
       next context
     end
@@ -42,7 +42,7 @@ module DppmRestApi::Actions::Pkg
     # a result on completion.
     relative_post "/:package" do |context|
       pkg_id = context.params.url["package"]?
-      if context.current_user? && has_access? context, Access::Create
+      if context.current_user? && Config.has_access? context, Access::Create
         # TODO: build the package based on the submitted configuration
       end
       deny_access! to: context
