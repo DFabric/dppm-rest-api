@@ -1,5 +1,6 @@
 require "spec"
 require "spec-kemal"
+require "./fixtures"
 require "../src/dppm_rest_api"
 
 def new_test_context(verb = "GET", path = "/api/test")

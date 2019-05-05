@@ -11,7 +11,7 @@ struct DppmRestApi::Config
       {% if env("KEMAL_ENV") == "test" %}
         puts "test env"
         # Override default in the case of specs
-        return FIXTURE_CONFIG
+        return Fixtures::Config
       {% end %}
       conf_dir = if confdir = ENV["XDG_CONFIG_HOME"]?
                    confdir
