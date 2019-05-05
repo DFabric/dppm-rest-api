@@ -14,9 +14,12 @@ module DppmRestApi
 
     def initialize(@permissions, @query_parameters); end
 
-    # Returns true if this Route matches the given verb, and query
-    # parameters. Does not imply a matching access.
+    # Returns true if this Route matches the given query parameters. Does not
+    # imply a matching access.
     def match?(parameters : HTTP::Params)
+      return true unless query_parameters.any? do |key, _|
+                           parameters.has_key? key
+                         end
       !!parameters.find do |key, value|
         if glob = query_parameters[key]?.try &.first?
           File.match? glob, value

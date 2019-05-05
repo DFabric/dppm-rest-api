@@ -5,7 +5,16 @@ module DppmRestApi
     API_KEY_SIZE = 63_u8
     include JSON::Serializable
     property api_key_hash : Scrypt::Password
-    property groups : Array(Int32)
+    setter groups : Array(Int32)
+
+    def groups : Array(Group)
+      Array(Group).new.tap { |ary| each_group { |group| ary << group } }
+    end
+
+    def group_ids
+      @groups
+    end
+
     property name : String
 
     def initialize(@api_key_hash,
@@ -38,7 +47,7 @@ module DppmRestApi
     end
 
     private def serialized_groups : String
-      groups.map(&.to_s base: 16).join(",")
+      groups.map(&.id.to_s base: 16).join(",")
     end
 
     def self.deserialize(groups : String)
