@@ -16,7 +16,7 @@ steps:
   commands:
   - apk add curl
   - shards install
-  - shards build --time --static
+  - shards build --static
 
 - name: test
   image: jrei/crystal-alpine

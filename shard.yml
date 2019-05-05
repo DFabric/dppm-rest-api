@@ -3,6 +3,7 @@ version: 0.2.0
 
 authors:
   - D. Scott Boggs <scott@tams.tech>
+  - Julien Reichardt <mi@jrei.ch>
 
 dependencies:
   kemal:
@@ -18,9 +19,5 @@ dependencies:
     github: DFabric/dppm
 
 targets:
-  dppm_rest_api:
+  dppm:
     main: src/cli.cr
-
-crystal: 0.28.0
-
-license: MIT

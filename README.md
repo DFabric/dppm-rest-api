@@ -2,32 +2,31 @@
 
 # DPPM REST API
 
-WIP: at this stage, just a scaffold. TODO everything.
+REST API for [DPPM](https://github.com/DFabric/dppm), an installer/manager of server applications.
 
-Crystal API docs: https://dfabric.github.io/dppm_rest_api/
+## Development
 
-## Installation
+You will need a [Crystal](https://crystal-lang.org) development environment.
+
+You can either [install it](https://crystal-lang.org/docs/installation) or use a [Docker image](https://hub.docker.com/r/jrei/crystal-alpine).
+
+### Compilation
 
 Clone the repository and run:
 
 `shards build`
 
-## Usage
+The binary is `bin/dppm`
 
-TODO: Write usage instructions here
+### Run tests
 
-## Development
-
-TODO: Write development instructions here
-
-## Contributing
-
-1. Fork it (<https://github.com/DFabric/dppm_rest_api/fork>)
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+`crystal spec`
 
 ## Contributors
 
 - [D. Scott Boggs](https://github.com/dscottboggs) - creator and maintainer
+- [Julien Reichardt](https://github.com/j8r) - contributor and backer
+
+## License
+
+Copyright (c) 2018-2019 DFabric members - ISC License
