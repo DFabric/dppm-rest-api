@@ -1,6 +1,6 @@
 require "../spec_helper"
 
-describe DppmRestApi::Group do
+describe DppmRestApi::Config::Group do
   describe "super user" do
     it "has access to everything" do
       group = DppmRestApi.permissions_config.group(named: "super user").not_nil!

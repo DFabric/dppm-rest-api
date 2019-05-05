@@ -1,6 +1,6 @@
 require "../spec_helper"
 
-describe DppmRestApi::User do
+describe DppmRestApi::Config::User do
   describe "Administrator" do
     it "is a memeber of the 'super user' group" do
       DppmRestApi.permissions_config

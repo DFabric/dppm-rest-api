@@ -1,8 +1,7 @@
-require "./access"
 require "./route"
 
 # A group represents an access role that a user may be a member of.
-struct DppmRestApi::Group
+struct DppmRestApi::Config::Group
   include JSON::Serializable
   include JSON::Serializable::Strict
   # The human-readable name of the `Group`. This *should* be unique.

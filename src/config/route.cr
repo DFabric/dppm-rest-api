@@ -1,7 +1,5 @@
-require "./access"
-
 # Matches a request to a series of globs loaded from a config file.
-struct DppmRestApi::Route
+struct DppmRestApi::Config::Route
   include JSON::Serializable
 
   # The permission/access level for this route

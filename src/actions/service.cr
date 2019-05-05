@@ -3,14 +3,14 @@ module DppmRestApi::Actions::Service
   # List the managed services. The `system` query parameter may be specified to
   # enumerate all system services rather than just the ones managed by DPPM.
   relative_get nil do |context|
-    if context.current_user? && has_access? context, Access::Read
+    if context.current_user? && Config.has_access? context, Access::Read
       next context
     end
     deny_access! to: context
   end
   # List each managed service along with its status output.
   relative_get "/status" do |context|
-    if context.current_user? && has_access? context, Access::Read
+    if context.current_user? && Config.has_access? context, Access::Read
       next context
     end
     deny_access! to: context
@@ -18,7 +18,7 @@ module DppmRestApi::Actions::Service
   # start the service associated with the given application
   relative_put "/:service/boot" do |context|
     service = context.params.url["service"]?
-    if context.current_user? && has_access? context, Access::Update
+    if context.current_user? && Config.has_access? context, Access::Update
       next context
     end
     deny_access! to: context
@@ -26,7 +26,7 @@ module DppmRestApi::Actions::Service
   # reload the service associated with the given application
   relative_put "/:service/reload" do |context|
     service = context.params.url["service"]?
-    if context.current_user? && has_access? context, Access::Update
+    if context.current_user? && Config.has_access? context, Access::Update
       next context
     end
     deny_access! to: context
@@ -34,7 +34,7 @@ module DppmRestApi::Actions::Service
   # restart the service associated with the given application
   relative_put "/:service/restart" do |context|
     service = context.params.url["service"]?
-    if context.current_user? && has_access? context, Access::Update
+    if context.current_user? && Config.has_access? context, Access::Update
       next context
     end
     deny_access! to: context
@@ -42,7 +42,7 @@ module DppmRestApi::Actions::Service
   # start the service associated with the given application
   relative_put "/:service/start" do |context|
     service = context.params.url["service"]?
-    if context.current_user? && has_access? context, Access::Update
+    if context.current_user? && Config.has_access? context, Access::Update
       next context
     end
     deny_access! to: context
@@ -50,7 +50,7 @@ module DppmRestApi::Actions::Service
   # get the status of the service associated with the given application
   relative_get "/:service/status" do |context|
     service = context.params.url["service"]?
-    if context.current_user? && has_access? context, Access::Read
+    if context.current_user? && Config.has_access? context, Access::Read
       next context
     end
     deny_access! to: context
@@ -58,7 +58,7 @@ module DppmRestApi::Actions::Service
   # stop the service associated with the given application
   relative_put "/:service/stop" do |context|
     service = context.params.url["service"]?
-    if context.current_user? && has_access? context, Access::Update
+    if context.current_user? && Config.has_access? context, Access::Update
       next context
     end
     deny_access! to: context

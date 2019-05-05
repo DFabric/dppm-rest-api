@@ -1,8 +1,3 @@
-require "kemal"
-require "kemal_jwt_auth"
-require "./user"
-require "./route"
-
 # Render the given data as JSON to the local `context` variable.
 macro render_data(data)
   context.response.content_type = "application/json"
@@ -20,21 +15,6 @@ private def deserialize(groups ambiguously_typed : Bool | Int32 | String?)
   if (groups = ambiguously_typed).is_a? String
     groups.split(",").map &.to_i
   end
-end
-
-# returns true if the given user has access to the given context with the given
-# permission type
-def has_access?(context : HTTP::Server::Context, permission : DppmRestApi::Access)
-  if user = context.current_user?.try { |user| DppmRestApi::User.from_h hash: user }
-    return true if user.find_group? do |group|
-                     group.can_access?(
-                       context.request.path,
-                       context.request.query_params,
-                       permission
-                     )
-                   end
-  end
-  false
 end
 
 alias JWTCompatibleHash = Hash(String, String | Int32 | Bool?)

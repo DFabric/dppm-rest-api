@@ -1,8 +1,7 @@
 require "json"
-require "./ext/scrypt_password"
 require "./group"
 
-struct DppmRestApi::User
+struct DppmRestApi::Config::User
   API_KEY_SIZE = 63_u8
   include JSON::Serializable
   property api_key_hash : Scrypt::Password
