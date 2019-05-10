@@ -48,7 +48,8 @@ module DppmRestApi::Actions::App
       if key == "."
         dump_config context, app
       elsif config = app.get_config(key)
-        context.response.puts({"data" => config, "errors" => [] of Nil}.to_json)
+        context.response.content_type = "application/json"
+        {"data" => config, "errors" => [] of Nil}.to_json context.response
       else
         Actions.throw_error context, "no config with app named '#{app_name}' found", status_code: 404
       end
@@ -172,12 +173,10 @@ module DppmRestApi::Actions::App
     deny_access! to: context
   end
   # Stream the logs for the given application over the websocket connection.
-  relative_ws "/:app_name/logs" do |sock, context|
+  relative_ws "/:app_name/logs" do |_, context|
+    # The first block argument is the open socket to the browser.
     if context.current_user? && Config.has_access? context, Access::Read
       # TODO: stream logs to sock
-      sock.tap do
-        # trick ameba into ignoring the sock variable
-      end
       next context
     end
     deny_access! to: context

@@ -1,9 +1,3 @@
-# Render the given data as JSON to the local `context` variable.
-macro render_data(data)
-  context.response.content_type = "application/json"
-  IO.copy {{data.id}}, context.response
-end
-
 def deny_access!(to context)
   context.response.status_code = 401
   context.response.write "Forbidden.".to_slice
@@ -28,7 +22,7 @@ end
 
 # the "last" or -1st block argument is selected because context is always the
 # argument -- either the only or the second of two
-{% for method in %w(get post put delete ws) %}
+{% for method in %w(get post put delete ws options) %}
 macro relative_{{method.id}}(route, &block)
   {{method.id}} fmt_route(\{{route}}) do |\{{block.args.splat}}|
     namespace = \{{block.args[-1]}}.params.query["namespace"]? || Prefix.default_group

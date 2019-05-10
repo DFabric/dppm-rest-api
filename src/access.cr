@@ -38,6 +38,10 @@ enum DppmRestApi::Access : UInt8
     value
   end
 
+  def to_json(builder : JSON::Builder)
+    builder.number value
+  end
+
   def self.from_json(value : Number)
     from_value number
   end
