@@ -11,6 +11,11 @@ steps:
   commands:
   - crystal tool format --check
 
+- name: lint
+  image: madscientists/ameba
+  commands:
+  - ameba
+
 - name: build
   image: jrei/crystal-alpine
   commands:

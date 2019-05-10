@@ -2,7 +2,7 @@ require "spec"
 require "spec-kemal"
 require "../src/dppm_rest_api"
 
-CRLF             = "\r\n"
+CRLF                = "\r\n"
 NORMAL_USER_API_KEY = __DIR__ + "/normal_user.api_key"
 
 def new_test_context(verb = "GET", path = "/api/test")
