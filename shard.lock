@@ -1,5 +1,9 @@
 version: 1.0
 shards:
+  ameba:
+    github: veelenga/ameba
+    version: 0.9.1
+
   clicr:
     github: j8r/clicr
     version: 0.5.1

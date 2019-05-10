@@ -17,7 +17,6 @@ module DppmRestApi::Actions::Service
   end
   # start the service associated with the given application
   relative_put "/:service/boot" do |context|
-    service = context.params.url["service"]?
     if context.current_user? && Config.has_access? context, Access::Update
       next context
     end
@@ -25,7 +24,6 @@ module DppmRestApi::Actions::Service
   end
   # reload the service associated with the given application
   relative_put "/:service/reload" do |context|
-    service = context.params.url["service"]?
     if context.current_user? && Config.has_access? context, Access::Update
       next context
     end
@@ -33,7 +31,6 @@ module DppmRestApi::Actions::Service
   end
   # restart the service associated with the given application
   relative_put "/:service/restart" do |context|
-    service = context.params.url["service"]?
     if context.current_user? && Config.has_access? context, Access::Update
       next context
     end
@@ -41,7 +38,6 @@ module DppmRestApi::Actions::Service
   end
   # start the service associated with the given application
   relative_put "/:service/start" do |context|
-    service = context.params.url["service"]?
     if context.current_user? && Config.has_access? context, Access::Update
       next context
     end
@@ -49,7 +45,6 @@ module DppmRestApi::Actions::Service
   end
   # get the status of the service associated with the given application
   relative_get "/:service/status" do |context|
-    service = context.params.url["service"]?
     if context.current_user? && Config.has_access? context, Access::Read
       next context
     end
@@ -57,7 +52,6 @@ module DppmRestApi::Actions::Service
   end
   # stop the service associated with the given application
   relative_put "/:service/stop" do |context|
-    service = context.params.url["service"]?
     if context.current_user? && Config.has_access? context, Access::Update
       next context
     end

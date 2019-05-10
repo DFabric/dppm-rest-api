@@ -18,6 +18,12 @@ dependencies:
   dppm:
     github: DFabric/dppm
 
+development_dependencies:
+  ameba:
+    github: veelenga/ameba
+    version: ~> 0.9.1
+
 targets:
   dppm:
     main: src/cli.cr
+    bootstrap-config: scripts/bootstrap-config.cr

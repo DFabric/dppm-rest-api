@@ -75,6 +75,8 @@ struct DppmRestApi::Config
     end
   end
 
+  # This needs to go away anyway.
+  # ameba:disable CyclomaticComplexity
   def self.from_args(args = ARGV)
     file_loc = nil
     host = nil

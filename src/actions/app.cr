@@ -90,7 +90,6 @@ module DppmRestApi::Actions::App
   end
   # start the service associated with the given application
   relative_put "/:app_name/service/boot" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Update
       # TODO: boot the service
       next context
@@ -100,7 +99,6 @@ module DppmRestApi::Actions::App
   end
   # reload the service associated with the given application
   relative_put "/:app_name/service/reload" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Update
       # TODO: reload the service
       next context
@@ -109,7 +107,6 @@ module DppmRestApi::Actions::App
   end
   # restart the service associated with the given application
   relative_put "/:app_name/service/restart" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Update
       # TODO: reboot the service
       next context
@@ -118,7 +115,6 @@ module DppmRestApi::Actions::App
   end
   # start the service associated with the given application
   relative_put "/:app_name/service/start" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Update
       # TODO: start the service
       next context
@@ -127,7 +123,6 @@ module DppmRestApi::Actions::App
   end
   # relative_get the status of the service associated with the given application
   relative_put "/:app_name/service/status" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Read
       # TODO: get the status of the service
       next context
@@ -136,7 +131,6 @@ module DppmRestApi::Actions::App
   end
   # stop the service associated with the given application
   relative_put "/:app_name/service/stop" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Update
       # TODO: stop the service
       next context
@@ -145,7 +139,6 @@ module DppmRestApi::Actions::App
   end
   # lists dependent library packages
   relative_get "/:app_name/libs" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Read
       # TODO: list dependencies
       next context
@@ -154,7 +147,6 @@ module DppmRestApi::Actions::App
   end
   # return the base application package
   relative_get "/:app_name/app" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Read
       # TODO: return the base application package
       next context
@@ -163,7 +155,6 @@ module DppmRestApi::Actions::App
   end
   # returns information present in pkg.con as JSON
   relative_get "/:app_name/pkg" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Read
       # TODO: return package data
       next context
@@ -174,7 +165,6 @@ module DppmRestApi::Actions::App
   # and stream the results. Otherwise return a JSON-formatted output of the
   # current log data.
   relative_get "/:app_name/logs" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Read
       # TODO: upgrade to websocket or output logs to date
       next context
@@ -183,16 +173,17 @@ module DppmRestApi::Actions::App
   end
   # Stream the logs for the given application over the websocket connection.
   relative_ws "/:app_name/logs" do |sock, context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Read
       # TODO: stream logs to sock
+      sock.tap do
+        # trick ameba into ignoring the sock variable
+      end
       next context
     end
     deny_access! to: context
   end
   # Install the given package
   relative_put "/:package_name" do |context|
-    pkg_name = context.params.url["package_name"]
     if context.current_user? && Config.has_access? context, Access::Create
       # TODO: install the package and return its name
       next context
@@ -201,7 +192,6 @@ module DppmRestApi::Actions::App
   end
   # Delete the given application
   relative_delete "/:app_name" do |context|
-    app_name = context.params.url["app_name"]
     if context.current_user? && Config.has_access? context, Access::Delete
       # TODO: delete the app
       next context

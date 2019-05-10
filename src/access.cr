@@ -17,10 +17,10 @@ enum DppmRestApi::Access : UInt8
       read = parser.read_string
       if read.includes? '|'
         value = Access::None
-        read.split('/').each { |ss| value |= parse ss }
-        return value
+        read.split('|').each { |substr| value |= parse substr }
+        value
       else
-        return parse? read
+        parse? read
       end
     when :begin_array
       value = Access::None

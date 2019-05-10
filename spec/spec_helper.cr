@@ -3,7 +3,7 @@ require "spec-kemal"
 require "../src/dppm_rest_api"
 
 CRLF             = "\r\n"
-NormalUserAPIKey = __DIR__ + "/normal_user.api_key"
+NORMAL_USER_API_KEY = __DIR__ + "/normal_user.api_key"
 
 def new_test_context(verb = "GET", path = "/api/test")
   backing_io = IO::Memory.new

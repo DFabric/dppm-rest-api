@@ -41,7 +41,6 @@ module DppmRestApi::Actions::Pkg
     # status of this action as it occurs over the API, rather than just returning
     # a result on completion.
     relative_post "/:package" do |context|
-      pkg_id = context.params.url["package"]?
       if context.current_user? && Config.has_access? context, Access::Create
         # TODO: build the package based on the submitted configuration
       end

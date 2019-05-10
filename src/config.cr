@@ -21,8 +21,8 @@ struct DppmRestApi::Config
   # returns true if the given user has access to the given context with the given
   # permission type
   def self.has_access?(context : HTTP::Server::Context, permission : DppmRestApi::Access)
-    if user = context.current_user?.try { |user| DppmRestApi::Config::User.from_h hash: user }
-      return true if user.find_group? do |group|
+    if received_user = context.current_user?.try { |user| DppmRestApi::Config::User.from_h hash: user }
+      return true if received_user.find_group? do |group|
                        group.can_access?(
                          context.request.path,
                          context.request.query_params,

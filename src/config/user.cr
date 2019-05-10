@@ -57,8 +57,11 @@ struct DppmRestApi::Config::User
   # Yields each Group to the block for which the user is a member of.
   def each_group : Nil
     @groups.each do |id|
-      if group = DppmRestApi.permissions_config.groups.find { |group| group.id === id }
-        yield group
+      found_group = DppmRestApi.permissions_config.groups.find do |group|
+        group.id === id
+      end
+      if found_group
+        yield found_group
       else
         Log.warn "user #{name} is a member of an invalid group", "##{id}"
       end
@@ -71,9 +74,6 @@ struct DppmRestApi::Config::User
   # array) -- hence the resulting array can be of a different size than the
   # number of groups of which this user is a member.
   def map_groups(&block : Group -> R) forall R
-    idx = -1
-    # ^^ so that when we add one it is the zero index (since crystal doesn't
-    # have an equivalend of the prefix '--' operator)
     Iterator.of do
       each_group { |group| yield group }
       Iterator.stop
