@@ -76,7 +76,7 @@ struct DppmRestApi::Config::User
   def map_groups(&block : Group -> R) forall R
     Iterator.of do
       each_group { |group| yield group }
-      Iterator.stop
+      yield Iterator.stop
     end.reject &.nil?
   end
 
@@ -84,5 +84,13 @@ struct DppmRestApi::Config::User
   # returns a truthy value
   def find_group?
     each_group { |group| return group if yield group }
+  end
+
+  def join_group(id : Int32)
+    @groups << id
+  end
+
+  def leave_group(id : Int32)
+    @groups.delete id
   end
 end

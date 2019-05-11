@@ -32,6 +32,25 @@ struct DppmRestApi::Config
     end
     false
   end
+
+  @[AlwaysInline]
+  def write_to(path : String)
+    write_to Path.new path
+  end
+
+  def write_to(path : Path)
+    prefix = path.basename
+    suffix = path.extension
+    tmp_file = File.tempfile prefix, suffix, dir: path.dirname do |file|
+      self.to_json file
+    end
+    # to prevent data loss in case of loss of power during the file write.
+    File.rename tmp_file.path, path.to_s
+  ensure
+    if tf = tmp_file
+      File.delete tf.path
+    end
+  end
 end
 
 require "./config/*"
