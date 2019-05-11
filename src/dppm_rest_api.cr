@@ -13,7 +13,7 @@ module DppmRestApi
   end
 
   def self.run(host : String, port : Int32, data_dir : String)
-    ::File.open data_dir + '/' + PERMISSIONS_FILE do |data|
+    ::File.open Path[data_dir, PERMISSIONS_FILE] do |data|
       @@permissions_config = Config.from_json data
     end
 

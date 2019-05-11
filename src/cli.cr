@@ -16,6 +16,10 @@ module DppmRestApi::CLI
     end
   end
 
+  private macro required(arg)
+    mn_{{arg.id}} || abort "{{ arg.id.gsub /_/, "-" }} argument is required."
+  end
+
   private def select_users(match_name, match_groups, api_key, current_config)
     selected_users = current_config.users
     # Filter by name
@@ -140,6 +144,91 @@ module DppmRestApi::CLI
     current_config.users.reject! { |user| selected.includes? user }
     current_config.write_to permissions_file
   end
+
+  def show_users(data_dir, **args)
+    permissions_file = Path[data_dir, "permissions.json"]
+    current_config = File.open permissions_file do |file|
+      DppmRestApi::Config.from_json file
+    end
+    JSON.build STDOUT, indent: 2 do |builder|
+      current_config.users.to_json builder
+    end
+    puts
+  end
+
+  def add_group(id, name, permissions, data_dir, **args)
+    abort "id argument is required" if id.nil?
+    abort "name argument is required" if name.nil?
+    abort "permissions argument is required" if permissions.nil?
+    permissions_file = Path[data_dir, "permissions.json"]
+    current_config = File.open permissions_file do |file|
+      DppmRestApi::Config.from_json file
+    end
+    id_number = id.not_nil!.to_i? || abort "failed to convert group ID #{id} to an integer"
+    abort "a group with the id #{id} already exists" if current_config.groups
+                                                          .map(&.id).includes? id
+    perms = Hash(String, DppmRestApi::Config::Route).from_json permissions.not_nil!
+    newgrp = DppmRestApi::Config::Group.new name.not_nil!, id_number, perms
+    current_config.groups << newgrp
+    current_config.write_to permissions_file
+  end
+
+  def edit_access(group_id mn_group_id, path mn_path, access mn_access, data_dir, **args)
+    group_id = required :group_id
+    path = required :path
+    access = required :access
+    permissions_file = Path[data_dir, "permissions.json"]
+    current_config = File.open permissions_file do |file|
+      DppmRestApi::Config.from_json file
+    end
+    id_number = group_id.to_i? || abort "failed to convert group ID #{group_id} to an integer"
+    group = current_config.groups.find do |grp|
+      grp.id == id_number
+    end || abort "no group found with ID number #{id_number}"
+    parsed_access = Access.parse?(access) ||
+                    Access.from_value access.to_i? ||
+                                      abort "failed to parse access value '#{access}', \
+                                            or convert it to an integer."
+    group.permissions[path].permissions = parsed_access
+    current_config.write_to permissions_file
+  end
+
+  def edit_group_query(group_id mn_group, key mn_key, add_glob, remove_glob, path mn_path, data_dir, **args)
+    group_id = (mn_group || abort "the group-id argument is required").to_i? ||
+               abort "failed to convert group ID '#{mn_group}' to an integer"
+    key = mn_key || abort "the key argument is required"
+    path = mn_path || abort "the path argument is required"
+    permissions_file = Path[data_dir, "permissions.json"]
+    current_config = File.open permissions_file do |file|
+      DppmRestApi::Config.from_json file
+    end
+    if glob_to_add = add_glob
+      current_config.groups
+        .find { |grp| grp.id == group_id }
+        .try do |mn_grp|
+          mn_grp.permissions[path].query_parameters[key] << glob_to_add
+        end
+    end
+    if glob_to_rm = remove_glob
+      current_config.groups
+        .find { |grp| grp.id == group_id }
+        .try do |mn_grp|
+          mn_grp.permissions[path].query_parameters[key].delete glob_to_rm
+        end
+    end
+    current_config.write_to permissions_file
+  end
+
+  def delete_group(group_id mn_group_id, data_dir, **args)
+    group_id = (mn_group_id || abort "the group-id argument is required").to_i? ||
+               abort "failed to convert group-id argument '#{mn_group_id}' to an integer"
+    permissions_file = Path[data_dir, "permissions.json"]
+    current_config = File.open permissions_file do |file|
+      DppmRestApi::Config.from_json file
+    end
+    current_config.groups.reject! { |group| group.id == group_id }
+    current_config.write_to permissions_file
+  end
 end
 
 # DPPM CLI isn't namespaced yet
@@ -168,6 +257,25 @@ CLI.run(
         },
       },
       user: {
+        info: "\
+        For the edit, rekey, show, and delete commands, the users may be selected \
+        either by sepecifying a user's API key, if it is known, or by matching \
+        the name and groups the user is a member of. It is not recommended to \
+        match only by name or by groups, as your command may unintentionally \
+        affect similar users. For example, two users may choose the same name, \
+        but be members of different groups. This doesn't matter as they're \
+        only identified internally by their API keys, but you may \
+        unintentionally add/remove groups from those users when using this \
+        command in that situation. \
+        \
+        Ideally, you won't have multiple users with the same name, or you \
+        can use the web interface to edit these values using API keys for \
+        exact identification. \
+        \
+        This can also be used for batch processing. For example, if you want to \
+        replace one group with several more granular ones, you can add all \
+        members of the old group to the new groups before deleting the old \
+        group.",
         commands: {
           add: {
             info:      "add a user",
@@ -184,22 +292,7 @@ CLI.run(
             },
           },
           edit: {
-            info: <<-HERE.to_s,
-            edit one or more user's groups
-
-            The users may be selected either by sepecifying a user's API key,
-            if it is known, or by matching the name and groups the user is a
-            member of. It is not recommended to match only by name or by groups,
-            as your command may unintentionally affect similar users. For
-            example, two users may choose the same name, but be members of
-            different groups. This doesn't matter as they're only identified
-            internally by their API keys, but you may unintentionally add/remove
-            groups from those users when using this command in that situation.
-
-            Ideally, you won't have multiple users with the same name, or you
-            can use the web interface to edit these values using API keys for
-            exact identification.
-            HERE
+            info:      "edit one or more user's groups",
             action:    "DppmRestApi::CLI.edit_users",
             variables: {
               match_name: {
@@ -208,18 +301,18 @@ CLI.run(
                       %q<`match-name=/some-user\d{0,2}/', or just a specific name.>,
               },
               match_groups: {
-                info: <<-HERE.to_s,
-                The groups selected users must be a member of. They may
-                also be members of grousp that are not specified.
-                You may specify several groups by separating them with
-                commas, and multiple group selectors by separating
-                them with a colon, like `match-groups=1,2,3:2,4', which
-                would select a user who's a member of groups 1, 2, and
-                3, or a user who's a member of groups 2 and 4.
-                HERE
+                info: "The groups that selected users must be a member of. \
+                       They may also be members of groups that are not \
+                       specified. You may specify several groups by separating \
+                       them with commas, and multiple group selectors by \
+                       separating them with a colon, like \
+                       `match-groups=1,2,3:2,4', which would select a user \
+                       who's a member of groups 1, 2, and 3, or a user who's a \
+                       member of groups 2 and 4.",
               },
               api_key: {
-                info: "the api key to select a user by. To change a user's \
+                short: "key",
+                info:  "the api key to select a user by. To change a user's \
                        API key that you already know, use the rekey command.",
               },
               new_name:   {info: "the name to change the selected user's name to."},
@@ -234,22 +327,7 @@ CLI.run(
             },
           },
           rekey: {
-            info: <<-HERE.to_s,
-            generate a new API key for this user/users and output that file.
-
-            The users may be selected either by sepecifying a user's API key,
-            if it is known, or by matching the name and groups the user is a
-            member of. It is not recommended to match only by name or by groups,
-            as your command may unintentionally affect similar users. For
-            example, two users may choose the same name, but be members of
-            different groups. This doesn't matter as they're only identified
-            internally by their API keys, but you may unintentionally add/remove
-            groups from those users when using this command in that situation.
-
-            Ideally, you won't have multiple users with the same name, or you
-            can use the web interface to edit these values using API keys for
-            exact identification.
-            HERE
+            info:      "generate a new API key for this user/users and output that file.",
             action:    "DppmRestApi::CLI.rekey_users",
             variables: {
               match_name: {
@@ -258,43 +336,30 @@ CLI.run(
                       %q<`match-name=/some-user\d{0,2}/', or just a specific name.>,
               },
               match_groups: {
-                info: <<-HERE.to_s,
-                The groups selected users must be a member of. They may
-                also be members of grousp that are not specified.
-                You may specify several groups by separating them with
-                commas, and multiple group selectors by separating
-                them with a colon, like `match-groups=1,2,3:2,4', which
-                would select a user who's a member of groups 1, 2, and
-                3, or a user who's a member of groups 2 and 4.
-                HERE
+                info: "The groups that selected users must be a member of. \
+                       They may also be members of groups that are not \
+                       specified. You may specify several groups by separating \
+                       them with commas, and multiple group selectors by \
+                       separating them with a colon, like \
+                       `match-groups=1,2,3:2,4', which would select a user \
+                       who's a member of groups 1, 2, and 3, or a user who's a \
+                       member of groups 2 and 4.",
               },
               api_key: {
-                info: "the api key to select a user by.",
+                short: "key",
+                info:  "the api key to select a user by.",
               },
               output_file: {
-                info: "write the generated key to a file. Default is to print \
+                short: "file",
+                info:  "write the generated key to a file. Default is to print \
                        to stdout.",
               },
             },
           },
           delete: {
-            info: <<-HERE.to_s,
-            Completely delete a user or set of users.
-
-            The users may be selected either by sepecifying a user's API key,
-            if it is known, or by matching the name and groups the user is a
-            member of. It is not recommended to match only by name or by groups,
-            as your command may unintentionally affect similar users. For
-            example, two users may choose the same name, but be members of
-            different groups. This doesn't matter as they're only identified
-            internally by their API keys, but you may unintentionally add/remove
-            groups from those users when using this command in that situation.
-
-            Ideally, you won't have multiple users with the same name, or you
-            can use the web interface to edit these values using API keys for
-            exact identification.
-            HERE
+            info:      "Completely delete a user or set of users",
             action:    "DppmRestApi::CLI.delete_users",
+            alias:     "rm",
             variables: {
               match_name: {
                 info: "the name of the users to filter by. You may use \
@@ -302,19 +367,120 @@ CLI.run(
                       %q<`match-name=/some-user\d{0,2}/', or just a specific name.>,
               },
               match_groups: {
-                info: <<-HERE.to_s,
-                The groups that selected users must be a member of. They may
-                also be members of groups that are not specified. You may
-                specify several groups by separating them with commas, and
-                multiple group selectors by separating them with a colon,
-                like `match-groups=1,2,3:2,4', which would select a user who's
-                a member of groups 1, 2, and 3, or a user who's a member of
-                groups 2 and 4.
-                HERE
+                info: "The groups that selected users must be a member of. \
+                       They may also be members of groups that are not \
+                       specified. You may specify several groups by separating \
+                       them with commas, and multiple group selectors by \
+                       separating them with a colon, like \
+                       `match-groups=1,2,3:2,4', which would select a user \
+                       who's a member of groups 1, 2, and 3, or a user who's a \
+                       member of groups 2 and 4.",
               },
               api_key: {
-                info: "the api key to select a user by",
+                short: "key",
+                info:  "the api key to select a user by",
               },
+            },
+          },
+          show: {
+            info:      "Show the available information about a user.",
+            action:    "DppmRestApi::CLI.show_users",
+            variables: {
+              match_name: {
+                info: "the name of the users to filter by. You may use \
+                      regex by surrounding the argument in slashes, like " +
+                      %q<`match-name=/some-user\d{0,2}/', or just a specific name.>,
+              },
+              match_groups: {
+                info: "The groups that selected users must be a member of. \
+                       They may also be members of groups that are not \
+                       specified. You may specify several groups by separating \
+                       them with commas, and multiple group selectors by \
+                       separating them with a colon, like \
+                       `match-groups=1,2,3:2,4', which would select a user \
+                       who's a member of groups 1, 2, and 3, or a user who's a \
+                       member of groups 2 and 4.",
+              },
+              api_key: {
+                short: "key",
+                info:  "the api key to select a user by",
+              },
+            },
+          },
+        },
+      },
+      group: {
+        alias:    "g",
+        commands: {
+          add: {
+            info:      "add a group",
+            alias:     "a",
+            action:    "DppmRestApi::CLI.add_group",
+            variables: {
+              id: {
+                info: "this group's ID. Defaults to a random value.",
+              },
+              name: {
+                info: "a short description of this group",
+              },
+              permissions: {
+                info: "\
+                  JSON-formatted permissions, mapping a path to the query \
+                  parameters and type of access allowed on that path.",
+                default: {
+                  "/**"                       => DppmRestApi::Config::Route.new(DppmRestApi::Access.deny),
+                  "/{app,pkg,src,service}/**" => DppmRestApi::Config::Route.new(
+                    DppmRestApi::Access::All,
+                    {"namespace" => ["default-namespace"]}),
+                }.to_json,
+              },
+            },
+          },
+          edit_access: {
+            info:      "change a group's permissions",
+            alias:     "e",
+            action:    "DppmRestApi::CLI.edit_access",
+            variables: {
+              group_id: {
+                info: "the numeric ID of the group to edit",
+              },
+              path: {
+                info: "The path on which to update permissions.",
+              },
+              access: {
+                info: "the access level to give this group on the given path",
+              },
+            },
+          },
+          edit_query: {
+            info:      "update the allowed query parameters on this path",
+            alias:     "q",
+            action:    "DppmRestApi::CLI.edit_group_query",
+            variables: {
+              group_id: {
+                info: "the numeric ID of the group to edit",
+              },
+              path: {
+                info: "the path on which to update allowed query parameters.",
+              },
+              key:      {info: "the query key to match for"},
+              add_glob: {
+                short: "add",
+                info:  "a glob to add to the allowed globs on this path.",
+              },
+              remove_glob: {
+                short: "rm",
+                info:  "\
+                    a glob to remove from the allowed globs on this path.",
+              },
+            },
+          },
+          delete: {
+            info:      "delete the given group from the system.",
+            alias:     "rm",
+            action:    "DppmRestApi::CLI.delete_group",
+            variables: {
+              group_id: {info: "the ID of the group to remove"},
             },
           },
         },

@@ -69,8 +69,8 @@ shards:
     version: 0.3.9
 
   scrypt:
-    github: ysbaddaden/scrypt-crystal
-    version: 0.2.2
+    github: dscottboggs/scrypt-crystal
+    commit: 716463437d602941ac0e96331fa15204ec08c51c
 
   semantic_compare:
     github: j8r/semantic_compare
