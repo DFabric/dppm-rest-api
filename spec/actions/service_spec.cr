@@ -16,37 +16,37 @@ module DppmRestApi::Actions::Service
     end
     describe (fmt_route "/:service/boot") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-service/boot")
+        put (fmt_route "/some-service/boot")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:service/reload") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-service/reload")
+        put (fmt_route "/some-service/reload")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:service/restart") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-service/restart")
+        put (fmt_route "/some-service/restart")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:service/start") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-service/start")
+        put (fmt_route "/some-service/start")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:service/status") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-service/status")
+        put (fmt_route "/some-service/status")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:service/stop") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-service/stop")
+        put (fmt_route "/some-service/stop")
         response.status_code.should eq 401
       end
     end

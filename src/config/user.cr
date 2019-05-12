@@ -25,9 +25,14 @@ struct DppmRestApi::Config::User
     new Scrypt::Password.new(string), groups, name
   end
 
+  @[AlwaysInline]
   def self.create(groups : Array(Group), name : String) : {String, self}
+    create groups.map { |g| g.id }, name
+  end
+
+  def self.create(groups : Array(Int), name : String) : {String, self}
     api_key = Random::Secure.base64 API_KEY_SIZE
-    {api_key, new(Scrypt::Password.create(api_key), groups.map { |g| g.id }, name)}
+    {api_key, new(Scrypt::Password.create(api_key), groups, name)}
   end
 
   def to_h : JWTCompatibleHash
@@ -92,5 +97,9 @@ struct DppmRestApi::Config::User
 
   def leave_group(id : Int32)
     @groups.delete id
+  end
+
+  def to_pretty_s
+    "Name: #{name}; Member of: #{group_ids.join(", ")}"
   end
 end

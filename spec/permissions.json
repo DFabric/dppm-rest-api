@@ -1,4 +1,3 @@
-
 {
   "groups": [
     {
@@ -6,61 +5,76 @@
       "id": 0,
       "permissions": {
         "/**": {
-          "permissions": "All"
+          "permissions": 15
         }
       }
-    }, {
+    },
+    {
       "name": "read access to default namespace",
       "id": 500,
       "permissions": {
         "/**": {
-          "permissions": "Read",
+          "permissions": 15,
           "query_parameters": {
-            "namespace": ["default-namespace"]
+            "namespace": [
+              "default-namespace"
+            ]
           }
         }
       }
-    }, {
+    },
+    {
       "name": "write access to default namespace",
       "id": 501,
       "permissions": {
         "/**": {
-          "permissions": ["Create", "Update"],
+          "permissions": 15,
           "query_parameters": {
-            "namespace": ["default-namespace"]
+            "namespace": [
+              "default-namespace"
+            ]
           }
         }
       }
-    }, {
+    },
+    {
       "name": "delete access to default namespace",
       "id": 502,
       "permissions": {
         "/**": {
-          "permissions": "Delete",
+          "permissions": 15,
           "query_parameters": {
-            "namespace": ["default-namespace"]
+            "namespace": [
+              "default-namespace"
+            ]
           }
         }
       }
-    }, {
+    },
+    {
       "name": "full access to default namespace",
       "id": 499,
       "permissions": {
         "/**": {
-          "permissions": "All",
+          "permissions": 15,
           "query_parameters": {
-            "namespace": ["default-namespace"]
+            "namespace": [
+              "default-namespace"
+            ]
           }
         }
       }
-    }, {
+    },
+    {
       "name": "full access to Jim Oliver's namespace",
       "id": 1000,
       "permissions": {
         "/**": {
-          "permissions": "All",
+          "permissions": 15,
           "query_parameters": {
-            "namespace": ["jim-oliver"]
+            "namespace": [
+              "jim-oliver"
+            ]
           }
         }
       }
@@ -69,12 +83,18 @@
   "users": [
     {
       "api_key_hash": "400$8$2b$f5726490$373097ee2bb99df0eb825ef343dccaa341d23e29569b45a2e9a6b0cc3319d80a",
-      "name": "Administrator",
-      "groups": [0]
-    }, {
+      "groups": [
+        0
+      ],
+      "name": "Administrator"
+    },
+    {
       "api_key_hash": "400$8$1b$78f8bd91$70f0f5d5a8da1f2f5a54e7f4ab35bfa1054eeca1168e92c7a4b1881489b017a6",
-      "name": "Jim Oliver",
-      "groups": [ 499, 1000 ]
+      "groups": [
+        499,
+        1000
+      ],
+      "name": "Jim Oliver"
     }
   ]
 }

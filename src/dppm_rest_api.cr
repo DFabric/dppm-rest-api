@@ -8,7 +8,7 @@ module DppmRestApi
   PERMISSIONS_FILE = "permissions.json"
   API_DOCUMENT     = DEFAULT_DATA_DIR + "api-options.json"
 
-  class_getter permissions_config : Config do
+  class_property permissions_config : Config do
     raise "no permissions file is defined!"
   end
 

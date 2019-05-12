@@ -96,7 +96,7 @@ module DppmRestApi::Actions::App
       next context
       puts "user found!"
     end
-    pp! deny_access! to: context
+    deny_access! to: context
   end
   # reload the service associated with the given application
   relative_put "/:app_name/service/reload" do |context|
