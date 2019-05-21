@@ -106,17 +106,19 @@ module DppmRestApi::CLI
           },
         },
         group: {
-          alias:    "g",
-          info:     "Add, update, or delete groups",
+          alias:     "g",
+          info:      "Add, update, or delete groups",
+          variables: {
+            id: {
+              info: "The ID of the group to work with",
+            },
+          },
           commands: {
             add: {
               info:      "Add a group",
               alias:     "a",
               action:    "DppmRestApi::CLI.add_group",
               variables: {
-                id: {
-                  info: "This group's ID. Defaults to a random value",
-                },
                 name: {
                   info: "A short description of this group",
                 },
@@ -128,14 +130,23 @@ module DppmRestApi::CLI
                 },
               },
             },
+            add_route: {
+              info:      "Add permissions to a route",
+              action:    "DppmRestApi::CLI.add_route",
+              variables: {
+                path: {
+                  info: "The path glob on which you want to add the permissions",
+                },
+                access: {
+                  info: "the kinds of access to allow on this path",
+                },
+              },
+            },
             edit_access: {
               info:      "Change a group's permissions",
               alias:     "e",
               action:    "DppmRestApi::CLI.edit_access",
               variables: {
-                group_id: {
-                  info: "the numeric ID of the group to edit",
-                },
                 path: {
                   info: "The path on which to update permissions",
                 },
@@ -149,9 +160,6 @@ module DppmRestApi::CLI
               alias:     "q",
               action:    "DppmRestApi::CLI.edit_group_query",
               variables: {
-                group_id: {
-                  info: "The numeric ID of the group to edit",
-                },
                 path: {
                   info: "The path on which to update allowed query parameters.",
                 },
@@ -168,14 +176,9 @@ module DppmRestApi::CLI
               },
             },
             delete: {
-              info:      "Delete the given group from the system",
-              alias:     "rm",
-              action:    "DppmRestApi::CLI.delete_group",
-              variables: {
-                group_id: {
-                  info: "The ID of the group to remove",
-                },
-              },
+              info:   "Delete the given group from the system",
+              alias:  "rm",
+              action: "DppmRestApi::CLI.delete_group",
             },
           },
         },
@@ -409,13 +412,13 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def edit_access(group_id, path, access, data_dir, **args)
-    required group_id, path, access, data_dir
+  def edit_access(id, path, access, data_dir, **args)
+    required id, path, access, data_dir
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
     end
-    id_number = group_id.to_i? || raise InvalidGroupID.new group_id
+    id_number = id.to_i? || raise InvalidGroupID.new id
     group = current_config.groups.find do |grp|
       grp.id == id_number
     end
@@ -429,12 +432,11 @@ module DppmRestApi::CLI
     group.permissions[path] = original_cfg
     current_config.groups << group
     current_config.write_to permissions_file
-    pp! File.read permissions_file
   end
 
-  def add_route(group_id, access, path, data_dir, **args)
-    required group_id, path, access, data_dir
-    group_id_number = group_id.to_i? || raise InvalidGroupID.new group_id
+  def add_route(id, access, path, data_dir, **args)
+    required id, path, access, data_dir
+    group_id_number = id.to_i? || raise InvalidGroupID.new id
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
@@ -447,9 +449,9 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def edit_group_query(group_id, key, add_glob, remove_glob, path, data_dir, **args)
-    required group_id, key, path, data_dir
-    group_id_number = group_id.to_i? || raise InvalidGroupID.new group_id
+  def edit_group_query(id, key, add_glob, remove_glob, path, data_dir, **args)
+    required id, key, path, data_dir
+    group_id_number = id.to_i? || raise InvalidGroupID.new id
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
@@ -476,9 +478,9 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def delete_group(group_id, data_dir, **args)
-    required group_id, data_dir
-    group_id_number = group_id.to_i? || raise InvalidGroupID.new group_id
+  def delete_group(id, data_dir, **args)
+    required id, data_dir
+    group_id_number = id.to_i? || raise InvalidGroupID.new id
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
@@ -511,9 +513,9 @@ module DppmRestApi::CLI
   define_error RequiredArgument, "the argument '#{@arg.gsub '_', '-'}' is required!", @arg : String do
     property arg
   end
-  define_error NoRouteMatchForThisGroup, <<-HERE, path, group_id
+  define_error NoRouteMatchForThisGroup, <<-HERE, path, id
     please use add-route to add a route before editing the
     query parameters of that group. No existing permissions
-    data was found for the glob #{path} for the group #{group_id}
+    data was found for the glob #{path} for the group #{id}
     HERE
 end

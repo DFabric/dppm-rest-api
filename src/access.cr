@@ -10,25 +10,21 @@ enum DppmRestApi::Access : UInt8
     Access::None
   end
 
-  def self.new(pull parser : JSON::PullParser)
+  def self.new(pull parser : JSON::PullParser) : Access
     case parser.kind
     when :int
       number = parser.read_int
-      puts "got numeric access to parse " + number.to_s
       from_value number
     when :string
       read = parser.read_string
-      puts "got string access to parse " + read
       if read.includes? '|'
         value = Access::None
         read.split('|').each do |substr|
-          parsed = parse substr.strip
-          value |= parsed
-          puts "got substring '#{substr}' which was parsed to '#{parsed}'. Value is now '#{value}'"
+          value |= parse substr.strip
         end
         value
       else
-        parse? read
+        parse read
       end
     when :begin_array
       value = Access::None
@@ -36,7 +32,6 @@ enum DppmRestApi::Access : UInt8
         str = parser.read_string
         parsed = parse str
         value |= parsed
-        puts "got array element '#{str}' which was parsed to '#{parsed}'. Value is now '#{value}'"
       end
       value
     else
@@ -47,16 +42,16 @@ enum DppmRestApi::Access : UInt8
     end
   end
 
-  def to_json
-    '"' + to_s + '"'
+  def to_json(**options)
+    JSON.build(**options) { |builder| to_json builder }
   end
 
   def to_json(builder : JSON::Builder)
-    builder.string to_s
-  end
-
-  def self.from_json(value : Number)
-    from_value number
+    builder.array do
+      each do |variant|
+        builder.string variant.to_s
+      end
+    end
   end
 
   def self.from_value(value : Int)

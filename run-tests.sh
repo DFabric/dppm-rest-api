@@ -1,14 +1,12 @@
 #!/bin/sh
 
-set -e
+set -eu
 
 build=no
-if [ "$1" = 'and' ] && [ "$2" = 'build' ]; then
-  shift; shift
+if [ "${1-}" = 'build' ]; then
+  shift
   build=yes
 fi
-
-set -e
 
 do_build() {
   printf "building...\r"

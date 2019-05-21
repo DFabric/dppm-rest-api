@@ -237,7 +237,7 @@ module DppmRestApi::CLI
     it "throws an error when the group id is not a numeral" do
       with_state_restore do
         expect_raises InvalidGroupID do
-          edit_access group_id: "five",
+          edit_access id: "five",
             path: "/doesnt/matter",
             access: "Read",
             data_dir: __DIR__
@@ -247,7 +247,7 @@ module DppmRestApi::CLI
     it "throws an error if the group doesn't exist" do
       with_state_restore do
         expect_raises NoSuchGroup do
-          edit_access group_id: "5",
+          edit_access id: "5",
             path: "/doesnt/matter",
             access: "Read",
             data_dir: __DIR__
@@ -256,14 +256,13 @@ module DppmRestApi::CLI
     end
     it "can make Administrator read-only" do
       with_state_restore do
-        edit_access group_id: "0",
+        edit_access id: "0",
           path: "/**",
           access: "Read",
           data_dir: __DIR__
         new_state = File.open permissions_file! do |file|
           Config.from_json file.rewind
         end
-        pp! new_state.groups.select { |grp| grp.id == 0 }
         if su = new_state.groups.find { |group| group.id == 0 }
           su.can_access?(
             "/literally/anything",
@@ -291,7 +290,7 @@ module DppmRestApi::CLI
       it "throws an error when the group id is not a numeral" do
         with_state_restore do
           expect_raises InvalidGroupID do
-            edit_group_query group_id: "five",
+            edit_group_query id: "five",
               path: "/doesnt/matter",
               access: "Read",
               data_dir: __DIR__,
@@ -304,7 +303,7 @@ module DppmRestApi::CLI
       it "throws an error if the group doesn't exist" do
         with_state_restore do
           expect_raises NoSuchGroup do
-            edit_group_query group_id: "5",
+            edit_group_query id: "5",
               path: "/doesnt/matter",
               access: "Read",
               data_dir: __DIR__,
@@ -316,7 +315,7 @@ module DppmRestApi::CLI
       end
       it "can add a glob to a query" do
         with_state_restore do
-          edit_group_query group_id: "1000",
+          edit_group_query id: "1000",
             path: "/**",
             access: "Create | Read | Delete",
             data_dir: __DIR__,
@@ -336,7 +335,7 @@ module DppmRestApi::CLI
     describe "#add_route" do
       it "can add a path to a group's #permissions values" do
         with_state_restore do
-          add_route group_id: "1000", access: "Read", path: "/some/path", data_dir: __DIR__
+          add_route id: "1000", access: "Read", path: "/some/path", data_dir: __DIR__
           new_state = File.open permissions_file! do |file|
             Config.from_json file
           end
@@ -348,7 +347,7 @@ module DppmRestApi::CLI
     describe "#delete_group" do
       it "can remove a group" do
         with_state_restore do
-          delete_group group_id: "1000", data_dir: __DIR__
+          delete_group id: "1000", data_dir: __DIR__
           new_state = File.open permissions_file! do |file|
             Config.from_json file
           end
