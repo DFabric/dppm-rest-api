@@ -261,9 +261,9 @@ module DppmRestApi::CLI
           access: "Read",
           data_dir: __DIR__
         new_state = File.open permissions_file! do |file|
-          Config.from_json file
+          Config.from_json file.rewind
         end
-        pp! permissions_file!
+        pp! new_state.groups.select { |grp| grp.id == 0 }
         if su = new_state.groups.find { |group| group.id == 0 }
           su.can_access?(
             "/literally/anything",
@@ -284,6 +284,75 @@ module DppmRestApi::CLI
           end
         else
           fail "didn't find a user with ID == 0"
+        end
+      end
+    end
+    describe "#edit_group_query" do
+      it "throws an error when the group id is not a numeral" do
+        with_state_restore do
+          expect_raises InvalidGroupID do
+            edit_group_query group_id: "five",
+              path: "/doesnt/matter",
+              access: "Read",
+              data_dir: __DIR__,
+              key: "something",
+              add_glob: nil,
+              remove_glob: nil
+          end
+        end
+      end
+      it "throws an error if the group doesn't exist" do
+        with_state_restore do
+          expect_raises NoSuchGroup do
+            edit_group_query group_id: "5",
+              path: "/doesnt/matter",
+              access: "Read",
+              data_dir: __DIR__,
+              key: "something",
+              add_glob: nil,
+              remove_glob: nil
+          end
+        end
+      end
+      it "can add a glob to a query" do
+        with_state_restore do
+          edit_group_query group_id: "1000",
+            path: "/**",
+            access: "Create | Read | Delete",
+            data_dir: __DIR__,
+            key: "test-key",
+            add_glob: "test-glob",
+            remove_glob: nil
+          new_state = File.open permissions_file! do |file|
+            Config.from_json file
+          end
+          test_group = new_state.groups.find { |grp| grp.id == 1000 }.not_nil!
+          test_group.permissions["/**"]
+            .query_parameters["test-key"]?
+            .should eq ["test-glob"]
+        end
+      end
+    end
+    describe "#add_route" do
+      it "can add a path to a group's #permissions values" do
+        with_state_restore do
+          add_route group_id: "1000", access: "Read", path: "/some/path", data_dir: __DIR__
+          new_state = File.open permissions_file! do |file|
+            Config.from_json file
+          end
+          test_group = new_state.groups.find { |grp| grp.id == 1000 }.not_nil!
+          test_group.permissions["/some/path"]?.should_not be_nil
+        end
+      end
+    end
+    describe "#delete_group" do
+      it "can remove a group" do
+        with_state_restore do
+          delete_group group_id: "1000", data_dir: __DIR__
+          new_state = File.open permissions_file! do |file|
+            Config.from_json file
+          end
+          new_state.groups.find { |grp| grp.id == 1000 }.should be_nil
         end
       end
     end

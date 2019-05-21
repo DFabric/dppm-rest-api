@@ -5,7 +5,7 @@
       "id": 0,
       "permissions": {
         "/**": {
-          "permissions": 15
+          "permissions": "Create | Read | Update | Delete"
         }
       }
     },
@@ -14,7 +14,7 @@
       "id": 500,
       "permissions": {
         "/**": {
-          "permissions": 15,
+          "permissions": "Create | Read | Update | Delete",
           "query_parameters": {
             "namespace": [
               "default-namespace"
@@ -28,7 +28,7 @@
       "id": 501,
       "permissions": {
         "/**": {
-          "permissions": 15,
+          "permissions": "Create | Read | Update | Delete",
           "query_parameters": {
             "namespace": [
               "default-namespace"
@@ -42,7 +42,7 @@
       "id": 502,
       "permissions": {
         "/**": {
-          "permissions": 15,
+          "permissions": "Create | Read | Update | Delete",
           "query_parameters": {
             "namespace": [
               "default-namespace"
@@ -56,7 +56,7 @@
       "id": 499,
       "permissions": {
         "/**": {
-          "permissions": 15,
+          "permissions": "Create | Read | Update | Delete",
           "query_parameters": {
             "namespace": [
               "default-namespace"
@@ -70,7 +70,7 @@
       "id": 1000,
       "permissions": {
         "/**": {
-          "permissions": 15,
+          "permissions": "Create | Read | Update | Delete",
           "query_parameters": {
             "namespace": [
               "jim-oliver"

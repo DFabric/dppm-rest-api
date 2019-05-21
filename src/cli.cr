@@ -424,34 +424,54 @@ module DppmRestApi::CLI
     parsed_access = Access.parse?(access) ||
                     Access.from_value access.to_i? ||
                                       raise InvalidAccessParam.new access
-    original_cfg = group.permissions[path]? || Config::Route.new parsed_access, {} of String => Array(String)
+    original_cfg = group.permissions[path]? || Config::Route.new parsed_access
     original_cfg.permissions = parsed_access
     group.permissions[path] = original_cfg
     current_config.groups << group
     current_config.write_to permissions_file
-    pp! permissions_file
+    pp! File.read permissions_file
   end
 
-  def edit_group_query(group_id, key, add_glob, remove_glob, path, data_dir, **args)
-    required group_id, key, path
+  def add_route(group_id, access, path, data_dir, **args)
+    required group_id, path, access, data_dir
     group_id_number = group_id.to_i? || raise InvalidGroupID.new group_id
-    permissions_file = Path[required(:data_dir), "permissions.json"]
+    permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
     end
+    relevant_group = current_config.groups
+      .find { |grp| grp.id == group_id_number } || raise NoSuchGroup.new group_id_number
+    parsed_access = DppmRestApi::Access.parse access
+    route = DppmRestApi::Config::Route.new parsed_access
+    relevant_group.permissions[path] = route
+    current_config.write_to permissions_file
+  end
+
+  def edit_group_query(group_id, key, add_glob, remove_glob, path, data_dir, **args)
+    required group_id, key, path, data_dir
+    group_id_number = group_id.to_i? || raise InvalidGroupID.new group_id
+    permissions_file = Path[data_dir, "permissions.json"]
+    current_config = File.open permissions_file do |file|
+      DppmRestApi::Config.from_json file
+    end
+    relevant_group = current_config.groups.find { |grp| grp.id == group_id_number }
+    relevant_group || raise NoSuchGroup.new group_id_number
     if glob_to_add = add_glob
-      current_config.groups
-        .find { |grp| grp.id == group_id_number }
-        .try do |mn_grp|
-          mn_grp.permissions[path].query_parameters[key] << glob_to_add
+      if route = relevant_group.permissions[path]?
+        if route.query_parameters[key]?
+          relevant_group.permissions[path].query_parameters[key] << glob_to_add
+        else
+          relevant_group.permissions[path].query_parameters[key] = [glob_to_add]
         end
+      else
+        raise NoRouteMatchForThisGroup.new path, group_id_number
+      end
     end
     if glob_to_rm = remove_glob
-      current_config.groups
-        .find { |grp| grp.id == group_id_number }
-        .try do |mn_grp|
-          mn_grp.permissions[path].query_parameters[key].delete glob_to_rm
-        end
+      relevant_group.permissions[path].query_parameters[key].delete glob_to_rm
+      if relevant_group.permissions[path].query_parameters[key].empty?
+        relevant_group.permissions[path].query_parameters.delete key
+      end
     end
     current_config.write_to permissions_file
   end
@@ -469,10 +489,7 @@ module DppmRestApi::CLI
 
   macro define_error(kind, message, *args, &block)
     class {{kind.id}} < ::Exception
-      def initialize(
-          {% unless args.empty? %}
-            {{args.splat}}
-          {% end %})
+      def initialize({% unless args.empty? %} {{args.splat}} {% end %})
         super {{message.id}}
       end
       {% if block %}
@@ -494,4 +511,9 @@ module DppmRestApi::CLI
   define_error RequiredArgument, "the argument '#{@arg.gsub '_', '-'}' is required!", @arg : String do
     property arg
   end
+  define_error NoRouteMatchForThisGroup, <<-HERE, path, group_id
+    please use add-route to add a route before editing the
+    query parameters of that group. No existing permissions
+    data was found for the glob #{path} for the group #{group_id}
+    HERE
 end
