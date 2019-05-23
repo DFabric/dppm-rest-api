@@ -97,7 +97,7 @@ module DppmRestApi::CLI
             Config.from_json permissions_file.rewind
           end
           if user = config.users.find { |usr| usr.name == "added user" }
-            user.api_key_hash.should eq key
+            user.api_key_hash.verify(key).should be_true
             user.group_ids.should eq [500]
           else
             fail "user failed to be added"
@@ -160,7 +160,7 @@ module DppmRestApi::CLI
           Config.from_json file
         end
         new_key = File.read_lines(data_file.path)[1]
-        new_state.users.find { |usr| usr.name == "Administrator" }.not_nil!.api_key_hash == new_key
+        new_state.users.find { |usr| usr.name == "Administrator" }.not_nil!.api_key_hash.verify(new_key).should be_true
         orig_key_hash.should_not eq new_key
       end
     end

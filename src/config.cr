@@ -13,7 +13,7 @@ struct DppmRestApi::Config
   def find_and_authenticate!(body) : Config::User?
     data = ReceivedUser.from_json body
     if key = data.auth?
-      users.find { |user| user.api_key_hash == key }
+      users.find { |user| user.api_key_hash.verify key }
     end
   rescue JSON::ParseException
     # Body was not formatted properly.

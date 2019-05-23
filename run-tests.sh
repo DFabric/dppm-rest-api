@@ -11,10 +11,11 @@ fi
 do_build() {
   printf "building...\r"
   shards build > /dev/null
-  printf "building...done\nAll OK\n"
+  printf "building...done\n"
 }
 
 crystal tool format
 ameba
 KEMAL_ENV=test crystal spec $@
 [ $build = yes ] && do_build
+echo All OK

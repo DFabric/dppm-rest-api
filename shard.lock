@@ -58,7 +58,7 @@ shards:
 
   libcrown:
     github: j8r/libcrown
-    version: 0.1.1
+    version: 0.2.0
 
   mysql:
     github: crystal-lang/crystal-mysql
@@ -70,7 +70,7 @@ shards:
 
   scrypt:
     github: dscottboggs/scrypt-crystal
-    commit: 716463437d602941ac0e96331fa15204ec08c51c
+    commit: c0bfad766effb1f7b0e3561cf51e0f25c7609e8a
 
   semantic_compare:
     github: j8r/semantic_compare
