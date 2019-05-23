@@ -14,10 +14,9 @@ describe DppmRestApi::Config::User do
   end
   describe "a mocked normal user" do
     it "has access to the default namespace and it's own but not others" do
-      token = File.read(NORMAL_USER_API_KEY).chomp
       user = DppmRestApi.permissions_config
         .users
-        .find { |usr| usr.api_key_hash =~ token }
+        .find { |usr| usr.api_key_hash =~ NORMAL_USER_API_KEY }
         .not_nil!
       user.find_group?(&.can_access?(
         "/some/arbitrary/path",

@@ -81,7 +81,7 @@ module DppmRestApi::CLI
       {% end %}
       it "selects by api key" do
         mock_users = DppmRestApi.permissions_config.users
-        selected = selected_users nil, nil, File.read(NORMAL_USER_API_KEY).chomp, from: mock_users
+        selected = selected_users nil, nil, NORMAL_USER_API_KEY, from: mock_users
         selected.size.should eq 1
         selected.first.name.should eq "Jim Oliver"
         selected.first.groups.map(&.id).should eq [499, 1000]
