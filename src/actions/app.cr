@@ -4,12 +4,6 @@ require "dppm/prefix"
 module DppmRestApi::Actions::App
   extend self
 
-  # Pull the context from the context's query parameter or use the default
-  # provided by the CLI.
-  macro prefix
-    context.params.query["prefix"]? || "" # TODO improve like DppmRestApi.config.default_prefix
-  end
-
   # gather the appropriate configuration option from the context and set it to
   # the app named `app_name`
   private def set_config(context, key, app_name)
