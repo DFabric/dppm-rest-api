@@ -8,12 +8,12 @@ module DppmRestApi
   PERMISSIONS_FILE = "permissions.json"
   API_DOCUMENT     = DEFAULT_DATA_DIR + "api-options.json"
 
-  class_getter permissions_config : Config do
+  class_property permissions_config : Config do
     raise "no permissions file is defined!"
   end
 
   def self.run(host : String, port : Int32, data_dir : String)
-    ::File.open data_dir + '/' + PERMISSIONS_FILE do |data|
+    ::File.open Path[data_dir, PERMISSIONS_FILE] do |data|
       @@permissions_config = Config.from_json data
     end
 

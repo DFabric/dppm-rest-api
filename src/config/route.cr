@@ -9,7 +9,7 @@ struct DppmRestApi::Config::Route
     {} of String => Array(String)
   end
 
-  def initialize(@permissions, @query_parameters); end
+  def initialize(@permissions, @query_parameters = {} of String => Array(String)); end
 
   # Returns true if this Route matches the given query parameters. Does not
   # imply a matching access.
@@ -18,8 +18,10 @@ struct DppmRestApi::Config::Route
                          parameters.has_key? key
                        end
     !!parameters.find do |key, value|
-      if glob = query_parameters[key]?.try &.first?
-        File.match? glob, value
+      if globs = query_parameters[key]?
+        globs.any? do |glob|
+          File.match? glob, value
+        end
       end
     end
   end

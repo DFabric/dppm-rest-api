@@ -4,17 +4,19 @@ describe DppmRestApi::Config::User do
   describe "Administrator" do
     it "is a memeber of the 'super user' group" do
       DppmRestApi.permissions_config
-        .user(named: "Administrator")
+        .users
+        .find { |usr| usr.name == "Administrator" }
         .not_nil!
         .groups
-        .includes?(DppmRestApi.permissions_config.group(named: "super user"))
+        .includes?(DppmRestApi.permissions_config.groups.find { |grp| grp.name == "super user" })
         .should be_true
     end
   end
   describe "a mocked normal user" do
-    pending "has access to the default namespace and it's own but not others" do
+    it "has access to the default namespace and it's own but not others" do
       user = DppmRestApi.permissions_config
-        .user(authenticated_with: NormalUserAPIKey)
+        .users
+        .find { |usr| usr.api_key_hash.verify NORMAL_USER_API_KEY }
         .not_nil!
       user.find_group?(&.can_access?(
         "/some/arbitrary/path",

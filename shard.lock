@@ -6,7 +6,7 @@ shards:
 
   clicr:
     github: j8r/clicr
-    version: 0.5.1
+    version: 0.6.0
 
   con:
     github: j8r/con
@@ -22,11 +22,11 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: 25863bf5c9736f777ae8ed1f07fe5bd87cd882e1
+    commit: a390edd66b307740c0dbec5b2c42c0151ca8b03b
 
   dynany:
     github: j8r/dynany
-    version: 0.2.1
+    version: 0.2.2
 
   exception_page:
     github: crystal-loot/exception_page
@@ -50,7 +50,7 @@ shards:
 
   kemal_jwt_auth:
     github: dscottboggs/kemal-jwt-auth
-    commit: 8feb01b84aa3a1fd51c8fe1cc5ce04fe61a10ce5
+    version: 1.0.0
 
   kilt:
     github: jeromegn/kilt
@@ -58,7 +58,7 @@ shards:
 
   libcrown:
     github: j8r/libcrown
-    version: 0.1.1
+    version: 0.2.0
 
   mysql:
     github: crystal-lang/crystal-mysql
@@ -69,8 +69,8 @@ shards:
     version: 0.3.9
 
   scrypt:
-    github: ysbaddaden/scrypt-crystal
-    version: 0.2.2
+    github: dscottboggs/scrypt-crystal
+    commit: c0bfad766effb1f7b0e3561cf51e0f25c7609e8a
 
   semantic_compare:
     github: j8r/semantic_compare

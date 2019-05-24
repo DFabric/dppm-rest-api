@@ -28,37 +28,37 @@ module DppmRestApi::Actions::App
     end
     describe (fmt_route "/:app_name/service/boot") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some_app/service/boot")
+        put (fmt_route "/some_app/service/boot")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/service/reload") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some_app/service/reload")
+        put (fmt_route "/some_app/service/reload")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/service/restart") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-app/service/restart")
+        put (fmt_route "/some-app/service/restart")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/service/start") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-app/service/start")
+        put (fmt_route "/some-app/service/start")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/service/status") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-app/service/status")
+        put (fmt_route "/some-app/service/status")
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/service/stop") do
       pending "responds with 401 Forbidden" do
-        put (pp! fmt_route "/some-app/service/stop")
+        put (fmt_route "/some-app/service/stop")
         response.status_code.should eq 401
       end
     end

@@ -12,7 +12,8 @@ dependencies:
     github: kemalcr/spec-kemal
     branch: master
   scrypt:
-    github: ysbaddaden/scrypt-crystal
+    github: dscottboggs/scrypt-crystal
+    branch: feature/comparison
   kemal_jwt_auth:
     github: dscottboggs/kemal-jwt-auth
   dppm:

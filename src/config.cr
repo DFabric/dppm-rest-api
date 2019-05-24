@@ -1,21 +1,23 @@
 require "./access"
 require "./ext/scrypt_password"
+require "json"
+require "kemal_jwt_auth"
+require "./config/received_user"
 
 struct DppmRestApi::Config
   include JSON::Serializable
+  include KemalJWTAuth::UsersCollection
   property groups : Array(Group)
   property users : Array(User)
 
-  def user(*, named username : String) : User?
-    users.find { |user| user.name == username }
-  end
-
-  def user(*, authenticated_with api_key : String)
-    users.find { |user| user.api_key_hash == api_key }
-  end
-
-  def group(*, named group_name : String) : Group?
-    groups.find { |group| group.name == group_name }
+  def find_and_authenticate!(body) : Config::User?
+    data = ReceivedUser.from_json body
+    if key = data.auth?
+      users.find { |user| user.api_key_hash.verify key }
+    end
+  rescue JSON::ParseException
+    # Body was not formatted properly.
+    nil
   end
 
   # returns true if the given user has access to the given context with the given
@@ -31,6 +33,32 @@ struct DppmRestApi::Config
                      end
     end
     false
+  end
+
+  @[AlwaysInline]
+  def write_to(path : String)
+    write_to Path.new path
+  end
+
+  def write_to(path : Path) : Void
+    prefix = path.basename suffix: ".json"
+    suffix = path.extension
+    tmp_file = File.tempfile prefix, suffix, dir: path.dirname do |file|
+      self.to_json file, indent: 2
+    end
+    # to prevent data loss in case of loss of power during the file write.
+    File.rename tmp_file.path, path.to_s
+  ensure
+    begin
+      tmp_file.try &.delete
+    rescue Errno
+    end
+  end
+
+  def to_json(io : IO, *, indent : String | Int32? = nil)
+    JSON.build io, indent: indent do |builder|
+      to_json builder
+    end
   end
 end
 

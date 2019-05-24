@@ -3,4 +3,4 @@
 /bin/
 /.shards/
 *.dwarf
-*.api_key
+.vscode/settings.json
