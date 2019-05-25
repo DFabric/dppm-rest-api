@@ -3,7 +3,12 @@ module DppmRestApi::Actions::Pkg
   # List built packages
   relative_get nil do |context|
     if context.current_user? && Actions.has_access? context, Access::Read
-      # TODO: list all built packages
+      pfx = Prefix.new prefix
+      JSON.build context.response do |json|
+        json.array do
+          pfx.each_pkg { |pkg| json.string pkg.package }
+        end
+      end
       next context
     end
     raise Unauthorized.new context
