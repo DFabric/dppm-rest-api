@@ -55,6 +55,7 @@ module DppmRestApi::Actions::Pkg
       else
         {errors: ["no packages to clean"]}
       end.to_json context.response
+      context.response.flush
       next context
     end
     raise Unauthorized.new context
@@ -76,6 +77,7 @@ module DppmRestApi::Actions::Pkg
               },
               "errors" => [] of Nil,
             }.to_json context.response
+            context.response.flush
             next context
           rescue e : Exception
             # catch the exception thown by the lack of a config value for the specified key
@@ -84,6 +86,7 @@ module DppmRestApi::Actions::Pkg
             raise e unless msg.starts_with? "config key not found"
             context.response.status_code = 404
             {errors: [e.message]}.to_json context.response
+            context.response.flush
             next context
           end
         else
@@ -109,6 +112,7 @@ module DppmRestApi::Actions::Pkg
         end
       else
         {errors: [%[no such package "#{package_name}" found]]}.to_json context.response
+        context.response.flush
         context.response.status_code = 404
       end
       next context
