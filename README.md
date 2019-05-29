@@ -1,6 +1,8 @@
-[![Build Status](https://cloud.drone.io/api/badges/DFabric/dppm-rest-api/status.svg)](https://cloud.drone.io/DFabric/dppm-rest-api)
-
 # DPPM REST API
+
+[![Build Status](https://cloud.drone.io/api/badges/DFabric/dppm-rest-api/status.svg)](https://cloud.drone.io/DFabric/dppm-rest-api)
+[![Gitter](https://img.shields.io/badge/chat-on_gitter-red.svg?style=flat-square)](https://gitter.im/DFabric/Lobby)
+[![ISC](https://img.shields.io/badge/License-ISC-blue.svg?style=flat-square)](https://en.wikipedia.org/wiki/ISC_license)
 
 REST API for [DPPM](https://github.com/DFabric/dppm), an installer/manager of server applications.
 
