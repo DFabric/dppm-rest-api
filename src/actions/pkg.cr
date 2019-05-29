@@ -122,7 +122,14 @@ module DppmRestApi::Actions::Pkg
   # Delete a given package
   relative_delete "/:id/delete" do |context|
     if context.current_user? && Actions.has_access? context, Access::Delete
-      # TODO: Query information about the given package
+      package_name = URI.unescape context.params.url["id"]
+      if selected_pkg = find_package_by_name package_name
+        selected_pkg.delete confirmation: false { }
+      else
+        context.response.status_code = 404
+        {errors: ["no package named #{package_name} was found"]}.to_json context.response
+        context.response.flush
+      end
       next context
     end
     raise Unauthorized.new context
