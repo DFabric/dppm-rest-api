@@ -13,6 +13,14 @@ module DppmRestApi::Actions::Pkg
     end
   end
 
+  def find_package_by_name(name) : Prefix::Pkg?
+    Prefix.new(prefix).each_pkg do |pkg|
+      if pkg.package == package_name
+        return pkg
+      end
+    end
+  end
+
   # List built packages
   relative_get nil do |context|
     if context.current_user? && Actions.has_access? context, Access::Read
@@ -54,17 +62,10 @@ module DppmRestApi::Actions::Pkg
   # Query information about a given package
   relative_get "/:id/query" do |context|
     if context.current_user? && Actions.has_access? context, Access::Read
-      package_name = URI.unescape context.params.url[:id]
-      # A DPPM::Package? to store the value in while searching
-      __selected_pkg = nil
+      package_name = URI.unescape context.params.url["id"]
       # Iterate over the packages to find the relevant one.
-      Prefix.new(prefix).each_pkg do |pkg|
-        if pkg.package == package_name
-          __selected_pkg = pkg
-        end
-      end
-      if selected_pkg = __selected_pkg
-        # The package whose name was the :id URL parameter was found
+      if selected_pkg = find_package_by_name package_name
+        # The package whose name was the :id URL parameter was found and we can query it
         if key = context.params.query["get"]?
           # A key was specified by the &get query parameter
           begin
