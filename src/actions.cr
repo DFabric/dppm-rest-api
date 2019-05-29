@@ -19,6 +19,17 @@ end
 {% end %}
 
 require "./access"
+
+# Pull the context from the context's query parameter or use the default
+# provided by the CLI.
+#
+# This macro only works inside of a route block with the variable "context"
+# available
+macro prefix
+  context.params.query["prefix"]? || DPPM.default_prefix
+end
+
+require "./middlewares"
 require "./actions/*"
 require "./errors/*"
 
@@ -31,8 +42,8 @@ module DppmRestApi::Actions
   include Service
   include Src
 
-  before_all do |ctx|
-    ctx.response.content_type = "application/json"
+  before_all do |context|
+    context.response.content_type = "application/json"
   end
 
   relative_options "/api" do |context|

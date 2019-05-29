@@ -13,6 +13,11 @@ module DppmRestApi::Actions::Pkg
       it "responds with 401 Forbidden" do
         delete fmt_route "/clean"
         assert_unauthorized response
+        # TODO: test authenticated requests
+        # response.status_code.should eq 404
+        # data = NamedTuple(errors: Array(String)).from_json response.body
+        # data[:errors].should contain "no packages to clean"
+        # data[:errors].should_not contain "received empty set from Prefix#clean_unused_packages; please report this strange bug"
       end
     end
     describe "get /:id/query" do

@@ -13,18 +13,25 @@ module DppmRestApi::Actions::Pkg
     end
   end
 
-  def find_package_by_name(name) : Prefix::Pkg?
-    Prefix.new(prefix).each_pkg do |pkg|
-      if pkg.package == package_name
-        return pkg
-      end
+  def find_package_by_name(name, pfx) : DPPM::Prefix::Pkg?
+    DPPM::Prefix.new(pfx).each_pkg { |pkg| return pkg if pkg.package == name }
+  end
+
+  def clean_unused_packages(context : HTTP::Server::Context)
+    if result = DPPM::Prefix.new(prefix).clean_unused_packages(confirmation: false) { }
+      return {data: result} if result.any?
+      bug = InternalServerError.new context, "received empty set from Prefix#clean_unused_packages; please report this strange bug"
+      error = NoPkgsToClean.new context
+      error.cause = bug
+      raise error
     end
+    raise NoPkgsToClean.new context
   end
 
   # List built packages
   relative_get nil do |context|
     if context.current_user? && Actions.has_access? context, Access::Read
-      pfx = Prefix.new prefix
+      pfx = DPPM::Prefix.new prefix
       # Build JSON directly to the HTTP response IO
       JSON.build context.response do |json|
         json.array do
@@ -39,22 +46,7 @@ module DppmRestApi::Actions::Pkg
   # Clean unused built packages
   relative_delete "/clean" do |context|
     if context.current_user? && Actions.has_access? context, Access::Delete
-      res = Prefix.new(prefix).clean_unused_packages(confirmation: false) { }
-      if result = res
-        if result.empty?
-          context.response.status_code = 404
-          {
-            errors: [
-              "no packages to clean",
-              "received empty set from Prefix#clean_unused_packages; please report this strange bug",
-            ],
-          }
-        else
-          result
-        end
-      else
-        {errors: ["no packages to clean"]}
-      end.to_json context.response
+      clean_unused_packages(context).to_json context.response
       context.response.flush
       next context
     end
@@ -65,18 +57,17 @@ module DppmRestApi::Actions::Pkg
     if context.current_user? && Actions.has_access? context, Access::Read
       package_name = URI.unescape context.params.url["id"]
       # Iterate over the packages to find the relevant one.
-      if selected_pkg = find_package_by_name package_name
+      if selected_pkg = find_package_by_name package_name, prefix
         # The package whose name was the :id URL parameter was found and we can query it
         if key = context.params.query["get"]?
           # A key was specified by the &get query parameter
           begin
-            {
+            {data: {
               package_name => {
                 key => selected_pkg.get_config key,
                 # This method call  ^^ raises an untyped error if the key is not found
               },
-              "errors" => [] of Nil,
-            }.to_json context.response
+            }}.to_json context.response
             context.response.flush
             next context
           rescue e : Exception
@@ -99,7 +90,7 @@ module DppmRestApi::Actions::Pkg
                 builder.field "dependencies" do
                   deps.each do |name, version|
                     semver = SemanticVersion.parse version
-                    Prefix.new(prefix).each_pkg do |pkg|
+                    DPPM::Prefix.new(prefix).each_pkg do |pkg|
                       if (pkg.package == name) && (pkg.semantic_version == semver)
                         output_config_for pkg, to: builder
                       end
@@ -111,9 +102,7 @@ module DppmRestApi::Actions::Pkg
           end
         end
       else
-        {errors: [%[no such package "#{package_name}" found]]}.to_json context.response
-        context.response.flush
-        context.response.status_code = 404
+        raise NoSuchPackage.new context, package_name
       end
       next context
     end
@@ -123,24 +112,35 @@ module DppmRestApi::Actions::Pkg
   relative_delete "/:id/delete" do |context|
     if context.current_user? && Actions.has_access? context, Access::Delete
       package_name = URI.unescape context.params.url["id"]
-      if selected_pkg = find_package_by_name package_name
+      if selected_pkg = find_package_by_name package_name, prefix
         selected_pkg.delete confirmation: false { }
       else
-        context.response.status_code = 404
-        {errors: ["no package named #{package_name} was found"]}.to_json context.response
-        context.response.flush
+        raise NoSuchPackage.new context, package_name
       end
       next context
     end
     raise Unauthorized.new context
   end
+
   # Build a package, returning the ID of the built image, and perhaps a status
   # message? We could also use server-side events or a websocket to provide the
   # status of this action as it occurs over the API, rather than just returning
   # a result on completion.
+  #
+  # This route takes the optional query parameters "version" and "tag".
   relative_post "/:id/build" do |context|
     if context.current_user? && Actions.has_access? context, Access::Create
-      # TODO: build the package based on the submitted configuration
+      package_name = URI.unescape context.params.url["package"]
+      pkg = DPPM::Prefix::Pkg.create DPPM::Prefix.new(prefix),
+        name: package_name,
+        version: context.params.query["version"]?,
+        tag: context.params.query["tag"]?
+      pkg.build confirmation: false { }
+      {data: {
+        status: "built package #{pkg.package}:#{pkg.version} successfully",
+      }}.to_json context.response
+      context.response.flush
+      next context
     end
     raise Unauthorized.new context
   end
