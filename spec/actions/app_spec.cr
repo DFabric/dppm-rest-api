@@ -3,25 +3,25 @@ require "../spec_helper"
 module DppmRestApi::Actions::App
   describe DppmRestApi::Actions::App do
     describe (fmt_route "/:app_name/config/:key") do
-      pending "responds with 401 Unauthorized" do
+      it "responds with 401 Unauthorized" do
         get fmt_route "/some-app/config/key"
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/config/:key") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         post fmt_route "/some-app/config/key"
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/config/:keys") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         delete fmt_route "/some-app/config/keys"
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/config") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         get fmt_route "/some-app/config"
         response.status_code.should eq 401
       end
@@ -63,25 +63,25 @@ module DppmRestApi::Actions::App
       end
     end
     describe (fmt_route "/:app_name/libs") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         get fmt_route "/some-app/libs"
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/app") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         get fmt_route "/some-app/app"
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/pkg") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         get fmt_route "/some-app/pkg"
         response.status_code.should eq 401
       end
     end
     describe (fmt_route "/:app_name/logs") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         get fmt_route "/some-app/logs"
         response.status_code.should eq 401
       end
@@ -96,7 +96,7 @@ module DppmRestApi::Actions::App
       end
     end
     describe (fmt_route "/:app_name") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         delete fmt_route "/some-app/"
         response.status_code.should eq 401
       end

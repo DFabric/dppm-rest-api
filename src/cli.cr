@@ -302,7 +302,7 @@ module DppmRestApi::CLI
     end
     api_key_hash = Scrypt::Password.create api_key
     group_list = split_numbers groups
-    current_config.users << DppmRestApi::Config::User.new api_key_hash, group_list.to_a, name
+    current_config.users << DppmRestApi::Config::User.new api_key_hash, group_list, name
     current_config.write_to permissions_file
   end
 

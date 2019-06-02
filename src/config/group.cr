@@ -15,16 +15,12 @@ struct DppmRestApi::Config::Group
   # returns true if members of this group may access a request on the given
   # route, with the given permission level.
   def can_access?(path : String, query : HTTP::Params, requested_permissions : Access) : Bool
-    maybe_nil_perms = permissions
-      .find do |pattern, route|
-        # Find the first route that matches both the path glob and the query list
-        File.match?(pattern, path) && route.match? query
+    permissions.each do |pattern, route|
+      # Find the first route that matches both the path glob and the query list
+      if File.match?(pattern, path) && route.match? query
+        # If the "flag is set" this will return true, otherwise we should keep looking
+        return true if route.permissions.includes? requested_permissions
       end
-      .try { |_, route| route.permissions }
-    if configured_permissions = maybe_nil_perms
-      # If the "flag is set" this will return true, otherwise it will return
-      # false
-      return configured_permissions.includes? requested_permissions
     end
     false
   end

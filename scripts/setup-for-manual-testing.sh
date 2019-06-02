@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 
-set -euxo pipefail
+set -eux
 
 ADMIN=no # By default don't create an admin user
 for arg in $@; do

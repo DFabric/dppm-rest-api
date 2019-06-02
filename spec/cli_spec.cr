@@ -98,7 +98,7 @@ module DppmRestApi::CLI
           end
           if user = config.users.find { |usr| usr.name == "added user" }
             user.api_key_hash.verify(key).should be_true
-            user.group_ids.should eq [500]
+            user.group_ids.should eq Set{500}
           else
             fail "user failed to be added"
           end
@@ -129,7 +129,7 @@ module DppmRestApi::CLI
           Config.from_json file
         end
         new_state.users.find { |usr| usr.name == "Jim Oliver" }.should be_nil
-        new_state.users.find { |usr| usr.name == "changed name" }.try(&.group_ids.sort).should eq [500, 1000]
+        new_state.users.find { |usr| usr.name == "changed name" }.try(&.group_ids).should eq Set{500, 1000}
       end
     end
     require_arg "data-dir" do
@@ -152,6 +152,7 @@ module DppmRestApi::CLI
           .not_nil!
           .api_key_hash
         rekey_users match_name: "Administrator",
+
           match_groups: nil,
           api_key: nil,
           data_dir: __DIR__,
@@ -192,8 +193,8 @@ module DppmRestApi::CLI
         api_key: nil
       File.open tmp do |file|
         config = Array(Config::User).from_json file
-        config.find(&.name.==("Administrator")).not_nil!.group_ids.should eq [0]
-        config.find(&.name.==("Jim Oliver")).not_nil!.group_ids.sort.should eq [499, 1000]
+        config.find(&.name.==("Administrator")).not_nil!.group_ids.should eq Set{0}
+        config.find(&.name.==("Jim Oliver")).not_nil!.group_ids.should eq Set{499, 1000}
       end
       File.delete tmp
     end
