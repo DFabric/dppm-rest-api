@@ -17,10 +17,10 @@ module DppmRestApi
       @@permissions_config = Config.from_json data
     end
 
+    Kemal.config.add_handler Actions.auth_handler
+    initialize_error_handlers
     # Kemal doesn't like IPV6 brackets
     Kemal.config.host_binding = host.lchop('[').rchop(']')
     Kemal.run port: port
-
-    add_handler Actions.auth_handler
   end
 end
