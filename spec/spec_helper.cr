@@ -16,7 +16,7 @@ def new_test_context(verb = "GET", path = "/api/test")
   {backing_io, HTTP::Server::Context.new(request, response)}
 end
 
-DppmRestApi.run Socket::IPAddress::LOOPBACK, Prefix.default_dppm_config.port, __DIR__
+DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
 
 # Because the API key for the "normal user" is automatically generated, we
 # need to update the configuration to match the key that was just generated.

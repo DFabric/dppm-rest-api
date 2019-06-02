@@ -22,7 +22,7 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: a390edd66b307740c0dbec5b2c42c0151ca8b03b
+    commit: fb2cfce5793fd0e6a14e48d7d47441192ed577b0
 
   dynany:
     github: j8r/dynany
@@ -70,7 +70,7 @@ shards:
 
   scrypt:
     github: dscottboggs/scrypt-crystal
-    commit: c0bfad766effb1f7b0e3561cf51e0f25c7609e8a
+    commit: 214f542c9ee2433e3dcc6fe9b726c6ccb774b10c
 
   semantic_compare:
     github: j8r/semantic_compare

@@ -21,11 +21,11 @@ module DppmRestApi::CLI
           variables: {
             host: {
               info:    "host to listen",
-              default: Prefix.default_dppm_config.host,
+              default: DPPM::Prefix.default_dppm_config.host,
             },
             port: {
               info:    "port to bind",
-              default: Prefix.default_dppm_config.port,
+              default: DPPM::Prefix.default_dppm_config.port,
             },
           },
         },
@@ -272,7 +272,7 @@ module DppmRestApi::CLI
       port = port.to_i
     end
     if config
-      dppm_config = Prefix::Config.new File.read config
+      dppm_config = DPPM::Prefix::Config.new File.read config
       port ||= dppm_config.port
       host ||= dppm_config.host
     end
