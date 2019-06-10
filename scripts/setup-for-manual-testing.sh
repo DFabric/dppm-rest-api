@@ -10,7 +10,7 @@ for arg in $@; do
 done
 
 make_admin() {
-  dppm server group add "name=admin's group" id=0 permissions='
+  bin/dppm server group add "name=admin's group" id=0 permissions='
       {
         "/**": {
           "permissions": [
@@ -19,7 +19,7 @@ make_admin() {
           "query_parameters": { }
         }
       }'
-  dppm server add_user name=admin groups=0
+  bin/dppm server add_user name=admin groups=0
 }
 
 DATA_DIR="${DATA_DIR:-"$PWD/data"}"
@@ -31,13 +31,13 @@ mkdir $DATA_DIR ||: nbd
 echo '{"groups":[], "users": []}' > $DATA_DIR/permissions.json
 
 shards build
-dppm server group add "name=${DPPM_USER}s group" id=$GROUP_ID
-dppm server add_user "name=$DPPM_USER" groups=$GROUP_ID
+bin/dppm server group add "name=${DPPM_USER}s group" id=$GROUP_ID
+bin/dppm server add_user "name=$DPPM_USER" groups=$GROUP_ID
 
 if [ $ADMIN = yes ]; then
   make_admin
 fi
 
-./bin/dppm server run
+bin/dppm server run
 
 rm -r data
