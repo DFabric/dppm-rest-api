@@ -22,9 +22,9 @@ dependencies:
 development_dependencies:
   ameba:
     github: veelenga/ameba
-    version: ~> 0.9.1
+    version: ~> 0.10.0
 
 targets:
   dppm:
-    main: src/cli.cr
+    main: src/dppm_rest_api_cli.cr
     bootstrap-config: scripts/bootstrap-config.cr

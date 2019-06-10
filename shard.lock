@@ -2,7 +2,7 @@ version: 1.0
 shards:
   ameba:
     github: veelenga/ameba
-    version: 0.9.1
+    version: 0.10.0
 
   clicr:
     github: j8r/clicr
@@ -22,7 +22,7 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: fb2cfce5793fd0e6a14e48d7d47441192ed577b0
+    commit: 76b0552b68dca73e0bb25e9fd8b6eb2e79985724
 
   dynany:
     github: j8r/dynany
