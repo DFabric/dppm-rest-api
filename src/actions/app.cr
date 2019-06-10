@@ -188,7 +188,6 @@ module DppmRestApi::Actions::App
       next context
     end
     deny_access! to: context
-    {% debug %}
   end
   # Delete the given application
   relative_delete "/:app_name" do |context|

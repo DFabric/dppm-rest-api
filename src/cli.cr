@@ -4,7 +4,7 @@ require "./dppm_rest_api"
 module DppmRestApi::CLI
   extend self
 
-  # DPPM CLI isn't namespaced yet
+  macro run
   DPPM::CLI.run(
     server: {
       info:      "DPPM REST API server",
@@ -185,6 +185,7 @@ module DppmRestApi::CLI
       },
     }
   )
+  end
 
   # A helper method for the select_users method -- splits a comma-separated
   # list of numbers in a string into a `Set` of `Int32` values.

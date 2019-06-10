@@ -18,7 +18,6 @@ macro fmt_route(route = "", namespace = false)
        .downcase
        .gsub(/^DppmRestApi::Actions::/, "")
        .gsub(/::/, "/") }} {% if namespace %} + "/:namespace" {% end %} + ( {{route}} || "")
-  {% debug %}
 end
 
 # the "last" or -1st block argument is selected because context is always the
@@ -29,7 +28,5 @@ macro relative_{{method.id}}(route, &block)
     namespace = \{{block.args[-1]}}.params.query["namespace"]? || DPPM::Prefix.default_group
     \{{block.body}}
   end
-  \{% debug %}
-  puts "built route at {{method.upcase.id}}:\t#{fmt_route(\{{route}})}"
 end
 {% end %}
