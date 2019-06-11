@@ -1,3 +1,4 @@
+require "../../src/actions"
 require "../spec_helper"
 
 module DppmRestApi::Actions::App

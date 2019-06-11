@@ -22,7 +22,9 @@ The binary is `bin/dppm`
 
 ### Run tests
 
-`crystal spec`
+This runs the formatter, the linter, then the spec tests:
+
+`crystal tool format && bin/ameba && crystal spec`
 
 ## Commands for setting permissions
 The `dppm server` command has two subcommands for managing user permissions:

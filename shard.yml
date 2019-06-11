@@ -27,4 +27,3 @@ development_dependencies:
 targets:
   dppm:
     main: src/dppm_rest_api_cli.cr
-    bootstrap-config: scripts/bootstrap-config.cr
