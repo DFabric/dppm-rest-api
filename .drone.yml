@@ -11,19 +11,29 @@ steps:
   commands:
   - crystal tool format --check
 
-- name: lint
-  image: madscientists/ameba
-  commands:
-  - ameba
-
 - name: build
   image: jrei/crystal-alpine
+  volumes:
+  - name: cache
+    path: /tmp/cache
   commands:
   - apk add curl
   - shards install
   - shards build --static
 
+- name: lint
+  image: jrei/crystal-alpine
+  volumes:
+  - name: cache
+    path: /tmp/cache
+  commands:
+  - bin/ameba
+
 - name: test
   image: jrei/crystal-alpine
   commands:
   - crystal spec
+
+volumes:
+- name: cache
+  temp: {}
