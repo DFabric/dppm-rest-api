@@ -1,12 +1,9 @@
 require "spec"
 require "spec-kemal"
+require "../src/dppm_rest_api"
+require "./fixtures"
 
-CRLF                = "\r\n"
-NORMAL_USER_API_KEY = Random::Secure.base64 48
-PERMISSION_FILE     = Path[__DIR__, "permissions.json"]
-
-Kemal.config.env = "test"
-Kemal.config.logging = false
+CRLF = "\r\n"
 
 def new_test_context(verb = "GET", path = "/api/test")
   backing_io = IO::Memory.new
@@ -15,12 +12,26 @@ def new_test_context(verb = "GET", path = "/api/test")
   {backing_io, HTTP::Server::Context.new(request, response)}
 end
 
-DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
+Kemal.config.env = "test"
 
-# Because the API key for the "normal user" is automatically generated, we
-# need to update the configuration to match the key that was just generated.
-usr = DppmRestApi.permissions_config.users.find { |user| user.name == "Jim Oliver" }.not_nil!
-DppmRestApi.permissions_config.users.delete usr
-usr.api_key_hash = Scrypt::Password.create NORMAL_USER_API_KEY
-DppmRestApi.permissions_config.users << usr
-DppmRestApi.permissions_config.write_to PERMISSION_FILE
+# Set up the mock permissions.json
+
+# the location
+macro permissions_file!
+  Path[__DIR__, "permissions.json"]
+end
+
+Spec.before_each do
+  # write the data to the file.
+  File.open permissions_file!, mode: "w" do |file|
+    JSON.build file, indent: 2 do |io|
+      DppmRestApi::Fixtures.test_permissions_config.to_json io
+    end
+  end
+  # Run the server
+  DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
+end
+# Clean up after ourselves
+Spec.after_each do
+  File.delete permissions_file! if File.exists? permissions_file!
+end
