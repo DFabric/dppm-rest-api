@@ -16,7 +16,7 @@ describe DppmRestApi::Config::User do
     it "has access to the default namespace and it's own but not others" do
       user = DppmRestApi.permissions_config
         .users
-        .find { |usr| usr.api_key_hash.verify DppmRestApi::Fixtures::TEST_USER_RAW_API_KEYS[:normal_user] }
+        .find { |usr| usr.api_key_hash.verify Fixtures::TEST_USER_RAW_API_KEYS[:normal_user] }
         .not_nil!
       user.find_group?(&.can_access?(
         "/some/arbitrary/path",

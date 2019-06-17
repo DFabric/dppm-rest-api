@@ -20,7 +20,7 @@ Kemal.config.env = "test"
 PERMISSION_FILE = Path[__DIR__, "permissions.json"]
 
 Spec.before_each do
-  DppmRestApi.permissions_config = DppmRestApi::Config.test_fixture!
+  DppmRestApi.permissions_config = Fixtures.permissions_config
   DppmRestApi.permissions_config.write_to PERMISSION_FILE
   DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
 end

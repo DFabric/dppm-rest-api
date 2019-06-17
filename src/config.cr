@@ -10,6 +10,10 @@ struct DppmRestApi::Config
   property groups : Array(Group)
   property users : Array(User)
 
+  # :nodoc:
+  def initialize(@groups, @users)
+  end
+
   def find_and_authenticate!(body) : Config::User?
     data = ReceivedUser.from_json body
     if key = data.auth?
@@ -53,6 +57,7 @@ struct DppmRestApi::Config
       tmp_file.try &.delete
     rescue Errno
     end
+    self
   end
 
   def to_json(io : IO, *, indent : String | Int32? = nil)
