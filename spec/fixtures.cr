@@ -38,12 +38,12 @@ module DppmRestApi
       ], users: [
         User.new(
           name: "Administrator",
-          groups: Set[0],
+          groups: Set{0},
           api_key_hash: Scrypt::Password.create password: Fixtures::TEST_USER_RAW_API_KEYS[:admin]
         ),
         User.new(
           name: "Jim Oliver",
-          groups: Set[499, 1000],
+          groups: Set{499, 1000},
           api_key_hash: Scrypt::Password.create password: Fixtures::TEST_USER_RAW_API_KEYS[:normal_user]
         ),
       ]
