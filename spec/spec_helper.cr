@@ -22,13 +22,8 @@ macro permissions_file!
 end
 
 Spec.before_each do
-  # write the data to the file.
-  File.open permissions_file!, mode: "w" do |file|
-    JSON.build file, indent: 2 do |io|
-      DppmRestApi::Fixtures.test_permissions_config.to_json io
-    end
-  end
-  # Run the server
+  DppmRestApi.permissions_config = DppmRestApi::Config.test_fixture!
+  DppmRestApi.permissions_config.write_to permissions_file!
   DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
 end
 # Clean up after ourselves
