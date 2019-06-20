@@ -94,3 +94,5 @@ struct DppmRestApi::Config::User
     "Name: #{name}; Member of: #{group_ids.join(", ")}"
   end
 end
+
+alias JWTCompatibleHash = Hash(String, String | Int32 | Bool?)

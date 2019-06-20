@@ -12,6 +12,17 @@ def new_test_context(verb = "GET", path = "/api/test")
   {backing_io, HTTP::Server::Context.new(request, response)}
 end
 
+def assert_unauthorized(response : HTTP::Client::Response)
+  response.status_code.should eq 401
+  found = ErrorResponse.from_json(response.body)
+    .errors
+    .find do |err|
+      err.message == "Unauthorized" &&
+        err.status_code == HTTP::Status::UNAUTHORIZED
+    end
+  fail "expected error response not found" unless found
+end
+
 Kemal.config.env = "test"
 
 # Set up the mock permissions.json
@@ -19,12 +30,17 @@ Kemal.config.env = "test"
 # the location
 PERMISSION_FILE = Path[__DIR__, "permissions.json"]
 
-Spec.before_each do
+# Set all configs to the expected values.
+def reset_config
   DppmRestApi.permissions_config = Fixtures.permissions_config
   DppmRestApi.permissions_config.write_to PERMISSION_FILE
-  DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
 end
+
+reset_config
+
+# Run the server
+DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
+# Set all configs back to the expected values, in case they changed
+Spec.before_each { reset_config }
 # Clean up after ourselves
-Spec.after_each do
-  File.delete PERMISSION_FILE if File.exists? PERMISSION_FILE
-end
+Spec.after_each { File.delete PERMISSION_FILE if File.exists? PERMISSION_FILE }

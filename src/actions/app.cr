@@ -1,5 +1,4 @@
 require "dppm"
-# require "../config/route"
 require "dppm/prefix"
 
 module DppmRestApi::Actions::App
@@ -17,7 +16,7 @@ module DppmRestApi::Actions::App
     if posted = context.request.body
       DPPM::Prefix.new(prefix).new_app(app_name).set_config key, posted.gets_to_end
     else
-      Actions.throw_error context, "setting config data requires a request body"
+      raise UnprocessableEntity.new context, "setting config data requires a request body"
     end
   end
 
@@ -32,12 +31,8 @@ module DppmRestApi::Actions::App
             end
           end
         end
-        json.field "errors" do
-          json.array { }
-        end
       end
     end
-    context.response.flush
   end
 
   relative_get "/:app_name/config/:key" do |context|
@@ -48,28 +43,27 @@ module DppmRestApi::Actions::App
       if key == "."
         dump_config context, app
       elsif config = app.get_config(key)
-        context.response.content_type = "application/json"
-        {"data" => config, "errors" => [] of Nil}.to_json context.response
+        {data: config}.to_json context.response
       else
-        Actions.throw_error context, "no config with app named '#{app_name}' found", status_code: 404
+        raise NotFound.new context, "no config with app named '#{app_name}' found"
       end
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   relative_post "/:app_name/config/:key" do |context|
     if context.current_user? && Config.has_access? context, Access::Create
       set_config context, context.params.url["key"], context.params.url["app_name"]
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   relative_put "/:app_name/config/:key" do |context|
     if context.current_user? && Config.has_access? context, Access::Update
       set_config context, context.params.url["key"], context.params.url["app_name"]
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   relative_delete "/:app_name/config/:key" do |context|
     if context.current_user? && Config.has_access? context, Access::Delete
@@ -78,7 +72,7 @@ module DppmRestApi::Actions::App
         .del_config context.params.url["key"]
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # All keys, or all config options
   relative_get "/:app_name/config" do |context|
@@ -87,7 +81,7 @@ module DppmRestApi::Actions::App
       dump_config context, DPPM::Prefix.new(prefix).new_app(app_name)
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # start the service associated with the given application
   relative_put "/:app_name/service/boot" do |context|
@@ -96,7 +90,7 @@ module DppmRestApi::Actions::App
       next context
       puts "user found!"
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # reload the service associated with the given application
   relative_put "/:app_name/service/reload" do |context|
@@ -104,7 +98,7 @@ module DppmRestApi::Actions::App
       # TODO: reload the service
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # restart the service associated with the given application
   relative_put "/:app_name/service/restart" do |context|
@@ -112,7 +106,7 @@ module DppmRestApi::Actions::App
       # TODO: reboot the service
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # start the service associated with the given application
   relative_put "/:app_name/service/start" do |context|
@@ -120,7 +114,7 @@ module DppmRestApi::Actions::App
       # TODO: start the service
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # relative_get the status of the service associated with the given application
   relative_put "/:app_name/service/status" do |context|
@@ -128,7 +122,7 @@ module DppmRestApi::Actions::App
       # TODO: get the status of the service
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # stop the service associated with the given application
   relative_put "/:app_name/service/stop" do |context|
@@ -136,7 +130,7 @@ module DppmRestApi::Actions::App
       # TODO: stop the service
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # lists dependent library packages
   relative_get "/:app_name/libs" do |context|
@@ -144,7 +138,7 @@ module DppmRestApi::Actions::App
       # TODO: list dependencies
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # return the base application package
   relative_get "/:app_name/app" do |context|
@@ -152,7 +146,7 @@ module DppmRestApi::Actions::App
       # TODO: return the base application package
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # returns information present in pkg.con as JSON
   relative_get "/:app_name/pkg" do |context|
@@ -160,7 +154,7 @@ module DppmRestApi::Actions::App
       # TODO: return package data
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # if the `"stream"` query parameter is set, attempt to upgrade to a websocket
   # and stream the results. Otherwise return a JSON-formatted output of the
@@ -170,7 +164,7 @@ module DppmRestApi::Actions::App
       # TODO: upgrade to websocket or output logs to date
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # Stream the logs for the given application over the websocket connection.
   relative_ws "/:app_name/logs" do |_, context|
@@ -179,7 +173,7 @@ module DppmRestApi::Actions::App
       # TODO: stream logs to sock
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # Install the given package
   relative_put "/:package_name" do |context|
@@ -187,7 +181,7 @@ module DppmRestApi::Actions::App
       # TODO: install the package and return its name
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # Delete the given application
   relative_delete "/:app_name" do |context|
@@ -195,6 +189,6 @@ module DppmRestApi::Actions::App
       # TODO: delete the app
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
 end

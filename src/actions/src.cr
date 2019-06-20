@@ -5,7 +5,7 @@ module DppmRestApi::Actions::Src
       # TODO: List all available source packages
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # List all available source packages, of either the *lib* or *app* type.
   relative_get "/:type" do |context|
@@ -13,6 +13,6 @@ module DppmRestApi::Actions::Src
       # TODO: List available source packages
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
 end

@@ -8,7 +8,7 @@ module DppmRestApi::Actions::Pkg
       # TODO: list all built packages
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # Clean unused built packages
   relative_delete ALL_PKGS do |context|
@@ -16,7 +16,7 @@ module DppmRestApi::Actions::Pkg
       # TODO: delete all unused built packages
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # Query information about a given package
   relative_get ONE_PKG do |context|
@@ -24,7 +24,7 @@ module DppmRestApi::Actions::Pkg
       # TODO: Query information about the given package
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
   # Delete a given package
   relative_delete ONE_PKG do |context|
@@ -32,7 +32,7 @@ module DppmRestApi::Actions::Pkg
       # TODO: Query information about the given package
       next context
     end
-    deny_access! to: context
+    raise Unauthorized.new context
   end
 
   module Build
@@ -44,7 +44,7 @@ module DppmRestApi::Actions::Pkg
       if context.current_user? && Config.has_access? context, Access::Create
         # TODO: build the package based on the submitted configuration
       end
-      deny_access! to: context
+      raise Unauthorized.new context
     end
   end
 end
