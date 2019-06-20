@@ -3,21 +3,27 @@ require "../spec_helper"
 
 module DppmRestApi::Actions::App
   describe DppmRestApi::Actions::App do
-    describe (fmt_route "/:app_name/config/:key") do
+    describe (fmt_route "/:app_name/config/:key/get") do
       it "responds with 401 Unauthorized" do
-        get fmt_route "/some-app/config/key"
+        get fmt_route "/some-app/config/key/get"
         assert_unauthorized response
       end
     end
-    describe (fmt_route "/:app_name/config/:key") do
+    describe (fmt_route "/:app_name/config/:key/add") do
       it "responds with 401 Forbidden" do
-        post fmt_route "/some-app/config/key"
+        post fmt_route "/some-app/config/key/add"
         assert_unauthorized response
       end
     end
-    describe (fmt_route "/:app_name/config/:keys") do
+    describe (fmt_route "/:app_name/config/:key/set") do
       it "responds with 401 Forbidden" do
-        delete fmt_route "/some-app/config/keys"
+        put fmt_route "/some-app/config/key/set"
+        assert_unauthorized response
+      end
+    end
+    describe (fmt_route "/:app_name/config/:key/delete") do
+      it "responds with 401 Forbidden" do
+        delete fmt_route "/some-app/config/key/delete"
         assert_unauthorized response
       end
     end
@@ -28,37 +34,37 @@ module DppmRestApi::Actions::App
       end
     end
     describe (fmt_route "/:app_name/service/boot") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         put (fmt_route "/some_app/service/boot")
         assert_unauthorized response
       end
     end
     describe (fmt_route "/:app_name/service/reload") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         put (fmt_route "/some_app/service/reload")
         assert_unauthorized response
       end
     end
     describe (fmt_route "/:app_name/service/restart") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         put (fmt_route "/some-app/service/restart")
         assert_unauthorized response
       end
     end
     describe (fmt_route "/:app_name/service/start") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         put (fmt_route "/some-app/service/start")
         assert_unauthorized response
       end
     end
     describe (fmt_route "/:app_name/service/status") do
-      pending "responds with 401 Forbidden" do
-        put (fmt_route "/some-app/service/status")
+      it "responds with 401 Forbidden" do
+        get fmt_route "/some-app/service/status"
         assert_unauthorized response
       end
     end
     describe (fmt_route "/:app_name/service/stop") do
-      pending "responds with 401 Forbidden" do
+      it "responds with 401 Forbidden" do
         put (fmt_route "/some-app/service/stop")
         assert_unauthorized response
       end
@@ -87,18 +93,15 @@ module DppmRestApi::Actions::App
         assert_unauthorized response
       end
     end
-    pending "ws #{fmt_route "/:app_name/logs"}" do
-      # spec-kemal has no way to test websocket routes
-    end
-    describe (fmt_route "/:package_name") do
-      pending "responds with 401 Forbidden" do
-        put fmt_route "/some-pkg"
+    describe (fmt_route "/:app_name/install") do
+      it "responds with 401 Forbidden" do
+        put fmt_route "/some-pkg/install"
         assert_unauthorized response
       end
     end
-    describe (fmt_route "/:app_name") do
+    describe (fmt_route "/:app_name/remove") do
       it "responds with 401 Forbidden" do
-        delete fmt_route "/some-app/"
+        delete fmt_route "/some-app/remove"
         assert_unauthorized response
       end
     end

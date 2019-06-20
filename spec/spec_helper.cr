@@ -12,7 +12,9 @@ def new_test_context(verb = "GET", path = "/api/test")
   {backing_io, HTTP::Server::Context.new(request, response)}
 end
 
-def assert_unauthorized(response : HTTP::Client::Response)
+# The only reason this is a macro is that a macro shows the location where it
+# is expanded on failure, a def shows the location of the def.
+macro assert_unauthorized(response)
   response.status_code.should eq 401
   found = ErrorResponse.from_json(response.body)
     .errors

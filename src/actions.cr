@@ -36,8 +36,4 @@ module DppmRestApi::Actions
       IO.copy file, context.response
     end
   end
-
-  def self.deny_access!(to context)
-    raise Unauthorized.new context
-  end
 end

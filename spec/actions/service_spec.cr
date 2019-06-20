@@ -40,8 +40,8 @@ module DppmRestApi::Actions::Service
       end
     end
     describe (fmt_route "/:service/status") do
-      pending "responds with 401 Forbidden" do
-        put (fmt_route "/some-service/status")
+      it "responds with 401 Forbidden" do
+        get (fmt_route "/some-service/status")
         assert_unauthorized response
       end
     end
