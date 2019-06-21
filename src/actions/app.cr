@@ -51,32 +51,25 @@ module DppmRestApi::Actions::App
     end
     raise Unauthorized.new context
   end
-  relative_post "/:app_name/config/:key/add" do |context|
+  relative_post "/:app_name/config/:key" do |context|
     if context.current_user? && Config.has_access? context, Access::Create
       set_config context, context.params.url["key"], context.params.url["app_name"]
       next context
     end
     raise Unauthorized.new context
   end
-  relative_put "/:app_name/config/:key/set" do |context|
+  relative_put "/:app_name/config/:key" do |context|
     if context.current_user? && Config.has_access? context, Access::Update
       set_config context, context.params.url["key"], context.params.url["app_name"]
       next context
     end
     raise Unauthorized.new context
   end
-  relative_delete "/:app_name/config/:key/delete" do |context|
+  relative_delete "/:app_name/config/:key" do |context|
     if context.current_user? && Config.has_access? context, Access::Delete
       DPPM::Prefix.new(prefix)
         .new_app(context.params.url["app_name"])
         .del_config context.params.url["key"]
-      next context
-    end
-    raise Unauthorized.new context
-  end
-  relative_get "/:app_name/config/:key/get" do |context|
-    if context.current_user? && Config.has_access? context, Access::Delete
-      # TODO
       next context
     end
     raise Unauthorized.new context
@@ -174,7 +167,7 @@ module DppmRestApi::Actions::App
     raise Unauthorized.new context
   end
   # Install the given package
-  relative_put "/:app_name/install" do |context|
+  relative_put "/:app_name" do |context|
     if context.current_user? && Config.has_access? context, Access::Create
       # TODO: install the package and return its name
       next context
@@ -182,7 +175,7 @@ module DppmRestApi::Actions::App
     raise Unauthorized.new context
   end
   # Delete the given application
-  relative_delete "/:app_name/remove" do |context|
+  relative_delete "/:app_name" do |context|
     if context.current_user? && Config.has_access? context, Access::Delete
       # TODO: delete the app
       next context

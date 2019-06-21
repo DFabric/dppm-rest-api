@@ -3,27 +3,27 @@ require "../spec_helper"
 
 module DppmRestApi::Actions::App
   describe DppmRestApi::Actions::App do
-    describe (fmt_route "/:app_name/config/:key/get") do
+    describe (fmt_route "/:app_name/config/:key") do
       it "responds with 401 Unauthorized" do
-        get fmt_route "/some-app/config/key/get"
+        get fmt_route "/some-app/config/key"
         assert_unauthorized response
       end
     end
-    describe (fmt_route "/:app_name/config/:key/add") do
+    describe (fmt_route "/:app_name/config/:key") do
       it "responds with 401 Forbidden" do
-        post fmt_route "/some-app/config/key/add"
+        post fmt_route "/some-app/config/key"
         assert_unauthorized response
       end
     end
-    describe (fmt_route "/:app_name/config/:key/set") do
+    describe (fmt_route "/:app_name/config/:key") do
       it "responds with 401 Forbidden" do
-        put fmt_route "/some-app/config/key/set"
+        put fmt_route "/some-app/config/key"
         assert_unauthorized response
       end
     end
-    describe (fmt_route "/:app_name/config/:key/delete") do
+    describe (fmt_route "/:app_name/config/:key") do
       it "responds with 401 Forbidden" do
-        delete fmt_route "/some-app/config/key/delete"
+        delete fmt_route "/some-app/config/key"
         assert_unauthorized response
       end
     end
@@ -95,13 +95,13 @@ module DppmRestApi::Actions::App
     end
     describe (fmt_route "/:app_name/install") do
       it "responds with 401 Forbidden" do
-        put fmt_route "/some-pkg/install"
+        put fmt_route "/some-pkg"
         assert_unauthorized response
       end
     end
     describe (fmt_route "/:app_name/remove") do
       it "responds with 401 Forbidden" do
-        delete fmt_route "/some-app/remove"
+        delete fmt_route "/some-app"
         assert_unauthorized response
       end
     end

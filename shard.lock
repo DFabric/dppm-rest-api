@@ -22,7 +22,7 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: 76b0552b68dca73e0bb25e9fd8b6eb2e79985724
+    commit: 4e0eac5b81274fbccd9ed3f94afc67f34fa13a4a
 
   dynany:
     github: j8r/dynany
@@ -50,7 +50,7 @@ shards:
 
   kemal_jwt_auth:
     github: dscottboggs/kemal-jwt-auth
-    version: 1.0.0
+    version: 1.0.1
 
   kilt:
     github: jeromegn/kilt
