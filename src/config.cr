@@ -1,4 +1,3 @@
-require "./access"
 require "./ext/scrypt_password"
 require "json"
 require "kemal_jwt_auth"
@@ -11,7 +10,8 @@ struct DppmRestApi::Config
   property users : Array(User)
 
   # :nodoc:
-  def initialize(@groups, @users)
+  def initialize(@groups : Array(Group), @users : Array(User))
+    User.all_groups = @groups
   end
 
   def find_and_authenticate!(body) : Config::User?
@@ -24,27 +24,12 @@ struct DppmRestApi::Config
     nil
   end
 
-  # returns true if the given user has access to the given context with the given
-  # permission type
-  def self.has_access?(context : HTTP::Server::Context, permission : DppmRestApi::Access)
-    if received_user = context.current_user?.try { |user| DppmRestApi::Config::User.from_h hash: user }
-      return true if received_user.find_group? do |group|
-                       group.can_access?(
-                         context.request.path,
-                         context.request.query_params,
-                         permission
-                       )
-                     end
-    end
-    false
-  end
-
   @[AlwaysInline]
   def write_to(path : String)
     write_to Path.new path
   end
 
-  def write_to(path : Path) : Void
+  def write_to(path : Path) : Nil
     prefix = path.basename suffix: ".json"
     suffix = path.extension
     tmp_file = File.tempfile prefix, suffix, dir: path.dirname do |file|

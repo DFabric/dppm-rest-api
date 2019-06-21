@@ -19,9 +19,14 @@ end
 {% end %}
 
 require "./middlewares"
+require "./access"
 require "./actions/*"
+require "./errors/*"
 
 module DppmRestApi::Actions
+  DEFAULT_DATA_DIR = "./data/"
+  API_DOCUMENT     = DEFAULT_DATA_DIR + "api-options.json"
+
   include Pkg
   include App
   include Service
@@ -36,4 +41,6 @@ module DppmRestApi::Actions
       IO.copy file, context.response
     end
   end
+
+  protected class_property? has_access : Proc(HTTP::Server::Context, Access, Bool) = ->(context : HTTP::Server::Context, access : Access) { false }
 end

@@ -5,21 +5,19 @@ struct DppmRestApi::Config::User
   API_KEY_SIZE = 63_u8
   include JSON::Serializable
   property api_key_hash : Scrypt::Password
-  setter groups : Set(Int32)
+  getter group_ids : Set(Int32)
+  property name : String
+  # :nodoc:
+  class_property all_groups : Array(Group) = Array(Group).new
 
   def groups : Array(Group)
-    DppmRestApi.permissions_config.groups.select { |group| @groups.includes? group.id }
+    @@all_groups.select { |group| @group_ids.includes? group.id }
   end
-
-  def group_ids
-    @groups
-  end
-
-  property name : String
 
   def initialize(@api_key_hash,
-                 @groups,
-                 @name); end
+                 @group_ids : Set(Int32),
+                 @name : String)
+  end
 
   def self.new(api_key_hash string : String, groups, name)
     new Scrypt::Password.new(string), groups.to_set, name
@@ -60,7 +58,7 @@ struct DppmRestApi::Config::User
   end
 
   # Yields each Group to the block for which the user is a member of.
-  def each_group : Void
+  def each_group : Nil
     groups.each { |group| yield group }
   end
 
@@ -83,11 +81,11 @@ struct DppmRestApi::Config::User
   end
 
   def join_group(id : Int32)
-    @groups << id
+    @group_ids << id
   end
 
   def leave_group(id : Int32)
-    @groups.delete id
+    @group_ids.delete id
   end
 
   def to_pretty_s

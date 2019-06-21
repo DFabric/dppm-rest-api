@@ -1,7 +1,7 @@
 require "spec"
 require "spec-kemal"
-require "../src/dppm_rest_api"
 require "./fixtures"
+require "../src/dppm_rest_api"
 
 CRLF = "\r\n"
 
@@ -26,23 +26,11 @@ macro assert_unauthorized(response)
 end
 
 Kemal.config.env = "test"
-
-# Set up the mock permissions.json
-
-# the location
-PERMISSION_FILE = Path[__DIR__, "permissions.json"]
-
-# Set all configs to the expected values.
-def reset_config
-  DppmRestApi.permissions_config = Fixtures.permissions_config
-  DppmRestApi.permissions_config.write_to PERMISSION_FILE
-end
-
-reset_config
+Fixtures.reset_config
 
 # Run the server
 DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
 # Set all configs back to the expected values, in case they changed
-Spec.before_each { reset_config }
+Spec.before_each { Fixtures.reset_config }
 # Clean up after ourselves
-Spec.after_each { File.delete PERMISSION_FILE if File.exists? PERMISSION_FILE }
+Spec.after_each { File.delete Fixtures::PERMISSION_FILE if File.exists? Fixtures::PERMISSION_FILE }

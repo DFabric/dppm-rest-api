@@ -2,10 +2,10 @@ require "./spec_helper"
 require "../src/cli"
 
 module DppmRestApi::CLI
-  private macro require_arg(arg, &block)
-    it "requires the {{arg.id}} argument" do
-      expect_raises RequiredArgument, message: "the argument '{{arg.id}}' is required!" do
-        {{block.body}}
+  private def require_arg(arg, file = __FILE__, line = __LINE__, &block)
+    it "requires the #{arg} argument", file, line do
+      expect_raises RequiredArgument, message: "the argument '#{arg}' is required!" do
+        block.call.not_nil!.body
       end
     end
   end
@@ -53,7 +53,7 @@ module DppmRestApi::CLI
       {% end %}
       it "selects by api key" do
         mock_users = DppmRestApi.permissions_config.users
-        selected = selected_users nil, nil, Fixtures::TEST_USER_RAW_API_KEYS[:normal_user], from: mock_users
+        selected = selected_users nil, nil, Fixtures::UserRawApiKeys::NORMAL_USER, from: mock_users
         selected.size.should eq 1
         selected.first.name.should eq "Jim Oliver"
         selected.first.groups.map(&.id).should eq [499, 1000]
@@ -64,9 +64,7 @@ module DppmRestApi::CLI
         tmp = File.tempname
         add_user name: "added user", groups: "500", data_dir: __DIR__, output_file: tmp
         key = File.read_lines(tmp)[1]
-        config = File.open PERMISSION_FILE do |permissions_file|
-          Config.from_json permissions_file.rewind
-        end
+        config = Fixtures.new_config
         if user = config.users.find { |usr| usr.name == "added user" }
           user.api_key_hash.verify(key).should be_true
           user.group_ids.should eq Set{500}
@@ -94,11 +92,9 @@ module DppmRestApi::CLI
         add_groups: "500",
         remove_groups: "499",
         data_dir: __DIR__
-      new_state = File.open PERMISSION_FILE do |file|
-        Config.from_json file
-      end
-      new_state.users.find { |usr| usr.name == "Jim Oliver" }.should be_nil
-      new_state.users.find { |usr| usr.name == "changed name" }.try(&.group_ids).should eq Set{500, 1000}
+      config = Fixtures.new_config
+      config.users.find { |usr| usr.name == "Jim Oliver" }.should be_nil
+      config.users.find { |usr| usr.name == "changed name" }.try(&.group_ids).should eq Set{500, 1000}
     end
     require_arg "data-dir" do
       edit_users match_name: nil,
@@ -124,11 +120,8 @@ module DppmRestApi::CLI
         api_key: nil,
         data_dir: __DIR__,
         output_file: data_file.path
-      new_state = File.open PERMISSION_FILE do |file|
-        Config.from_json file
-      end
       new_key = File.read_lines(data_file.path)[1]
-      new_state.users.find { |usr| usr.name == "Administrator" }.not_nil!.api_key_hash.verify(new_key).should be_true
+      Fixtures.new_config.users.find { |usr| usr.name == "Administrator" }.not_nil!.api_key_hash.verify(new_key).should be_true
       orig_key_hash.should_not eq new_key
     end
     require_arg "data-dir" do
@@ -138,10 +131,7 @@ module DppmRestApi::CLI
   describe "#delete_users" do
     it "deletes a user" do
       delete_users match_name: nil, match_groups: "0", api_key: nil, data_dir: __DIR__
-      new_state = File.open PERMISSION_FILE do |file|
-        Config.from_json file
-      end
-      new_state.users.find { |usr| usr.name == "Administrator" }.should be_nil
+      Fixtures.new_config.users.find { |usr| usr.name == "Administrator" }.should be_nil
     end
     require_arg "data-dir" do
       delete_users match_name: nil, match_groups: nil, api_key: nil, data_dir: nil
@@ -186,11 +176,9 @@ module DppmRestApi::CLI
         name: "test-added group",
         permissions: new_grp_permissions.to_json,
         data_dir: __DIR__)
-      new_state = File.open PERMISSION_FILE do |file|
-        Config.from_json file
-      end
-      new_state.groups.find { |group| group.id == 1234 }.should_not be_nil
-      new_state.groups
+      config = Fixtures.new_config
+      config.groups.find { |group| group.id == 1234 }.should_not be_nil
+      config.groups
         .find { |group| group.id == 1234 }
         .try(&.can_access? "/pkg/something", HTTP::Params.new, Access::Read)
         .should be_true
@@ -218,10 +206,8 @@ module DppmRestApi::CLI
         path: "/**",
         access: "Read",
         data_dir: __DIR__
-      new_state = File.open PERMISSION_FILE do |file|
-        Config.from_json file.rewind
-      end
-      if su = new_state.groups.find { |group| group.id == 0 }
+      config = Fixtures.new_config
+      if su = config.groups.find { |group| group.id == 0 }
         su.can_access?(
           "/literally/anything",
           HTTP::Params.new({} of String => Array(String)),
@@ -274,10 +260,7 @@ module DppmRestApi::CLI
           key: "test-key",
           add_glob: "test-glob",
           remove_glob: nil
-        new_state = File.open PERMISSION_FILE do |file|
-          Config.from_json file
-        end
-        test_group = new_state.groups.find { |grp| grp.id == 1000 }.not_nil!
+        test_group = Fixtures.new_config.groups.find { |grp| grp.id == 1000 }.not_nil!
         test_group.permissions["/**"]
           .query_parameters["test-key"]?
           .should eq ["test-glob"]
@@ -286,20 +269,14 @@ module DppmRestApi::CLI
     describe "#add_route" do
       it "can add a path to a group's #permissions values" do
         add_route id: "1000", access: "Read", path: "/some/path", data_dir: __DIR__
-        new_state = File.open PERMISSION_FILE do |file|
-          Config.from_json file
-        end
-        test_group = new_state.groups.find { |grp| grp.id == 1000 }.not_nil!
+        test_group = Fixtures.new_config.groups.find { |grp| grp.id == 1000 }.not_nil!
         test_group.permissions["/some/path"]?.should_not be_nil
       end
     end
     describe "#delete_group" do
       it "can remove a group" do
         delete_group id: "1000", data_dir: __DIR__
-        new_state = File.open PERMISSION_FILE do |file|
-          Config.from_json file
-        end
-        new_state.groups.find { |grp| grp.id == 1000 }.should be_nil
+        Fixtures.new_config.groups.find { |grp| grp.id == 1000 }.should be_nil
       end
     end
   end

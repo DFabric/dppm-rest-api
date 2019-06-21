@@ -11,7 +11,7 @@ module DppmRestApi::CLI
       variables: {
         data_dir: {
           info:    "data directory",
-          default: DppmRestApi::DEFAULT_DATA_DIR,
+          default: DppmRestApi::Actions::DEFAULT_DATA_DIR,
         },
       },
       commands: {
@@ -280,7 +280,7 @@ module DppmRestApi::CLI
     DppmRestApi.run host, port, data_dir
   end
 
-  def add_user(name, groups, data_dir, output_file, **args) : Void
+  def add_user(name, groups, data_dir, output_file, **args) : Nil
     required data_dir, groups, name
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|

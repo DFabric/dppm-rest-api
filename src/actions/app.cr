@@ -38,7 +38,7 @@ module DppmRestApi::Actions::App
   relative_get "/:app_name/config/:key" do |context|
     app_name = context.params.url["app_name"]
     key = context.params.url["key"]
-    if context.current_user? && Config.has_access? context, Access::Read
+    if context.current_user? && Actions.has_access?.call context, Access::Read
       app = DPPM::Prefix.new(prefix).new_app app_name
       if key == "."
         dump_config context, app
@@ -52,21 +52,21 @@ module DppmRestApi::Actions::App
     raise Unauthorized.new context
   end
   relative_post "/:app_name/config/:key" do |context|
-    if context.current_user? && Config.has_access? context, Access::Create
+    if context.current_user? && Actions.has_access?.call context, Access::Create
       set_config context, context.params.url["key"], context.params.url["app_name"]
       next context
     end
     raise Unauthorized.new context
   end
   relative_put "/:app_name/config/:key" do |context|
-    if context.current_user? && Config.has_access? context, Access::Update
+    if context.current_user? && Actions.has_access?.call context, Access::Update
       set_config context, context.params.url["key"], context.params.url["app_name"]
       next context
     end
     raise Unauthorized.new context
   end
   relative_delete "/:app_name/config/:key" do |context|
-    if context.current_user? && Config.has_access? context, Access::Delete
+    if context.current_user? && Actions.has_access?.call context, Access::Delete
       DPPM::Prefix.new(prefix)
         .new_app(context.params.url["app_name"])
         .del_config context.params.url["key"]
@@ -77,7 +77,7 @@ module DppmRestApi::Actions::App
   # All keys, or all config options
   relative_get "/:app_name/config" do |context|
     app_name = context.params.url["app_name"]
-    if context.current_user? && Config.has_access? context, Access::Read
+    if context.current_user? && Actions.has_access?.call context, Access::Read
       dump_config context, DPPM::Prefix.new(prefix).new_app(app_name)
       next context
     end
@@ -85,7 +85,7 @@ module DppmRestApi::Actions::App
   end
   # start the service associated with the given application
   relative_put "/:app_name/service/boot" do |context|
-    if context.current_user? && Config.has_access? context, Access::Update
+    if context.current_user? && Actions.has_access?.call context, Access::Update
       # TODO: boot the service
       next context
       puts "user found!"
@@ -94,7 +94,7 @@ module DppmRestApi::Actions::App
   end
   # reload the service associated with the given application
   relative_put "/:app_name/service/reload" do |context|
-    if context.current_user? && Config.has_access? context, Access::Update
+    if context.current_user? && Actions.has_access?.call context, Access::Update
       # TODO: reload the service
       next context
     end
@@ -102,7 +102,7 @@ module DppmRestApi::Actions::App
   end
   # restart the service associated with the given application
   relative_put "/:app_name/service/restart" do |context|
-    if context.current_user? && Config.has_access? context, Access::Update
+    if context.current_user? && Actions.has_access?.call context, Access::Update
       # TODO: reboot the service
       next context
     end
@@ -110,7 +110,7 @@ module DppmRestApi::Actions::App
   end
   # start the service associated with the given application
   relative_put "/:app_name/service/start" do |context|
-    if context.current_user? && Config.has_access? context, Access::Update
+    if context.current_user? && Actions.has_access?.call context, Access::Update
       # TODO: start the service
       next context
     end
@@ -118,7 +118,7 @@ module DppmRestApi::Actions::App
   end
   # get the status of the service associated with the given application
   relative_get "/:app_name/service/status" do |context|
-    if context.current_user? && Config.has_access? context, Access::Read
+    if context.current_user? && Actions.has_access?.call context, Access::Read
       # TODO: get the status of the service
       next context
     end
@@ -126,7 +126,7 @@ module DppmRestApi::Actions::App
   end
   # stop the service associated with the given application
   relative_put "/:app_name/service/stop" do |context|
-    if context.current_user? && Config.has_access? context, Access::Update
+    if context.current_user? && Actions.has_access?.call context, Access::Update
       # TODO: stop the service
       next context
     end
@@ -134,7 +134,7 @@ module DppmRestApi::Actions::App
   end
   # lists dependent library packages
   relative_get "/:app_name/libs" do |context|
-    if context.current_user? && Config.has_access? context, Access::Read
+    if context.current_user? && Actions.has_access?.call context, Access::Read
       # TODO: list dependencies
       next context
     end
@@ -142,7 +142,7 @@ module DppmRestApi::Actions::App
   end
   # return the base application package
   relative_get "/:app_name/app" do |context|
-    if context.current_user? && Config.has_access? context, Access::Read
+    if context.current_user? && Actions.has_access?.call context, Access::Read
       # TODO: return the base application package
       next context
     end
@@ -150,7 +150,7 @@ module DppmRestApi::Actions::App
   end
   # returns information present in pkg.con as JSON
   relative_get "/:app_name/pkg" do |context|
-    if context.current_user? && Config.has_access? context, Access::Read
+    if context.current_user? && Actions.has_access?.call context, Access::Read
       # TODO: return package data
       next context
     end
@@ -160,7 +160,7 @@ module DppmRestApi::Actions::App
   # and stream the results. Otherwise return a JSON-formatted output of the
   # current log data.
   relative_get "/:app_name/logs" do |context|
-    if context.current_user? && Config.has_access? context, Access::Read
+    if context.current_user? && Actions.has_access?.call context, Access::Read
       # TODO: upgrade to websocket or output logs to date
       next context
     end
@@ -168,7 +168,7 @@ module DppmRestApi::Actions::App
   end
   # Install the given package
   relative_put "/:app_name" do |context|
-    if context.current_user? && Config.has_access? context, Access::Create
+    if context.current_user? && Actions.has_access?.call context, Access::Create
       # TODO: install the package and return its name
       next context
     end
@@ -176,7 +176,7 @@ module DppmRestApi::Actions::App
   end
   # Delete the given application
   relative_delete "/:app_name" do |context|
-    if context.current_user? && Config.has_access? context, Access::Delete
+    if context.current_user? && Actions.has_access?.call context, Access::Delete
       # TODO: delete the app
       next context
     end
