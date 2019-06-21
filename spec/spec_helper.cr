@@ -1,7 +1,7 @@
 require "spec"
 require "spec-kemal"
-require "./fixtures"
 require "../src/dppm_rest_api"
+require "./fixtures"
 
 CRLF = "\r\n"
 

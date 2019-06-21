@@ -31,14 +31,14 @@ module DppmRestApi::CLI
         selected = selected_users "/^Admin/", nil, nil, from: mock_users
         selected.size.should eq 1
         selected.first.name.should eq "Administrator"
-        selected.first.groups.map(&.id).should eq [0]
+        DppmRestApi.permissions_config.group_view(selected.first).groups.map(&.id).should eq [0]
       end
       it "selects by name literals" do
         mock_users = DppmRestApi.permissions_config.users
         selected = selected_users "Administrator", nil, nil, from: mock_users
         selected.size.should eq 1
         selected.first.name.should eq "Administrator"
-        selected.first.groups.map(&.id).should eq [0]
+        DppmRestApi.permissions_config.group_view(selected.first).groups.map(&.id).should eq [0]
       end
       {% for group_args in ["499,1000", "499"] %}
       context %<with group id {{group_args}}> do
@@ -47,7 +47,7 @@ module DppmRestApi::CLI
           selected = selected_users nil, {{group_args}}, nil, from: mock_users
           selected.size.should eq 1
           selected.first.name.should eq "Jim Oliver"
-          selected.first.groups.map(&.id).should eq [499, 1000]
+          DppmRestApi.permissions_config.group_view(selected.first).groups.map(&.id).should eq [499, 1000]
         end
       end
       {% end %}
@@ -56,7 +56,7 @@ module DppmRestApi::CLI
         selected = selected_users nil, nil, Fixtures::UserRawApiKeys::NORMAL_USER, from: mock_users
         selected.size.should eq 1
         selected.first.name.should eq "Jim Oliver"
-        selected.first.groups.map(&.id).should eq [499, 1000]
+        DppmRestApi.permissions_config.group_view(selected.first).groups.map(&.id).should eq [499, 1000]
       end
     end
     describe "#add_user" do

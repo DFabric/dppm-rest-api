@@ -355,7 +355,7 @@ module DppmRestApi::CLI
       # Rekey the users that have made it through the filters
       new_key = Random::Secure.base64 24
       output_io.puts "user named #{user.name} who has access to the \
-                      groups #{user.groups} is now accessible via API key:"
+                      groups #{current_config.group_view(user).groups} is now accessible via API key:"
       output_io.puts new_key
       user.api_key_hash = Scrypt::Password.create new_key
       user

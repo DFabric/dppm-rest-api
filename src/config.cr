@@ -1,7 +1,6 @@
 require "./ext/scrypt_password"
 require "json"
 require "kemal_jwt_auth"
-require "./config/received_user"
 
 struct DppmRestApi::Config
   include JSON::Serializable
@@ -9,9 +8,12 @@ struct DppmRestApi::Config
   property groups : Array(Group)
   property users : Array(User)
 
+  def group_view(user : User) : GroupView
+    GroupView.new user, groups
+  end
+
   # :nodoc:
   def initialize(@groups : Array(Group), @users : Array(User))
-    User.all_groups = @groups
   end
 
   def find_and_authenticate!(body) : Config::User?

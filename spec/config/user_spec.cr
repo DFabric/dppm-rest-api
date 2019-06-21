@@ -3,11 +3,14 @@ require "../spec_helper"
 describe DppmRestApi::Config::User do
   describe "Administrator" do
     it "is a memeber of the 'super user' group" do
-      DppmRestApi.permissions_config
-        .users
-        .find { |usr| usr.name == "Administrator" }
-        .not_nil!
-        .groups
+      user = DppmRestApi.permissions_config.group_view(
+        DppmRestApi.permissions_config
+          .users
+          .find { |usr| usr.name == "Administrator" }
+          .not_nil!
+      )
+
+      user.groups
         .includes?(DppmRestApi.permissions_config.groups.find { |grp| grp.name == "super user" })
         .should be_true
     end
@@ -18,15 +21,18 @@ describe DppmRestApi::Config::User do
         .users
         .find { |usr| usr.api_key_hash.verify Fixtures::UserRawApiKeys::NORMAL_USER }
         .not_nil!
-      user.find_group?(&.can_access?(
+
+      group_view = DppmRestApi.permissions_config.group_view user
+
+      group_view.find_group?(&.can_access?(
         "/some/arbitrary/path",
         HTTP::Params.new({"namespace" => ["default-namespace"]}),
         DppmRestApi::Access::Delete)).should be_truthy
-      user.find_group?(&.can_access?(
+      group_view.find_group?(&.can_access?(
         "/some/arbitrary/path",
         HTTP::Params.new({"namespace" => ["jim-oliver"]}),
         DppmRestApi::Access::Update)).should be_truthy
-      user.find_group?(&.can_access?(
+      group_view.find_group?(&.can_access?(
         "/some/arbitrary/path",
         HTTP::Params.new({"namespace" => ["admins-stuff"]}),
         DppmRestApi::Access::Read)).should be_falsey

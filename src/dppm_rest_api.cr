@@ -18,7 +18,7 @@ module DppmRestApi
 
     Actions.has_access = ->(context : HTTP::Server::Context, permission : Access) {
       if received_user = context.current_user?.try { |user| Config::User.from_h hash: user }
-        return true if received_user.find_group? do |group|
+        return true if permissions_config.group_view(received_user).find_group? do |group|
                          group.can_access?(
                            context.request.path,
                            context.request.query_params,
