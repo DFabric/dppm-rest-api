@@ -1,7 +1,8 @@
 module DppmRestApi::Actions::Src
   extend self
+  include Utils
   relative_get "" do |context|
-    if context.current_user? && Actions.has_access? context, Access::Read
+    if Actions.has_access? context, Access::Read
       # TODO: List all available source packages
       next context
     end
@@ -9,7 +10,7 @@ module DppmRestApi::Actions::Src
   end
   # List all available source packages, of either the *lib* or *app* type.
   relative_get "/:type" do |context|
-    if context.current_user? && Actions.has_access? context, Access::Read
+    if Actions.has_access? context, Access::Read
       # TODO: List available source packages
       next context
     end

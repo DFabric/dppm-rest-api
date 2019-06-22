@@ -1,147 +1,129 @@
-module DppmRestApi::Actions::Pkg
-  extend self
-  ALL_PKGS = ""
-  ONE_PKG  = "/:id"
+module DppmRestApi::Actions
+  module Pkg
+    extend self
+    ALL_PKGS = ""
+    ONE_PKG  = "/:id"
+    include Utils
 
-  def output_config_for(package, to builder)
-    builder.field package.package do
-      builder.object do
-        package.pkg_file.config_vars.try &.each_key do |key|
-          builder.field key, package.get_config key
-        end
-      end
-    end
-  end
-
-  def find_package_by_name(name, pfx) : DPPM::Prefix::Pkg?
-    DPPM::Prefix.new(pfx).each_pkg { |pkg| return pkg if pkg.package == name }
-  end
-
-  def clean_unused_packages(context : HTTP::Server::Context)
-    if result = DPPM::Prefix.new(prefix).clean_unused_packages(confirmation: false) { }
-      return {data: result} if result.any?
-      bug = InternalServerError.new context, "received empty set from Prefix#clean_unused_packages; please report this strange bug"
-      error = NoPkgsToClean.new context
-      error.cause = bug
-      raise error
-    end
-    raise NoPkgsToClean.new context
-  end
-
-  # List built packages
-  relative_get nil do |context|
-    if context.current_user? && Actions.has_access? context, Access::Read
-      pfx = DPPM::Prefix.new prefix
-      # Build JSON directly to the HTTP response IO
-      JSON.build context.response do |json|
-        json.array do
-          # build an array of all the package names
-          pfx.each_pkg { |pkg| json.string pkg.package }
-        end
-      end
-      next context
-    end
-    raise Unauthorized.new context
-  end
-  # Clean unused built packages
-  relative_delete "/clean" do |context|
-    if context.current_user? && Actions.has_access? context, Access::Delete
-      clean_unused_packages(context).to_json context.response
-      context.response.flush
-      next context
-    end
-    raise Unauthorized.new context
-  end
-  # Query information about a given package
-  relative_get "/:id/query" do |context|
-    if context.current_user? && Actions.has_access? context, Access::Read
-      package_name = URI.unescape context.params.url["id"]
-      # Iterate over the packages to find the relevant one.
-      if selected_pkg = find_package_by_name package_name, prefix
-        # The package whose name was the :id URL parameter was found and we can query it
-        if key = context.params.query["get"]?
-          # A key was specified by the &get query parameter
-          begin
-            {data: {
-              package_name => {
-                key => selected_pkg.get_config key,
-                # This method call  ^^ raises an untyped error if the key is not found
-              },
-            }}.to_json context.response
-            context.response.flush
-            next context
-          rescue e : Exception
-            # catch the exception thown by the lack of a config value for the specified key
-            # otherwise, pass it on to the
-            msg = e.message || raise e
-            raise e unless msg.starts_with? "config key not found"
-            context.response.status_code = 404
-            {errors: [e.message]}.to_json context.response
-            context.response.flush
-            next context
+    def build_config_response(package, builder)
+      builder.field package.package do
+        builder.object do
+          package.each_config_key do |key|
+            builder.field key, package.get_config key
           end
+        end
+      end
+    end
+
+    def clean_unused_packages(context : HTTP::Server::Context)
+      if result = get_prefix_or_default(from: context).clean_unused_packages(confirmation: false) { }
+        return {data: result} if result.any?
+        bug = InternalServerError.new context, "received empty set from Prefix#clean_unused_packages; please report this strange bug"
+        error = NoPkgsToClean.new context
+        error.cause = bug
+        raise error
+      end
+      raise NoPkgsToClean.new context
+    end
+
+    # List built packages
+    relative_get nil do |context|
+      if Actions.has_access? context, Access::Read
+        build_json context.response do |json|
+          json.array do
+            # build an array of all the package names
+            get_prefix_or_default(from: context).each_pkg { |pkg| json.string pkg.package }
+          end
+        end
+        next context
+      end
+      raise Unauthorized.new context
+    end
+    # Clean unused built packages
+    relative_delete "/clean" do |context|
+      if Actions.has_access? context, Access::Delete
+        clean_unused_packages(context).to_json context.response
+        context.response.flush
+        next context
+      end
+      raise Unauthorized.new context
+    end
+    # Query information about a given package
+    relative_get "/:id/query" do |context|
+      if Actions.has_access? context, Access::Read
+        package_name = URI.unescape context.params.url["id"]
+        version = context.params.query["version"]?.try { |v| URI.unescape v }
+        # Iterate over the packages to find the relevant one.
+        selected_pkg = get_prefix_or_default(from: context).new_pkg package_name, version
+        raise NoSuchPackage.new context, package_name unless selected_pkg.exists?
+        # Stop here ^^ unless the package whose name was the :id URL parameter
+        # was found and we can query it
+        if key = context.params.query["get"]?
+          data = begin
+            selected_pkg.get_config key
+          rescue error : ConfigKeyError
+            raise NotFound.new context, cause: error
+          end
+          # A key was specified by the &get query parameter
+          build_json context.response do |json|
+            json.field package_name do
+              json.object do
+                json.field key, value: data
+              end
+            end
+          end
+          next context
         else
-          # No specific key was requested, respond with all of the config options
-          # for this package and all dependent packages
-          JSON.build context.response do |builder|
-            builder.object do
-              output_config_for selected_pkg, to: builder
-              if context.params.query["deps"]? && (deps = selected_pkg.pkg_file.deps)
-                builder.field "dependencies" do
-                  deps.each do |name, version|
-                    semver = SemanticVersion.parse version
-                    DPPM::Prefix.new(prefix).each_pkg do |pkg|
-                      if (pkg.package == name) && (pkg.semantic_version == semver)
-                        output_config_for pkg, to: builder
-                      end
-                    end
-                  end
-                end
+          # No specific key was requested, respond with all of the config
+          # options for this package. Additionally, respond with all
+          # dependent packages if the "libraries" boolean query parameter
+          # is specified.
+          build_json context.response do |builder|
+            build_config_response selected_pkg, builder
+            if parse_boolean_param("libraries", from: context) &&
+               (libs = selected_pkg.libs)
+              builder.field "libraries" do
+                libs.each { |pkg| build_config_response pkg, builder }
               end
             end
           end
         end
-      else
-        raise NoSuchPackage.new context, package_name
+        next context
       end
-      next context
+      raise Unauthorized.new context
     end
-    raise Unauthorized.new context
-  end
-  # Delete a given package
-  relative_delete "/:id/delete" do |context|
-    if context.current_user? && Actions.has_access? context, Access::Delete
-      package_name = URI.unescape context.params.url["id"]
-      if selected_pkg = find_package_by_name package_name, prefix
+    # Delete a given package
+    relative_delete "/:id/delete" do |context|
+      if Actions.has_access? context, Access::Delete
+        package_name = URI.unescape context.params.url["id"]
+        selected_pkg = get_prefix_or_default(from: context).new_pkg package_name,
+          context.params.query["version"]?
+        raise NoSuchPackage.new context, package_name if selected_pkg.nil?
         selected_pkg.delete confirmation: false { }
-      else
-        raise NoSuchPackage.new context, package_name
+        next context
       end
-      next context
+      raise Unauthorized.new context
     end
-    raise Unauthorized.new context
-  end
 
-  # Build a package, returning the ID of the built image, and perhaps a status
-  # message? We could also use server-side events or a websocket to provide the
-  # status of this action as it occurs over the API, rather than just returning
-  # a result on completion.
-  #
-  # This route takes the optional query parameters "version" and "tag".
-  relative_post "/:id/build" do |context|
-    if context.current_user? && Actions.has_access? context, Access::Create
-      package_name = URI.unescape context.params.url["package"]
-      pkg = DPPM::Prefix::Pkg.create DPPM::Prefix.new(prefix),
-        name: package_name,
-        version: context.params.query["version"]?,
-        tag: context.params.query["tag"]?
-      pkg.build confirmation: false { }
-      {data: {
-        status: "built package #{pkg.package}:#{pkg.version} successfully",
-      }}.to_json context.response
-      context.response.flush
-      next context
+    # Build a package, returning the ID of the built image, and perhaps a status
+    # message? We could also use server-side events or a websocket to provide the
+    # status of this action as it occurs over the API, rather than just returning
+    # a result on completion.
+    #
+    # This route takes the optional query parameters "version" and "tag".
+    relative_post "/:id/build" do |context|
+      if Actions.has_access? context, Access::Create
+        package_name = URI.unescape context.params.url["package"]
+        pkg = get_prefix_or_default(from: context).new_pkg package_name,
+          version: context.params.query["version"]?
+        pkg.build confirmation: false { }
+        pkg.exists!
+        build_json context.response do |json|
+          json.field "status", "built package #{pkg.package}:#{pkg.version} successfully"
+        end
+        next context
+      end
+      raise Unauthorized.new context
     end
-    raise Unauthorized.new context
   end
 end

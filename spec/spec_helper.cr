@@ -28,10 +28,11 @@ end
 # Disable all authentication checks by making `DppmRestApi::Actions.has_access?`
 # always return true, then set the authentication back to the default system
 # after yielding to the block.
-def without_authentication!
-  DppmRestApi::Actions.access_filter = ->(_context, _permissions) { true }
+def self.without_authentication!
+  DppmRestApi::Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) { true }
   yield
-  DppmRestApi::Actions.access_filter = DppmRestApi.access_filter
+ensure
+  DppmRestApi::Actions.access_filter = ->DppmRestApi.access_filter(HTTP::Server::Context, Access)
 end
 
 Kemal.config.env = "test"
@@ -40,6 +41,12 @@ Fixtures.reset_config
 # Run the server
 DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
 # Set all configs back to the expected values, in case they changed
-Spec.before_each { Fixtures.reset_config }
+Spec.before_each do
+  Fixtures.reset_config
+  FileUtils.mkdir_p Fixtures::PREFIX_PATH
+end
 # Clean up after ourselves
-Spec.after_each { File.delete Fixtures::PERMISSION_FILE if File.exists? Fixtures::PERMISSION_FILE }
+Spec.after_each do
+  File.delete Fixtures::PERMISSION_FILE if File.exists? Fixtures::PERMISSION_FILE
+  FileUtils.rm_rf Fixtures::PREFIX_PATH
+end
