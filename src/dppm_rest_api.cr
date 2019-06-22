@@ -1,6 +1,8 @@
 require "kemal"
+require "kemal_jwt_auth"
 require "./config"
 require "./actions"
+require "./errors/api_errors"
 
 module DppmRestApi
   PERMISSIONS_FILE = "permissions.json"
@@ -14,9 +16,7 @@ module DppmRestApi
       @@permissions_config = Config.from_json data
     end
 
-    Kemal.config.add_handler Actions.auth_handler
-
-    Actions.has_access = ->(context : HTTP::Server::Context, permission : Access) {
+    Actions.access_filter = ->(context : HTTP::Server::Context, permission : Access) {
       if received_user = context.current_user?.try { |user| Config::User.from_h hash: user }
         return true if permissions_config.group_view(received_user).find_group? do |group|
                          group.can_access?(
@@ -29,7 +29,23 @@ module DppmRestApi
       false
     }
 
-    initialize_error_handlers
+    # Add authentification handler
+    Kemal.config.add_handler KemalJWTAuth::Handler.new(users: permissions_config)
+
+    # Add error handlers
+    {% for code in HTTP::Status.constants %}
+    if HTTP::Status::{{code}}.value >= 400
+      Kemal.config.add_error_handler HTTP::Status::{{code.id}}.value do |context, exception|
+        context.response.status_code = exception.status_code.value if exception.responds_to? :status_code
+        response_data = ErrorResponse.new exception
+        response_data.to_json context.response
+        context.response.flush
+        response_data.log
+        nil
+      end
+    end
+    {% end %}
+
     # Kemal doesn't like IPV6 brackets
     Kemal.config.host_binding = host.lchop('[').rchop(']')
     Kemal.run port: port

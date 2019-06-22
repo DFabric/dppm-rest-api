@@ -1,3 +1,4 @@
+# A `Group` view of an `User`, used to retrieve groups associated to an user.
 struct DppmRestApi::Config::GroupView
   getter user : User
   getter groups : Array(Group)

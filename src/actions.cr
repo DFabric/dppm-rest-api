@@ -18,7 +18,6 @@ macro relative_{{method.id}}(route, &block)
 end
 {% end %}
 
-require "./middlewares"
 require "./access"
 require "./actions/*"
 require "./errors/*"
@@ -42,5 +41,9 @@ module DppmRestApi::Actions
     end
   end
 
-  protected class_property? has_access : Proc(HTTP::Server::Context, Access, Bool) = ->(context : HTTP::Server::Context, access : Access) { false }
+  def self.has_access?(context : HTTP::Server::Context, access : Access) : Bool
+    access_filter.call context, access
+  end
+
+  protected class_property access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->(context : HTTP::Server::Context, access : Access) { false }
 end
