@@ -11,23 +11,30 @@ module DppmRestApi
     raise "no permissions file is defined!"
   end
 
-  def self.run(host : String, port : Int32, data_dir : String)
+  private def self.access_filter(context : HTTP::Server::Context, permission : Access) : Bool
+    if received_user = context.current_user?.try { |user| Config::User.from_h hash: user }
+      return true if permissions_config.group_view(received_user).find_group? do |group|
+                       group.can_access?(
+                         context.request.path,
+                         context.request.query_params,
+                         permission
+                       )
+                     end
+    end
+    false
+  end
+
+  def self.run(
+    host : String,
+    port : Int32,
+    data_dir : String,
+    access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->access_filter(HTTP::Server::Context, Access)
+  )
     ::File.open Path[data_dir, PERMISSIONS_FILE] do |data|
       @@permissions_config = Config.from_json data
     end
 
-    Actions.access_filter = ->(context : HTTP::Server::Context, permission : Access) {
-      if received_user = context.current_user?.try { |user| Config::User.from_h hash: user }
-        return true if permissions_config.group_view(received_user).find_group? do |group|
-                         group.can_access?(
-                           context.request.path,
-                           context.request.query_params,
-                           permission
-                         )
-                       end
-      end
-      false
-    }
+    Actions.access_filter = access_filter
 
     # Add authentification handler
     Kemal.config.add_handler KemalJWTAuth::Handler.new(users: permissions_config)
