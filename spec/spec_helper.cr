@@ -25,14 +25,21 @@ macro assert_unauthorized(response)
   fail "expected error response not found" unless found
 end
 
-# Disable all authentication checks by making `DppmRestApi::Actions.has_access?`
-# always return true, then set the authentication back to the default system
-# after yielding to the block.
-def self.without_authentication!
-  DppmRestApi::Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) { true }
-  yield
-ensure
-  DppmRestApi::Actions.access_filter = ->DppmRestApi.access_filter(HTTP::Server::Context, Access)
+module DppmRestApi
+  # Disable all authentication checks by making `DppmRestApi::Actions.has_access?`
+  # always return true, then set the authentication back to the default system
+  # after yielding to the block.
+  def self.without_authentication!
+    Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) { true }
+    yield
+  ensure
+    Actions.access_filter = ->access_filter(HTTP::Server::Context, Access)
+  end
+end
+
+@[AlwaysInline]
+def without_authentication!
+  DppmRestApi.without_authentication! { yield }
 end
 
 Kemal.config.env = "test"
@@ -44,6 +51,7 @@ DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.po
 Spec.before_each do
   Fixtures.reset_config
   FileUtils.mkdir_p Fixtures::PREFIX_PATH
+  DPPM::Prefix.new(Fixtures::PREFIX_PATH).create
 end
 # Clean up after ourselves
 Spec.after_each do

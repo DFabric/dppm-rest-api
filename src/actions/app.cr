@@ -4,7 +4,7 @@ require "dppm/prefix"
 module DppmRestApi::Actions
   module App
     extend self
-    include Utils
+    include RouteHelpers
 
     # gather the appropriate configuration option from the context and set it to
     # the app named `app_name`

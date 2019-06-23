@@ -1,6 +1,6 @@
 module DppmRestApi::Actions
   # A series of utility functions that are useful to all of the Action blocks
-  module Utils
+  module RouteHelpers
     macro fmt_route(route = "", namespace = false)
     {{ "/" + @type.stringify
          .downcase
@@ -25,7 +25,7 @@ module DppmRestApi::Actions
     # This macro only works inside of a route block with the variable "context"
     # available
     def get_prefix_or_default(from context)
-      DPPM::Prefix.new ensure_dir_exists context.params.query["prefix"]? || DPPM.default_prefix
+      DPPM::Prefix.new context.params.query["prefix"]? || DPPM.default_prefix
     end
 
     # This method parses a boolean value from a query parameter. It returns
@@ -65,15 +65,6 @@ module DppmRestApi::Actions
           json.field("data") { json.object { yield json } }
         end
       end
-    end
-
-    def ensure_dir_exists(dir : String)
-      if File.exists? dir
-        raise "expected #{dir} to be a directory" unless File.directory? dir
-        return dir
-      end
-      FileUtils.mkdir_p dir
-      dir
     end
   end
 end

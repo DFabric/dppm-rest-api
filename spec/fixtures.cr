@@ -12,7 +12,7 @@ module Fixtures
     NORMAL_USER = Random::Secure.base64(TEST_KEY_SIZE)
   end
 
-  PREFIX_PATH = Path[__DIR__, "prefix"].to_s
+  PREFIX_PATH = File.tempname("_temp_dppm_prefix")
 
   PERMISSIONS_CONFIG = DppmRestApi::Config.new groups: [
     DppmRestApi::Config::Group.new(

@@ -16,7 +16,7 @@ module DppmRestApi::Actions::Pkg
       end
       it "responds that there are no packages to clean" do
         without_authentication! do
-          delete fmt_route "/clean"
+          delete fmt_route("/clean?prefix=" + Fixtures::PREFIX_PATH)
           # response.status_code.should eq 404
           data = ErrorResponse.from_json response.body
           error_msgs = data.errors.map &.message

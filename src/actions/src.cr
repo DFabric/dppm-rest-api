@@ -1,6 +1,6 @@
 module DppmRestApi::Actions::Src
   extend self
-  include Utils
+  include RouteHelpers
   relative_get "" do |context|
     if Actions.has_access? context, Access::Read
       # TODO: List all available source packages

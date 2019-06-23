@@ -3,7 +3,7 @@ module DppmRestApi::Actions
     extend self
     ALL_PKGS = ""
     ONE_PKG  = "/:id"
-    include Utils
+    include RouteHelpers
 
     def build_config_response(package, builder)
       builder.field package.package do

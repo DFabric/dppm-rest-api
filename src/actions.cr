@@ -1,6 +1,6 @@
 require "kemal"
 require "./access"
-require "./actions/utils"
+require "./actions/route_helpers"
 require "./actions/*"
 require "./errors/*"
 
