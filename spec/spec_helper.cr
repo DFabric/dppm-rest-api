@@ -25,23 +25,16 @@ macro assert_unauthorized(response)
   fail "expected error response not found" unless found
 end
 
-module DppmRestApi
-  # Disable all authentication checks by making `DppmRestApi::Actions.has_access?`
-  # always return true, then set the authentication back to the default system
-  # after yielding to the block.
+module DppmRestApi::SpecHelper
   def self.without_authentication!
     Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) { true }
     yield
   ensure
-    Actions.access_filter = ->access_filter(HTTP::Server::Context, Access)
+    Actions.access_filter = ->DppmRestApi.access_filter(HTTP::Server::Context, Access)
   end
 end
 
-@[AlwaysInline]
-def without_authentication!
-  DppmRestApi.without_authentication! { yield }
-end
-
+DPPM::Log.output = DPPM::Log.error = File.open File::NULL, "w"
 Kemal.config.env = "test"
 Fixtures.reset_config
 

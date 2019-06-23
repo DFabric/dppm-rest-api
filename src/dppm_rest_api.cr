@@ -11,7 +11,7 @@ module DppmRestApi
     raise "no permissions file is defined!"
   end
 
-  private def self.access_filter(context : HTTP::Server::Context, permission : Access) : Bool
+  def self.access_filter(context : HTTP::Server::Context, permission : Access) : Bool
     if received_user = context.current_user?.try { |user| Config::User.from_h hash: user }
       return true if permissions_config.group_view(received_user).find_group? do |group|
                        group.can_access?(

@@ -29,12 +29,16 @@ module DppmRestApi::Actions
     # List built packages
     relative_get nil do |context|
       if Actions.has_access? context, Access::Read
-        build_json context.response do |json|
-          json.array do
-            # build an array of all the package names
-            get_prefix_or_default(from: context).each_pkg { |pkg| json.string pkg.package }
-          end
+        pkgs = [] of String
+        begin
+          get_prefix_or_default(from: context).each_pkg { |pkg| pkgs << pkg.package }
+        rescue e
+          raise InternalServerError.new context,
+            message: "#each_pkg raised an exception with the message '#{e.message}'.",
+            cause: e
         end
+        {data: pkgs}.to_json context.response
+        context.response.flush
         next context
       end
       raise Unauthorized.new context
@@ -100,6 +104,9 @@ module DppmRestApi::Actions
           context.params.query["version"]?
         raise NoSuchPackage.new context, package_name if selected_pkg.nil?
         selected_pkg.delete confirmation: false { }
+        build_json context.response do |json|
+          json.field "status", "successfully deleted '#{package_name}'"
+        end
         next context
       end
       raise Unauthorized.new context
@@ -113,11 +120,11 @@ module DppmRestApi::Actions
     # This route takes the optional query parameters "version" and "tag".
     relative_post "/:id/build" do |context|
       if Actions.has_access? context, Access::Create
-        package_name = URI.unescape context.params.url["package"]
-        pkg = get_prefix_or_default(from: context).new_pkg package_name,
-          version: context.params.query["version"]?
+        package_name = URI.unescape context.params.url["id"]
+        pfx = get_prefix_or_default(from: context)
+        pfx.update
+        pkg = pfx.new_pkg package_name, version: context.params.query["version"]?
         pkg.build confirmation: false { }
-        pkg.exists!
         build_json context.response do |json|
           json.field "status", "built package #{pkg.package}:#{pkg.version} successfully"
         end
