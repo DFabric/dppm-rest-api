@@ -124,7 +124,7 @@ module DppmRestApi::Actions
         pfx = DppmRestApi.prefix
         pfx.update
         pkg = pfx.new_pkg package_name, version: context.params.query["version"]?
-        pkg.build confirmation: false { }
+        pkg.build
         build_json context.response do |json|
           json.field "status", "built package #{pkg.package}:#{pkg.version} successfully"
         end

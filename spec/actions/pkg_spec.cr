@@ -41,6 +41,23 @@ module DppmRestApi::Actions::Pkg
     property data : Hash(String, Hash(String, String | Int64))
   end
 
+  struct CleanResponse
+    include JSON::Serializable
+    property data : Array(String)
+
+    def should_contain_value_matching(expr : Regex)
+      found = false
+      data.each { |response| found = true if expr =~ response }
+      fail "#{expr} was not in #{data}" unless found
+    end
+  end
+
+  def build_test_package
+    DppmRestApi.prefix.update
+    pkg = DppmRestApi.prefix.new_pkg "dppm"
+    pkg.build confirmation: false { }
+  end
+
   describe DppmRestApi::Actions::Pkg do
     describe "list built packages" do
       it "responds with 401 Forbidden" do
@@ -81,6 +98,18 @@ module DppmRestApi::Actions::Pkg
           error_msgs.should_not contain "received empty set from Prefix#clean_unused_packages; please report this strange bug"
         end
       end
+      it "cleans a built package (build -> clean flow)" do
+        SpecHelper.without_authentication! do
+          build_test_package
+          delete fmt_route "/clean"
+          CleanResponse.from_json(response.body).should_contain_value_matching /^dppm_\d+\.\d+\.\d+$/
+          response.status_code.should eq HTTP::Status::OK.value
+          DppmRestApi.prefix.each_pkg do |pkg|
+            # There shouldn't be any packages
+            fail "found package #{pkg.name} after cleaning"
+          end
+        end
+      end
     end
     describe "get /:id/query" do
       it "responds with 401 Forbidden" do
@@ -89,10 +118,7 @@ module DppmRestApi::Actions::Pkg
       end
       it "responds with all configuration data for a built package (build -> query flow)" do
         SpecHelper.without_authentication! do
-          post fmt_route "/dppm/build"
-          if response.status_code != HTTP::Status::OK.value
-            fail "building package 'dppm' (to test querying its configuration) due to " + ErrorResponse.from_json(response.body).errors.to_s
-          end
+          build_test_package
           get fmt_route "/dppm/query"
           response.status_code.should eq HTTP::Status::OK.value
           response.body.should eq %<{"data":{"dppm":{"port":8994,"host":"[::1]"}}}>
@@ -100,10 +126,7 @@ module DppmRestApi::Actions::Pkg
       end
       it "responds with a particular configuration key" do
         SpecHelper.without_authentication! do
-          post fmt_route "/dppm/build"
-          if response.status_code != HTTP::Status::OK.value
-            fail "building package 'dppm' (to test querying its configuration) due to " + ErrorResponse.from_json(response.body).errors.to_s
-          end
+          build_test_package
           get fmt_route "/dppm/query?get=port&prefix=" + Fixtures::PREFIX_PATH
           response.status_code.should eq HTTP::Status::OK.value
           QueryResponse.from_json(response.body).data["dppm"]["port"].should eq 8994
@@ -117,10 +140,7 @@ module DppmRestApi::Actions::Pkg
       end
       it "successfully deletes a package (build -> delete flow)" do
         SpecHelper.without_authentication! do
-          post fmt_route "/dppm/build"
-          if response.status_code != HTTP::Status::OK.value
-            fail "building package 'dppm' (to test deleting it) due to " + ErrorResponse.from_json(response.body).errors.to_s
-          end
+          build_test_package
           delete fmt_route "/dppm/delete"
           if response.status_code != HTTP::Status::OK.value
             fail "deleting package 'dppm' due to " + ErrorResponse.from_json(response.body).errors.to_s
@@ -143,6 +163,13 @@ module DppmRestApi::Actions::Pkg
           fail "POST '/dppm/build' received status code " + HTTP::Status.new(response.status_code).to_s
         end
         BuildResponse.from_json(response.body).should_be_successful_for "dppm"
+      end
+    end
+    it "responds with Internal Server Error when given an invalid package name" do
+      SpecHelper.without_authentication! do
+        post fmt_route "/nonexistent-pkg/build"
+        response.status_code.should eq HTTP::Status::INTERNAL_SERVER_ERROR.value
+        puts response.body
       end
     end
   end
