@@ -19,15 +19,6 @@ module DppmRestApi::Actions
     end
     {% end %}
 
-    # Pull the context from the context's query parameter or use the default
-    # provided by the CLI.
-    #
-    # This macro only works inside of a route block with the variable "context"
-    # available
-    def get_prefix_or_default(from context)
-      DPPM::Prefix.new context.params.query["prefix"]? || DPPM.default_prefix
-    end
-
     # This method parses a boolean value from a query parameter. It returns
     # true when the query parameter contains any string *except* for `"false"`
     # or `"0"`.

@@ -11,6 +11,8 @@ module DppmRestApi
     raise "no permissions file is defined!"
   end
 
+  class_property prefix : DPPM::Prefix { raise "no prefix set" }
+
   def self.access_filter(context : HTTP::Server::Context, permission : Access) : Bool
     if received_user = context.current_user?.try { |user| Config::User.from_h hash: user }
       return true if permissions_config.group_view(received_user).find_group? do |group|
@@ -28,12 +30,24 @@ module DppmRestApi
     host : String,
     port : Int32,
     data_dir : String,
+    prefix : String = DPPM.default_prefix,
+    access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->access_filter(HTTP::Server::Context, Access)
+  )
+    run host, port, data_dir, DPPM::Prefix.new(prefix), access_filter
+  end
+
+  def self.run(
+    host : String,
+    port : Int32,
+    data_dir : String,
+    prefix : DPPM::Prefix,
     access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->access_filter(HTTP::Server::Context, Access)
   )
     ::File.open Path[data_dir, PERMISSIONS_FILE] do |data|
       @@permissions_config = Config.from_json data
     end
 
+    @@prefix = prefix
     Actions.access_filter = access_filter
 
     # Add authentification handler

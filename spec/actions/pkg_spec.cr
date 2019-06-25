@@ -49,9 +49,20 @@ module DppmRestApi::Actions::Pkg
       end
       it "responds with an empty array" do
         SpecHelper.without_authentication! do
-          get fmt_route "?prefix=" + Fixtures::PREFIX_PATH
+          get fmt_route nil
           response.status_code.should eq HTTP::Status::OK.value
           ListBuiltPkgsResponse.from_json(response.body).should_be_empty
+        end
+      end
+      it "responds with a recently built package (build -> list flow)" do
+        SpecHelper.without_authentication! do
+          post fmt_route "/dppm/build"
+          if response.status_code != HTTP::Status::OK.value
+            fail "building package 'dppm' (to test listing packages) due to " + ErrorResponse.from_json(response.body).errors.to_s
+          end
+          get fmt_route nil
+          ListBuiltPkgsResponse.from_json(response.body)
+            .data.should contain "dppm"
         end
       end
     end
@@ -62,7 +73,7 @@ module DppmRestApi::Actions::Pkg
       end
       it "responds that there are no packages to clean" do
         SpecHelper.without_authentication! do
-          delete fmt_route("/clean?prefix=" + Fixtures::PREFIX_PATH)
+          delete fmt_route "/clean"
           # response.status_code.should eq 404
           data = ErrorResponse.from_json response.body
           error_msgs = data.errors.map &.message
@@ -78,18 +89,18 @@ module DppmRestApi::Actions::Pkg
       end
       it "responds with all configuration data for a built package (build -> query flow)" do
         SpecHelper.without_authentication! do
-          post fmt_route "/dppm/build?prefix=" + Fixtures::PREFIX_PATH
+          post fmt_route "/dppm/build"
           if response.status_code != HTTP::Status::OK.value
             fail "building package 'dppm' (to test querying its configuration) due to " + ErrorResponse.from_json(response.body).errors.to_s
           end
-          get fmt_route "/dppm/query?prefix=" + Fixtures::PREFIX_PATH
+          get fmt_route "/dppm/query"
           response.status_code.should eq HTTP::Status::OK.value
           response.body.should eq %<{"data":{"dppm":{"port":8994,"host":"[::1]"}}}>
         end
       end
       it "responds with a particular configuration key" do
         SpecHelper.without_authentication! do
-          post fmt_route "/dppm/build?prefix=" + Fixtures::PREFIX_PATH
+          post fmt_route "/dppm/build"
           if response.status_code != HTTP::Status::OK.value
             fail "building package 'dppm' (to test querying its configuration) due to " + ErrorResponse.from_json(response.body).errors.to_s
           end
@@ -106,11 +117,11 @@ module DppmRestApi::Actions::Pkg
       end
       it "successfully deletes a package (build -> delete flow)" do
         SpecHelper.without_authentication! do
-          post fmt_route "/dppm/build?prefix=" + Fixtures::PREFIX_PATH
+          post fmt_route "/dppm/build"
           if response.status_code != HTTP::Status::OK.value
             fail "building package 'dppm' (to test deleting it) due to " + ErrorResponse.from_json(response.body).errors.to_s
           end
-          delete fmt_route "/dppm/delete?prefix=" + Fixtures::PREFIX_PATH
+          delete fmt_route "/dppm/delete"
           if response.status_code != HTTP::Status::OK.value
             fail "deleting package 'dppm' due to " + ErrorResponse.from_json(response.body).errors.to_s
           end
@@ -126,10 +137,10 @@ module DppmRestApi::Actions::Pkg
     end
     it "builds a test package" do
       SpecHelper.without_authentication! do
-        post fmt_route "/dppm/build?prefix=" + Fixtures::PREFIX_PATH
+        post fmt_route "/dppm/build"
         if response.status_code != HTTP::Status::OK.value
           puts ErrorResponse.from_json(response.body).errors
-          fail "POST '/dppm/build?prefix=" + Fixtures::PREFIX_PATH + "' received status code " + HTTP::Status.new(response.status_code).to_s
+          fail "POST '/dppm/build' received status code " + HTTP::Status.new(response.status_code).to_s
         end
         BuildResponse.from_json(response.body).should_be_successful_for "dppm"
       end

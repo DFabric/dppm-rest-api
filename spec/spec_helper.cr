@@ -26,7 +26,7 @@ macro assert_unauthorized(response)
 end
 
 module DppmRestApi::SpecHelper
-  def self.without_authentication!
+  def SpecHelper.without_authentication!
     Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) { true }
     yield
   ensure
@@ -39,15 +39,18 @@ Kemal.config.env = "test"
 Fixtures.reset_config
 
 # Run the server
-DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
+DppmRestApi.run Socket::IPAddress::LOOPBACK,
+  DPPM::Prefix.default_dppm_config.port,
+  __DIR__,
+  DPPM::Prefix.new(Fixtures::PREFIX_PATH).tap &.create
 # Set all configs back to the expected values, in case they changed
 Spec.before_each do
   Fixtures.reset_config
   FileUtils.mkdir_p Fixtures::PREFIX_PATH
-  DPPM::Prefix.new(Fixtures::PREFIX_PATH).create
+  DppmRestApi.prefix.create
 end
 # Clean up after ourselves
 Spec.after_each do
   File.delete Fixtures::PERMISSION_FILE if File.exists? Fixtures::PERMISSION_FILE
-  FileUtils.rm_rf Fixtures::PREFIX_PATH
+  FileUtils.rm_rf DppmRestApi.prefix.path.to_s
 end
