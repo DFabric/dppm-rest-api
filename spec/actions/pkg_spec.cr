@@ -127,7 +127,7 @@ module DppmRestApi::Actions::Pkg
       it "responds with a particular configuration key" do
         SpecHelper.without_authentication! do
           build_test_package
-          get fmt_route "/dppm/query?get=port&prefix=" + Fixtures::PREFIX_PATH
+          get fmt_route "/dppm/query?get=port&prefix=" + Fixtures::PREFIX_PATH.to_s
           response.status_code.should eq HTTP::Status::OK.value
           QueryResponse.from_json(response.body).data["dppm"]["port"].should eq 8994
         end

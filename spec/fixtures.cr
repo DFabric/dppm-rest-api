@@ -1,18 +1,19 @@
 module Fixtures
   # Set up the mock permissions.json
   # the location
-  PERMISSION_FILE = Path[__DIR__, "permissions.json"]
+  PERMISSION_FILE = Path[DIR, "permissions.json"].to_s
+  DIR             = File.tempname
 
   # The size of the test api keys.
   TEST_KEY_SIZE = 24
 
   # Filepaths to raw test API keys.
   module UserRawApiKeys
-    ADMIN       = Random::Secure.base64(TEST_KEY_SIZE)
-    NORMAL_USER = Random::Secure.base64(TEST_KEY_SIZE)
+    ADMIN       = Random::Secure.base64 TEST_KEY_SIZE
+    NORMAL_USER = Random::Secure.base64 TEST_KEY_SIZE
   end
 
-  PREFIX_PATH = File.tempname("_temp_dppm_prefix")
+  PREFIX_PATH = Path[DIR, "temp_dppm_prefix"]
 
   PERMISSIONS_CONFIG = DppmRestApi::Config.new groups: [
     DppmRestApi::Config::Group.new(
@@ -58,11 +59,11 @@ module Fixtures
   # Set all configs to the expected values.
   def self.reset_config
     DppmRestApi.permissions_config = PERMISSIONS_CONFIG
-    DppmRestApi.permissions_config.write_to PERMISSION_FILE
+    DppmRestApi.permissions_config.write_to Path[DIR, "permissions.json"]
   end
 
   def self.new_config : DppmRestApi::Config
-    File.open PERMISSION_FILE do |file|
+    File.open Path[DIR, "permissions.json"] do |file|
       DppmRestApi::Config.from_json file
     end
   end

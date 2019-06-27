@@ -36,17 +36,18 @@ end
 
 DPPM::Log.output = DPPM::Log.error = File.open File::NULL, "w"
 Kemal.config.env = "test"
+FileUtils.mkdir_p Fixtures::DIR.to_s
 Fixtures.reset_config
-
 # Run the server
 DppmRestApi.run Socket::IPAddress::LOOPBACK,
   DPPM::Prefix.default_dppm_config.port,
-  __DIR__,
-  DPPM::Prefix.new(Fixtures::PREFIX_PATH).tap &.create
+  Fixtures::DIR,
+  DPPM::Prefix.new(Fixtures::PREFIX_PATH.to_s).tap &.create
 # Set all configs back to the expected values, in case they changed
 Spec.before_each do
+  FileUtils.mkdir_p Fixtures::DIR.to_s
   Fixtures.reset_config
-  FileUtils.mkdir_p Fixtures::PREFIX_PATH
+  FileUtils.mkdir_p Fixtures::PREFIX_PATH.to_s
   DppmRestApi.prefix.create
 end
 # Clean up after ourselves
