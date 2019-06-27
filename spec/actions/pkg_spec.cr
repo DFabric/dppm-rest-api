@@ -4,7 +4,7 @@ require "../spec_helper"
 module DppmRestApi::Actions::Pkg
   struct ListBuiltPkgsResponse
     include JSON::Serializable
-    property data : Array(String)
+    property data : Array(ListResponse)
 
     def should_be_empty
       data.empty?.should be_true
@@ -79,7 +79,7 @@ module DppmRestApi::Actions::Pkg
           end
           get fmt_route nil
           ListBuiltPkgsResponse.from_json(response.body)
-            .data.should contain "dppm"
+            .data.map(&.package).should contain "dppm"
         end
       end
     end
@@ -165,10 +165,10 @@ module DppmRestApi::Actions::Pkg
         BuildResponse.from_json(response.body).should_be_successful_for "dppm"
       end
     end
-    it "responds with Internal Server Error when given an invalid package name" do
+    it "responds with Bad Request when given an invalid package name" do
       SpecHelper.without_authentication! do
-        post fmt_route "/nonexistent-pkg/build"
-        response.status_code.should eq HTTP::Status::INTERNAL_SERVER_ERROR.value
+        post fmt_route "/$(echo all your base are belong to us!)/build"
+        response.status_code.should eq HTTP::Status::BAD_REQUEST.value
         puts response.body
       end
     end

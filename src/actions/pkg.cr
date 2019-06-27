@@ -1,3 +1,5 @@
+require "../ext/semantic_version"
+
 module DppmRestApi::Actions
   module Pkg
     extend self
@@ -26,16 +28,24 @@ module DppmRestApi::Actions
       raise NoPkgsToClean.new context
     end
 
+    struct ListResponse
+      include JSON::Serializable
+      property version : SemanticVersion
+      property package : String
+
+      def initialize(@package : String, @version : SemanticVersion); end
+
+      def self.new(package : String, version : String)
+        new package SemanticVersion.parse version
+      end
+    end
+
     # List built packages
     relative_get nil do |context|
       if Actions.has_access? context, Access::Read
-        pkgs = [] of String
-        begin
-          DppmRestApi.prefix.each_pkg { |pkg| pkgs << pkg.package }
-        rescue e
-          raise InternalServerError.new context,
-            message: "#each_pkg raised an exception with the message '#{e.message}'.",
-            cause: e
+        pkgs = [] of ListResponse
+        DppmRestApi.prefix.each_pkg do |package|
+          pkgs << ListResponse.new package.package, package.semantic_version
         end
         {data: pkgs}.to_json context.response
         context.response.flush
@@ -124,7 +134,13 @@ module DppmRestApi::Actions
         pfx = DppmRestApi.prefix
         pfx.update
         pkg = pfx.new_pkg package_name, version: context.params.query["version"]?
-        pkg.build
+        init_done = false
+        pkg.build confirmation: false do
+          init_done = true
+        rescue e
+          raise InternalServerError.new context, cause: e if init_done
+          raise BadRequest.new context, cause: e
+        end
         build_json context.response do |json|
           json.field "status", "built package #{pkg.package}:#{pkg.version} successfully"
         end
