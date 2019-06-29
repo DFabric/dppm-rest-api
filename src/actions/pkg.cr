@@ -131,15 +131,13 @@ module DppmRestApi::Actions
     relative_post "/:id/build" do |context|
       if Actions.has_access? context, Access::Create
         package_name = URI.unescape context.params.url["id"]
-        pfx = DppmRestApi.prefix
-        pfx.update
-        pkg = pfx.new_pkg package_name, version: context.params.query["version"]?
         init_done = false
-        pkg.build confirmation: false do
-          init_done = true
-        rescue e
-          raise InternalServerError.new context, cause: e if init_done
-          raise BadRequest.new context, cause: e
+        begin
+          pkg = DppmRestApi.prefix.new_pkg package_name, version: context.params.query["version"]?
+          pkg.build confirmation: false { init_done = true }
+        rescue ex
+          raise InternalServerError.new context, cause: ex if init_done
+          raise BadRequest.new context, cause: ex
         end
         build_json context.response do |json|
           json.field "status", "built package #{pkg.package}:#{pkg.version} successfully"

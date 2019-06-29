@@ -37,6 +37,7 @@ end
 DPPM::Log.output = DPPM::Log.error = File.open File::NULL, "w"
 Kemal.config.env = "test"
 FileUtils.mkdir_p Fixtures::DIR.to_s
+at_exit { FileUtils.rm_rf Fixtures::DIR.to_s }
 Fixtures.reset_config
 # Run the server
 DppmRestApi.run Socket::IPAddress::LOOPBACK,
@@ -49,6 +50,7 @@ Spec.before_each do
   Fixtures.reset_config
   FileUtils.mkdir_p Fixtures::PREFIX_PATH.to_s
   DppmRestApi.prefix.create
+  FileUtils.cp_r "./lib/dppm/spec/samples", DppmRestApi.prefix.src.to_s
 end
 # Clean up after ourselves
 Spec.after_each do

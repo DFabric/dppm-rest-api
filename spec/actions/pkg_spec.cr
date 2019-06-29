@@ -53,8 +53,7 @@ module DppmRestApi::Actions::Pkg
   end
 
   def build_test_package
-    DppmRestApi.prefix.update
-    pkg = DppmRestApi.prefix.new_pkg "dppm"
+    pkg = DppmRestApi.prefix.new_pkg "testapp"
     pkg.build confirmation: false { }
   end
 
@@ -73,13 +72,13 @@ module DppmRestApi::Actions::Pkg
       end
       it "responds with a recently built package (build -> list flow)" do
         SpecHelper.without_authentication! do
-          post fmt_route "/dppm/build"
+          post fmt_route "/testapp/build"
           if response.status_code != HTTP::Status::OK.value
-            fail "building package 'dppm' (to test listing packages) due to " + ErrorResponse.from_json(response.body).errors.to_s
+            fail "building package 'testapp' (to test listing packages) due to " + ErrorResponse.from_json(response.body).errors.to_s
           end
           get fmt_route nil
           ListBuiltPkgsResponse.from_json(response.body)
-            .data.map(&.package).should contain "dppm"
+            .data.map(&.package).should contain "testapp"
         end
       end
     end
@@ -102,7 +101,7 @@ module DppmRestApi::Actions::Pkg
         SpecHelper.without_authentication! do
           build_test_package
           delete fmt_route "/clean"
-          CleanResponse.from_json(response.body).should_contain_value_matching /^dppm_\d+\.\d+\.\d+$/
+          CleanResponse.from_json(response.body).should_contain_value_matching /^testapp_\d+\.\d+\.\d+$/
           response.status_code.should eq HTTP::Status::OK.value
           DppmRestApi.prefix.each_pkg do |pkg|
             # There shouldn't be any packages
@@ -119,17 +118,17 @@ module DppmRestApi::Actions::Pkg
       it "responds with all configuration data for a built package (build -> query flow)" do
         SpecHelper.without_authentication! do
           build_test_package
-          get fmt_route "/dppm/query"
+          get fmt_route "/testapp/query"
           response.status_code.should eq HTTP::Status::OK.value
-          response.body.should eq %<{"data":{"dppm":{"port":8994,"host":"[::1]"}}}>
+          response.body.should eq %<{"data":{"testapp":{"port":1,"host":"[::1]"}}}>
         end
       end
       it "responds with a particular configuration key" do
         SpecHelper.without_authentication! do
           build_test_package
-          get fmt_route "/dppm/query?get=port&prefix=" + Fixtures::PREFIX_PATH.to_s
+          get fmt_route "/testapp/query?get=port&prefix=" + Fixtures::PREFIX_PATH.to_s
           response.status_code.should eq HTTP::Status::OK.value
-          QueryResponse.from_json(response.body).data["dppm"]["port"].should eq 8994
+          QueryResponse.from_json(response.body).data["testapp"]["port"].should eq 1
         end
       end
     end
@@ -141,11 +140,11 @@ module DppmRestApi::Actions::Pkg
       it "successfully deletes a package (build -> delete flow)" do
         SpecHelper.without_authentication! do
           build_test_package
-          delete fmt_route "/dppm/delete"
+          delete fmt_route "/testapp/delete"
           if response.status_code != HTTP::Status::OK.value
-            fail "deleting package 'dppm' due to " + ErrorResponse.from_json(response.body).errors.to_s
+            fail "deleting package 'testapp' due to " + ErrorResponse.from_json(response.body).errors.to_s
           end
-          DeleteResponse.from_json(response.body).should_be_successful_for "dppm"
+          DeleteResponse.from_json(response.body).should_be_successful_for "testapp"
         end
       end
     end
@@ -157,19 +156,17 @@ module DppmRestApi::Actions::Pkg
     end
     it "builds a test package" do
       SpecHelper.without_authentication! do
-        post fmt_route "/dppm/build"
+        post fmt_route "/testapp/build"
         if response.status_code != HTTP::Status::OK.value
-          puts ErrorResponse.from_json(response.body).errors
-          fail "POST '/dppm/build' received status code " + HTTP::Status.new(response.status_code).to_s
+          fail "POST '/testapp/build' received status code " + HTTP::Status.new(response.status_code).to_s
         end
-        BuildResponse.from_json(response.body).should_be_successful_for "dppm"
+        BuildResponse.from_json(response.body).should_be_successful_for "testapp"
       end
     end
     it "responds with Bad Request when given an invalid package name" do
       SpecHelper.without_authentication! do
         post fmt_route "/$(echo all your base are belong to us!)/build"
         response.status_code.should eq HTTP::Status::BAD_REQUEST.value
-        puts response.body
       end
     end
   end
