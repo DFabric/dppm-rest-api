@@ -1,5 +1,3 @@
-require "../ext/semantic_version"
-
 module DppmRestApi::Actions
   module Pkg
     extend self
@@ -28,27 +26,25 @@ module DppmRestApi::Actions
       raise NoPkgsToClean.new context
     end
 
-    struct ListResponse
-      include JSON::Serializable
-      property version : SemanticVersion
-      property package : String
-
-      def initialize(@package : String, @version : SemanticVersion); end
-
-      def self.new(package : String, version : String)
-        new package SemanticVersion.parse version
-      end
-    end
-
     # List built packages
+    #
+    # TODO optional pagination
     relative_get nil do |context|
       if Actions.has_access? context, Access::Read
-        pkgs = [] of ListResponse
-        Actions.prefix.each_pkg do |package|
-          pkgs << ListResponse.new package.package, package.semantic_version
+        JSON.build context.response do |json|
+          json.object do
+            json.field "data" do
+              json.array do
+                Actions.prefix.each_pkg do |package|
+                  json.object do
+                    json.field "package", package.package
+                    json.field "version", package.version
+                  end
+                end
+              end
+            end
+          end
         end
-        {data: pkgs}.to_json context.response
-        context.response.flush
         next context
       end
       raise Unauthorized.new context

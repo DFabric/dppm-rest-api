@@ -3,8 +3,11 @@ require "../spec_helper"
 
 module DppmRestApi::Actions::Pkg
   struct ListBuiltPkgsResponse
+    record ListedPackageData, package : String, version : String do
+      include JSON::Serializable
+    end
     include JSON::Serializable
-    property data : Array(ListResponse)
+    property data : Array(ListedPackageData)
 
     def should_be_empty
       data.empty?.should be_true
@@ -46,9 +49,7 @@ module DppmRestApi::Actions::Pkg
     property data : Array(String)
 
     def should_contain_value_matching(expr : Regex)
-      found = false
-      data.each { |response| found = true if expr =~ response }
-      fail "#{expr} was not in #{data}" unless found
+      data.find { |response| expr =~ response } || fail "#{expr} was not in #{data}"
     end
   end
 
