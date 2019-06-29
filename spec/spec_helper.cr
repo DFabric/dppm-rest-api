@@ -49,11 +49,11 @@ Spec.before_each do
   FileUtils.mkdir_p Fixtures::DIR.to_s
   Fixtures.reset_config
   FileUtils.mkdir_p Fixtures::PREFIX_PATH.to_s
-  DppmRestApi.prefix.create
-  FileUtils.cp_r "./lib/dppm/spec/samples", DppmRestApi.prefix.src.to_s
+  DppmRestApi::Actions.prefix.create
+  FileUtils.cp_r "./lib/dppm/spec/samples", DppmRestApi::Actions.prefix.src.to_s
 end
 # Clean up after ourselves
 Spec.after_each do
   File.delete Fixtures::PERMISSION_FILE if File.exists? Fixtures::PERMISSION_FILE
-  FileUtils.rm_rf DppmRestApi.prefix.path.to_s
+  FileUtils.rm_rf DppmRestApi::Actions.prefix.path.to_s
 end

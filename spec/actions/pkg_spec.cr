@@ -53,7 +53,7 @@ module DppmRestApi::Actions::Pkg
   end
 
   def build_test_package
-    pkg = DppmRestApi.prefix.new_pkg "testapp"
+    pkg = Actions.prefix.new_pkg "testapp"
     pkg.build confirmation: false { }
   end
 
@@ -103,7 +103,7 @@ module DppmRestApi::Actions::Pkg
           delete fmt_route "/clean"
           CleanResponse.from_json(response.body).should_contain_value_matching /^testapp_\d+\.\d+\.\d+$/
           response.status_code.should eq HTTP::Status::OK.value
-          DppmRestApi.prefix.each_pkg do |pkg|
+          Actions.prefix.each_pkg do |pkg|
             # There shouldn't be any packages
             fail "found package #{pkg.name} after cleaning"
           end

@@ -10,7 +10,7 @@ module DppmRestApi::Actions
     # the app named `app_name`
     private def set_config(context, key, app_name)
       if posted = context.request.body
-        DppmRestApi.prefix.new_app(app_name).set_config key, posted.gets_to_end
+        Actions.prefix.new_app(app_name).set_config key, posted.gets_to_end
       else
         raise UnprocessableEntity.new context, "setting config data requires a request body"
       end
@@ -39,7 +39,7 @@ module DppmRestApi::Actions
       app_name = context.params.url["app_name"]
       key = context.params.url["key"]
       if Actions.has_access? context, Access::Read
-        app = DppmRestApi.prefix.new_app app_name
+        app = Actions.prefix.new_app app_name
         if key == "."
           dump_config context, app
         else
@@ -69,7 +69,7 @@ module DppmRestApi::Actions
     end
     relative_delete "/:app_name/config/:key" do |context|
       if Actions.has_access? context, Access::Delete
-        DppmRestApi.prefix
+        Actions.prefix
           .new_app(context.params.url["app_name"])
           .del_config context.params.url["key"]
         next context
@@ -80,7 +80,7 @@ module DppmRestApi::Actions
     relative_get "/:app_name/config" do |context|
       app_name = context.params.url["app_name"]
       if Actions.has_access? context, Access::Read
-        dump_config context, DppmRestApi.prefix.new_app(app_name)
+        dump_config context, Actions.prefix.new_app(app_name)
         next context
       end
       raise Unauthorized.new context

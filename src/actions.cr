@@ -28,5 +28,6 @@ module DppmRestApi::Actions
     access_filter.call context, access
   end
 
+  class_property prefix : DPPM::Prefix { raise "no prefix set" }
   protected class_property access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->(context : HTTP::Server::Context, access : Access) { false }
 end
