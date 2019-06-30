@@ -15,6 +15,11 @@ module DppmRestApi::Actions
       {{method.id}} fmt_route(\{{route}}) do |\{{block.args.splat}}|
         namespace = \{{block.args[-1]}}.params.query["namespace"]? || DPPM::Prefix.default_group
         \{{block.body}}
+      rescue e
+        # Catch non-HTTPStatusError exceptions, and throw an InternalServerError
+        # with the original error as the cause.
+        raise e if e.is_a? HTTPStatusError
+        raise InternalServerError.new \{{block.args[0]}}, cause: e
       end
     end
     {% end %}
