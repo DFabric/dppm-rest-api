@@ -16,7 +16,7 @@ end
 # is expanded on failure, a def shows the location of the def.
 macro assert_unauthorized(response)
   response.status_code.should eq 401
-  found = DppmRestApi::ErrorResponse.from_json(response.body)
+  found = DppmRestApi::Actions::ErrorResponse.from_json(response.body)
     .errors
     .find do |err|
       err.message == "Unauthorized" &&

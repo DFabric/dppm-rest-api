@@ -1,4 +1,4 @@
-module DppmRestApi
+module DppmRestApi::Actions
   class NoSuchPackage < NotFound
     setter cause
 

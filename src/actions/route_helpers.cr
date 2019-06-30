@@ -1,3 +1,5 @@
+require "./errors/*"
+
 module DppmRestApi::Actions
   # A series of utility functions that are useful to all of the Action blocks
   module RouteHelpers
@@ -15,11 +17,12 @@ module DppmRestApi::Actions
       {{method.id}} fmt_route(\{{route}}) do |\{{block.args.splat}}|
         namespace = \{{block.args[-1]}}.params.query["namespace"]? || DPPM::Prefix.default_group
         \{{block.body}}
-      rescue e
+      rescue ex : Actions::Exception
+        raise ex
+      rescue ex
         # Catch non-HTTPStatusError exceptions, and throw an InternalServerError
         # with the original error as the cause.
-        raise e if e.is_a? HTTPStatusError
-        raise InternalServerError.new \{{block.args[0]}}, cause: e
+        raise InternalServerError.new \{{block.args[0]}}, cause: ex
       end
     end
     {% end %}

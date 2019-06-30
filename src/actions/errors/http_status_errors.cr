@@ -1,7 +1,7 @@
 require "http"
 require "./exception"
 
-module DppmRestApi
+module DppmRestApi::Actions
   abstract class HTTPStatusError < Exception
     abstract def status_code
   end

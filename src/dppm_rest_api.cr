@@ -2,7 +2,6 @@ require "kemal"
 require "kemal_jwt_auth"
 require "./config"
 require "./actions"
-require "./errors/api_errors"
 
 module DppmRestApi
   PERMISSIONS_FILE = "permissions.json"
@@ -56,7 +55,7 @@ module DppmRestApi
     if HTTP::Status::{{code}}.value >= 400
       Kemal.config.add_error_handler HTTP::Status::{{code.id}}.value do |context, exception|
         context.response.status_code = exception.status_code.value if exception.responds_to? :status_code
-        response_data = ErrorResponse.new exception
+        response_data = Actions::ErrorResponse.new exception
         response_data.to_json context.response
         context.response.flush
         response_data.log

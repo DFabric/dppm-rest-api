@@ -1,7 +1,7 @@
 require "http"
 require "json"
 
-module DppmRestApi
+module DppmRestApi::Actions
   struct ErrorData
     include JSON::Serializable
     property type : String
@@ -14,7 +14,7 @@ module DppmRestApi
     end
 
     def self.new(error)
-      if error.is_a? DppmRestApi::HTTPStatusError
+      if error.is_a? HTTPStatusError
         # expected error handler type
         new(
           type: error.class.to_s,

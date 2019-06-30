@@ -2,7 +2,6 @@ require "kemal"
 require "./access"
 require "./actions/route_helpers"
 require "./actions/*"
-require "./errors/*"
 
 module DppmRestApi::Actions
   DEFAULT_DATA_DIR = "./data/"
