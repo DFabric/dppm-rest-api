@@ -3,6 +3,7 @@ require "../../src/actions/route_helpers"
 
 module DppmRestApi::Actions
   module Spec
+    extend self
     include RouteHelpers
     relative_get "/test" do |_context|
       raise "some untyped exception"

@@ -4,6 +4,9 @@ require "./actions/route_helpers"
 require "./actions/*"
 
 module DppmRestApi::Actions
+  extend self
+  include RouteHelpers
+
   DEFAULT_DATA_DIR = "./data/"
   API_DOCUMENT     = DEFAULT_DATA_DIR + "api-options.json"
   alias ConfigKeyError = DPPM::Prefix::Base::ConfigKeyError
@@ -23,7 +26,7 @@ module DppmRestApi::Actions
     end
   end
 
-  def self.has_access?(context : HTTP::Server::Context, access : Access) : Bool
+  def has_access?(context : HTTP::Server::Context, access : Access) : Bool
     access_filter.call context, access
   end
 
