@@ -28,11 +28,13 @@ module DppmRestApi::Actions::RouteHelpers
   end
 
   # This method parses a boolean value from a query parameter. It returns
-  # true when the query parameter contains any string *except* for `"false"`
-  # or `"0"`.
+  # true when the query parameter is specified, but empty; false when the
+  # parameter is not specified (null); and otherwise raises a BadRequest
+  # exception.
   def parse_boolean_param(key : String, from context : HTTP::Server::Context) : Bool
-    if param = context.params.query[key]?
-      return true unless {"false", "0"}.includes? param.downcase
+    context.params.query[key]?.try do |value|
+      raise BooleanParamHasValue.new context, key, value unless value == ""
+      return true
     end
     false
   end
