@@ -68,16 +68,13 @@ module DppmRestApi::Actions::Pkg
       # Stop here ^^ unless the package whose name was the :id URL parameter
       # was found and we can query it
       if key = context.params.query["get"]?
-        data = begin
-          selected_pkg.get_config key
-        rescue error : ConfigKeyError
-          raise NotFound.new context, cause: error
-        end
+        config_value = selected_pkg.get_config? key
+        raise ConfigKeyNotFound.new context, key, package_name if config_value.nil?
         # A key was specified by the &get query parameter
         build_json context.response do |json|
           json.field package_name do
             json.object do
-              json.field key, value: data
+              json.field key, value: config_value
             end
           end
         end

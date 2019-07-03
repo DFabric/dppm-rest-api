@@ -33,8 +33,8 @@ module DppmRestApi::Actions::RouteHelpers
   # exception.
   def parse_boolean_param(key : String, from context : HTTP::Server::Context) : Bool
     context.params.query[key]?.try do |value|
-      raise BooleanParamHasValue.new context, key, value unless value == ""
-      return true
+      return true if value.empty?
+      raise BooleanParamHasValue.new context, key, value
     end
     false
   end
