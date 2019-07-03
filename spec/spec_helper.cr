@@ -16,7 +16,7 @@ end
 # is expanded on failure, a def shows the location of the def.
 macro assert_unauthorized(response)
   response.status_code.should eq 401
-  found = DppmRestApi::ErrorResponse.from_json(response.body)
+  found = DppmRestApi::Actions::ErrorResponse.from_json(response.body)
     .errors
     .find do |err|
       err.message == "Unauthorized" &&
@@ -25,21 +25,35 @@ macro assert_unauthorized(response)
   fail "expected error response not found" unless found
 end
 
-# Disable all authentication checks by making `DppmRestApi::Actions.has_access?`
-# always return true, then set the authentication back to the default system
-# after yielding to the block.
-def without_authentication!
-  DppmRestApi::Actions.access_filter = ->(_context, _permissions) { true }
-  yield
-  DppmRestApi::Actions.access_filter = DppmRestApi.access_filter
+module DppmRestApi::SpecHelper
+  def SpecHelper.without_authentication!
+    Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) { true }
+    yield
+  ensure
+    Actions.access_filter = ->DppmRestApi.access_filter(HTTP::Server::Context, Access)
+  end
 end
 
+DPPM::Log.output = DPPM::Log.error = File.open File::NULL, "w"
 Kemal.config.env = "test"
+FileUtils.mkdir_p Fixtures::DIR.to_s
+at_exit { FileUtils.rm_rf Fixtures::DIR.to_s }
 Fixtures.reset_config
-
 # Run the server
-DppmRestApi.run Socket::IPAddress::LOOPBACK, DPPM::Prefix.default_dppm_config.port, __DIR__
+DppmRestApi.run Socket::IPAddress::LOOPBACK,
+  DPPM::Prefix.default_dppm_config.port,
+  Fixtures::DIR,
+  DPPM::Prefix.new(Fixtures::PREFIX_PATH.to_s).tap &.create
 # Set all configs back to the expected values, in case they changed
-Spec.before_each { Fixtures.reset_config }
+Spec.before_each do
+  FileUtils.mkdir_p Fixtures::DIR.to_s
+  Fixtures.reset_config
+  FileUtils.mkdir_p Fixtures::PREFIX_PATH.to_s
+  DppmRestApi::Actions.prefix.create
+  FileUtils.cp_r "./lib/dppm/spec/samples", DppmRestApi::Actions.prefix.src.to_s
+end
 # Clean up after ourselves
-Spec.after_each { File.delete Fixtures::PERMISSION_FILE if File.exists? Fixtures::PERMISSION_FILE }
+Spec.after_each do
+  File.delete Fixtures::PERMISSION_FILE if File.exists? Fixtures::PERMISSION_FILE
+  FileUtils.rm_rf DppmRestApi::Actions.prefix.path.to_s
+end

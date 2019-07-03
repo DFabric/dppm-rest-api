@@ -62,7 +62,7 @@ module DppmRestApi::CLI
     describe "#add_user" do
       it "adds a user" do
         tmp = File.tempname
-        add_user name: "added user", groups: "500", data_dir: __DIR__, output_file: tmp
+        add_user name: "added user", groups: "500", data_dir: Fixtures::DIR, output_file: tmp
         key = File.read_lines(tmp)[1]
         config = Fixtures.new_config
         if user = config.users.find { |usr| usr.name == "added user" }
@@ -91,7 +91,7 @@ module DppmRestApi::CLI
         new_name: "changed name",
         add_groups: "500",
         remove_groups: "499",
-        data_dir: __DIR__
+        data_dir: Fixtures::DIR
       config = Fixtures.new_config
       config.users.find { |usr| usr.name == "Jim Oliver" }.should be_nil
       config.users.find { |usr| usr.name == "changed name" }.try(&.group_ids).should eq Set{500, 1000}
@@ -118,7 +118,7 @@ module DppmRestApi::CLI
 
         match_groups: nil,
         api_key: nil,
-        data_dir: __DIR__,
+        data_dir: Fixtures::DIR,
         output_file: data_file.path
       new_key = File.read_lines(data_file.path)[1]
       Fixtures.new_config.users.find { |usr| usr.name == "Administrator" }.not_nil!.api_key_hash.verify(new_key).should be_true
@@ -130,7 +130,7 @@ module DppmRestApi::CLI
   end
   describe "#delete_users" do
     it "deletes a user" do
-      delete_users match_name: nil, match_groups: "0", api_key: nil, data_dir: __DIR__
+      delete_users match_name: nil, match_groups: "0", api_key: nil, data_dir: Fixtures::DIR
       Fixtures.new_config.users.find { |usr| usr.name == "Administrator" }.should be_nil
     end
     require_arg "data-dir" do
@@ -140,7 +140,7 @@ module DppmRestApi::CLI
   describe "#show_users" do
     it "outputs the known userdata" do
       tmp = File.tempname "permissions", ".json"
-      show_users data_dir: __DIR__,
+      show_users data_dir: Fixtures::DIR,
         output_file: tmp,
         match_name: "/.*/",
         match_groups: nil,
@@ -175,7 +175,7 @@ module DppmRestApi::CLI
         id: "1234",
         name: "test-added group",
         permissions: new_grp_permissions.to_json,
-        data_dir: __DIR__)
+        data_dir: Fixtures::DIR)
       config = Fixtures.new_config
       config.groups.find { |group| group.id == 1234 }.should_not be_nil
       config.groups
@@ -190,7 +190,7 @@ module DppmRestApi::CLI
         edit_access id: "five",
           path: "/doesnt/matter",
           access: "Read",
-          data_dir: __DIR__
+          data_dir: Fixtures::DIR
       end
     end
     it "throws an error if the group doesn't exist" do
@@ -198,14 +198,14 @@ module DppmRestApi::CLI
         edit_access id: "5",
           path: "/doesnt/matter",
           access: "Read",
-          data_dir: __DIR__
+          data_dir: Fixtures::DIR
       end
     end
     it "can make Administrator read-only" do
       edit_access id: "0",
         path: "/**",
         access: "Read",
-        data_dir: __DIR__
+        data_dir: Fixtures::DIR
       config = Fixtures.new_config
       if su = config.groups.find { |group| group.id == 0 }
         su.can_access?(
@@ -235,7 +235,7 @@ module DppmRestApi::CLI
           edit_group_query id: "five",
             path: "/doesnt/matter",
             access: "Read",
-            data_dir: __DIR__,
+            data_dir: Fixtures::DIR,
             key: "something",
             add_glob: nil,
             remove_glob: nil
@@ -246,7 +246,7 @@ module DppmRestApi::CLI
           edit_group_query id: "5",
             path: "/doesnt/matter",
             access: "Read",
-            data_dir: __DIR__,
+            data_dir: Fixtures::DIR,
             key: "something",
             add_glob: nil,
             remove_glob: nil
@@ -256,7 +256,7 @@ module DppmRestApi::CLI
         edit_group_query id: "1000",
           path: "/**",
           access: "Create | Read | Delete",
-          data_dir: __DIR__,
+          data_dir: Fixtures::DIR,
           key: "test-key",
           add_glob: "test-glob",
           remove_glob: nil
@@ -268,14 +268,14 @@ module DppmRestApi::CLI
     end
     describe "#add_route" do
       it "can add a path to a group's #permissions values" do
-        add_route id: "1000", access: "Read", path: "/some/path", data_dir: __DIR__
+        add_route id: "1000", access: "Read", path: "/some/path", data_dir: Fixtures::DIR
         test_group = Fixtures.new_config.groups.find { |grp| grp.id == 1000 }.not_nil!
         test_group.permissions["/some/path"]?.should_not be_nil
       end
     end
     describe "#delete_group" do
       it "can remove a group" do
-        delete_group id: "1000", data_dir: __DIR__
+        delete_group id: "1000", data_dir: Fixtures::DIR
         Fixtures.new_config.groups.find { |grp| grp.id == 1000 }.should be_nil
       end
     end
