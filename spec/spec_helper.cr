@@ -25,6 +25,13 @@ macro assert_unauthorized(response)
   fail "expected error response not found" unless found
 end
 
+macro assert_authorization_works(*args)
+  it "responds with 401 Forbidden" do
+    get fmt_route *args
+    assert_unauthorized response
+  end
+end
+
 module DppmRestApi::SpecHelper
   def SpecHelper.without_authentication!
     Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) { true }

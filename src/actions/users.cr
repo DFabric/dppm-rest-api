@@ -1,4 +1,6 @@
 module DppmRestApi::Actions::Users
+  include RouteHelpers
+  extend self
   relative_put nil do |context|
     if Actions.has_access? context, Access::Create
       # TODO: apply an edit to a batch of users

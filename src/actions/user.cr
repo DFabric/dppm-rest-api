@@ -5,9 +5,11 @@ module DppmRestApi::Actions::User
     getter groups : Array(Int32)
   end
 
+  extend self
+  include RouteHelpers
   relative_post nil do |context|
     if Actions.has_access? context, Access::Create
-      userdata = AddUserBody.from_json context.request.body_io
+      # userdata = AddUserBody.from_json context.request.body_io
       # TODO add user
       next context
     end
@@ -15,7 +17,7 @@ module DppmRestApi::Actions::User
   end
   relative_delete nil do |context|
     if Actions.has_access? context, Access::Delete
-      userdata = AddUserBody.from_json context.request.body_io
+      # userdata = AddUserBody.from_json context.request.body_io
       # TODO delete a user
       next context
     end
@@ -23,7 +25,7 @@ module DppmRestApi::Actions::User
   end
   relative_get nil do |context|
     if Actions.has_access? context, Access::Read
-      userdata = AddUserBody.from_json context.request.body_io
+      # userdata = AddUserBody.from_json context.request.body_io
       # TODO delete a user
       next context
     end

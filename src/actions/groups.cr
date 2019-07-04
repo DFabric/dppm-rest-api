@@ -1,4 +1,6 @@
 module DppmRestApi::Actions::Groups
+  extend self
+  include RouteHelpers
   relative_post nil do |context|
     if Actions.has_access? context, Access::Create
       # TODO: create a group based on the response body
