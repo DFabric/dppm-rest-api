@@ -1,5 +1,6 @@
 require "kemal"
 require "kemal_jwt_auth"
+require "./ext/path"
 require "./config"
 require "./actions"
 
@@ -40,9 +41,11 @@ module DppmRestApi
     prefix : DPPM::Prefix,
     access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->access_filter(HTTP::Server::Context, Access)
   )
-    ::File.open Path[data_dir, PERMISSIONS_FILE] do |data|
+    filepath = Path[data_dir, PERMISSIONS_FILE]
+    ::File.open filepath do |data|
       @@permissions_config = Config.from_json data
     end
+    permissions_config.filepath = filepath
 
     Actions.prefix = prefix
     Actions.access_filter = access_filter

@@ -70,8 +70,27 @@ struct DppmRestApi::Config::User
     @group_ids.delete id
   end
 
+  # Show a human-readable representation of the important information about a
+  # user.
   def to_pretty_s
     "Name: #{name}; Member of: #{group_ids.join(", ")}"
+  end
+
+  # Build a JSON response, like JSON::Serializable, but allow certain
+  # variables to be excluded for this instance.
+  def to_json(builder : JSON::Builder, *, except : Enumerable(Symbol))
+    builder.object do
+      {% for ivar in @type.instance_vars %}
+        unless except.includes? {{ivar.name.symbolize}}
+          builder.field({{ivar.name.stringify}}) { {{ivar}}.to_json builder }
+        end
+      {% end %}
+    end
+  end
+
+  # :ditto:
+  def to_json(builder : JSON::Builder, *, except : Symbol)
+    to_json builder, except: StaticArray[except]
   end
 end
 
