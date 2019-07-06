@@ -1,6 +1,7 @@
 require "kemal"
 require "./ext/path"
 require "./config"
+require "./utils"
 require "./actions"
 
 module DppmRestApi
