@@ -1,5 +1,3 @@
-require "../config/helpers"
-
 module DppmRestApi
   module Actions::User
     include Config::Helpers
@@ -13,6 +11,12 @@ module DppmRestApi
       #
       # For testing
       def initialize(@name, @groups); end
+    end
+
+    def optional_query_param(context : HTTP::Server::Context, key : String)
+      context.params.query[key]?.try do |value|
+        URI.unescape value
+      end
     end
 
     extend self
@@ -43,7 +47,17 @@ module DppmRestApi
     end
     relative_delete nil do |context|
       if Actions.has_access? context, Access::Delete
-        # TODO delete a user
+        users_to_delete = selected_users(
+          match_name: optional_query_param(context, "match_name"),
+          match_groups: optional_query_param(context, "match_groups"),
+          api_key: optional_query_param(context, "api_key"),
+          from: DppmRestApi.permissions_config.users
+        )
+        DppmRestApi.permissions_config.users.reject! { |user| users_to_delete.includes? user }
+        DppmRestApi.permissions_config.sync_to_disk
+        build_json context.response do |json|
+          json.field "status", "success"
+        end
         next context
       end
       raise Unauthorized.new context

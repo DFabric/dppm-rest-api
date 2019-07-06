@@ -7,6 +7,16 @@ module DppmRestApi::Actions::User
     getter group_ids : Set(Int32)
   end
 
+  struct UserDeleteResponse
+    struct Status
+      include JSON::Serializable
+      getter status : String
+    end
+
+    include JSON::Serializable
+    getter data : Status
+  end
+
   describe "POST #{fmt_route nil}" do
     it "responds with 401 Forbidden" do
       post fmt_route nil
@@ -47,13 +57,21 @@ module DppmRestApi::Actions::User
   end
   describe "DELETE #{fmt_route nil}" do
     it "responds with 401 Forbidden" do
-      delete fmt_route nil
+      delete fmt_route
       assert_unauthorized response
     end
+    it "successfully deletes a user from the configuration" do
+      SpecHelper.without_authentication! do
+        delete fmt_route "?match_name=#{URI.escape "Jim Oliver"}"
+        response.status_code.should eq HTTP::Status::OK.value
+        UserDeleteResponse.from_json(response.body).data.status.should eq "success"
+        DppmRestApi.permissions_config.users.find { |user| user.name == "Jim Oliver" }.should be_nil
+      end
+    end
   end
-  describe "GET #{fmt_route nil}" do
+  describe "GET #{fmt_route}" do
     it "responds with 401 Forbidden" do
-      get fmt_route nil
+      get fmt_route
       assert_unauthorized response
     end
   end
