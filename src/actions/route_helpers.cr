@@ -3,28 +3,28 @@ require "./errors/*"
 # A series of route utilities functions that are useful to all of the Action blocks.
 module DppmRestApi::Actions::RouteHelpers
   macro included
-  ROOT_PATH = {{ "/" + @type.stringify.downcase.split("::").last }}
+    ROOT_PATH = {{ "/" + @type.stringify.downcase.split("::").last }}
 
-  # Transform a relative route to an absolute one from the `ROOT_PATH`.
-  def fmt_route(relative_route : String? = nil, namespace : Bool = false)
-    ROOT_PATH + (namespace ? "/:namespace" : "") + relative_route.to_s
-  end
-
-  {% for method in %w(get post put delete ws options) %}
-  # Perform a relative {{method.id}} from the `ROOT_PATH`.
-  def relative_{{method.id}}(route : String? = nil, &block : HTTP::Server::Context ->)
-    {{method.id}} fmt_route(route) do |context|
-      #namespace = context.params.query["namespace"]? || DPPM::Prefix.default_group
-      block.call context
-    rescue ex : Actions::Exception
-      raise ex
-    rescue ex
-      # Catch non-HTTPStatusError exceptions, and throw an InternalServerError
-      # with the original error as the cause.
-      raise InternalServerError.new context, cause: ex
+    # Transform a relative route to an absolute one from the `ROOT_PATH`.
+    def fmt_route(relative_route : String? = nil, namespace : Bool = false)
+      ROOT_PATH + (namespace ? "/:namespace" : "") + relative_route.to_s
     end
-  end
-  {% end %}
+
+    {% for method in %w(get post put delete ws options) %}
+      # Perform a relative {{method.id}} from the `ROOT_PATH`.
+      def relative_{{method.id}}(route : String? = nil, &block : HTTP::Server::Context ->)
+        {{method.id}} fmt_route(route) do |context|
+          #namespace = context.params.query["namespace"]? || DPPM::Prefix.default_group
+          block.call context
+        rescue ex : Actions::Exception
+          raise ex
+        rescue ex
+          # Catch non-HTTPStatusError exceptions, and throw an InternalServerError
+          # with the original error as the cause.
+          raise InternalServerError.new context, cause: ex
+        end
+      end
+    {% end %}
   end
 
   # This method parses a boolean value from a query parameter. It returns
@@ -78,3 +78,5 @@ module DppmRestApi::Actions::RouteHelpers
     ).tap &.ensure_pkg_dir
   end
 end
+
+require "./route_helpers/*"
