@@ -2,6 +2,8 @@ require "./spec_helper"
 require "../src/cli"
 
 module DppmRestApi::CLI
+  include DppmRestApi::Config::Helpers
+
   private def require_arg(arg, file = __FILE__, line = __LINE__, &block)
     it "requires the #{arg} argument", file, line do
       expect_raises RequiredArgument, message: "the argument '#{arg}' is required!" do

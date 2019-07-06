@@ -2,6 +2,7 @@ require "./ext/scrypt_password"
 require "json"
 require "kemal_jwt_auth"
 require "dppm/prefix"
+require "./config/helpers"
 
 struct DppmRestApi::Config
   include JSON::Serializable

@@ -1,8 +1,10 @@
 require "dppm/cli"
 require "./dppm_rest_api"
+require "./config/helpers"
 
 module DppmRestApi::CLI
   extend self
+  include Config::Helpers
 
   macro run
     DPPM::CLI.run(
@@ -205,22 +207,6 @@ module DppmRestApi::CLI
     )
   end
 
-  # A helper method for the select_users method -- splits a comma-separated
-  # list of numbers in a string into a `Set` of `Int32` values.
-  private def split_numbers(number_list : String) : Set(Int32)
-    numbers = Set(Int32).new
-    split_numbers number_list do |number|
-      numbers.add number
-    end
-    numbers
-  end
-
-  private def split_numbers(number_list)
-    number_list.split ',', remove_empty: true do |raw_group_id|
-      yield raw_group_id.to_i? || raise InvalidGroupID.new raw_group_id
-    end
-  end
-
   # All variables are received by a method as a `String | Nil`. This macro
   # converts an argument, by name, to its `String` value, or raises an
   # error instructing the user to include the variable value.
@@ -228,62 +214,6 @@ module DppmRestApi::CLI
     {% for arg in args %}
     {{arg.id}} || raise RequiredArgument.new "{{arg.id}}"
     {% end %}
-  end
-
-  # select the users from the current configuration according to the name,
-  # groups the user is a member of, and/or the user's API key.
-  private def selected_users(match_name, match_groups, api_key, from users_list)
-    # Filter by name
-    if name = match_name
-      if stripped_name = name.lchop?('/').try(&.rchop?('/'))
-        # match by regex
-        name_regex = Regex.new stripped_name
-        users_list = users_list.select do |user|
-          name_regex =~ user.name
-        end
-      else
-        # find users by exact match
-        users_list = users_list.select do |user|
-          user.name == name
-        end
-      end
-    end
-    # Filter by group membership
-    if groups = match_groups
-      group_matches = Set(Set(Int32)).new
-      groups.split ':', remove_empty: true do |part|
-        group_matches << split_numbers part
-      end
-      users_list = users_list.select do |user|
-        group_matches.any? do |group_set|
-          group_set.all? do |group|
-            user.group_ids.includes? group
-          end
-        end
-      end
-    end
-    # filter by API key if specified.
-    if key = api_key
-      users_list = users_list.select { |user| user.api_key_hash == key }
-      # freak out if multiple users were found.
-      raise DuplicateAPIKey.new users_list if users_list.size > 1
-    end
-    users_list
-  end
-
-  # :ditto:
-  #
-  # Yield each of the matching users to a block.
-  private def selected_users(match_name,
-                             match_groups,
-                             api_key,
-                             from users_list,
-                             &block : Config::User -> Config::User?)
-    selected_users(match_name, match_groups, api_key, from: users_list).each do |user|
-      old_user = user
-      users_list.delete user
-      users_list << ((yield user) || old_user)
-    end
   end
 
   def run_server(config, host, port, data_dir)
@@ -503,34 +433,4 @@ module DppmRestApi::CLI
     current_config.groups.reject! { |group| group.id == group_id_number }
     current_config.write_to permissions_file
   end
-
-  macro define_error(kind, message, *args, &block)
-    class {{kind.id}} < ::Exception
-      def initialize({% unless args.empty? %} {{args.splat}} {% end %})
-        super {{message.id}}
-      end
-      {% if block %}
-      {{block.body}}
-      {% end %}
-    end
-  end
-
-  define_error InvalidGroupID, "failed to convert group ID '#{id}' to an integer", id
-  define_error NoSuchGroup, "no group found with ID number '#{id_number}'", id_number
-  define_error GroupAlreadyExists, "tried to create group with ID '#{id}' which already exists", id
-  define_error InvalidAccessParam, "failed to parse access value '#{access}', or convert it to an integer.", access
-  define_error DuplicateAPIKey, <<-HERE, users
-  ERROR!!!        Multiple users detected with the same API key!!       ERROR!!!
-  The following users each have the same API key. Keys MUST be unique!
-  #{users.map(&.to_pretty_s).join('\n')}
-  You MUST fix this immediately!
-  HERE
-  define_error RequiredArgument, "the argument '#{@arg.gsub '_', '-'}' is required!", @arg : String do
-    property arg
-  end
-  define_error NoRouteMatchForThisGroup, <<-HERE, path, id
-    please use add-route to add a route before editing the
-    query parameters of that group. No existing permissions
-    data was found for the glob #{path} for the group #{id}
-    HERE
 end
