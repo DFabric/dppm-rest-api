@@ -234,7 +234,6 @@ module DppmRestApi::CLI
         expect_raises InvalidGroupID do
           edit_group_query id: "five",
             path: "/doesnt/matter",
-            access: "Read",
             data_dir: Fixtures::DIR,
             key: "something",
             add_glob: nil,
@@ -245,7 +244,6 @@ module DppmRestApi::CLI
         expect_raises NoSuchGroup do
           edit_group_query id: "5",
             path: "/doesnt/matter",
-            access: "Read",
             data_dir: Fixtures::DIR,
             key: "something",
             add_glob: nil,
@@ -255,7 +253,6 @@ module DppmRestApi::CLI
       it "can add a glob to a query" do
         edit_group_query id: "1000",
           path: "/**",
-          access: "Create | Read | Delete",
           data_dir: Fixtures::DIR,
           key: "test-key",
           add_glob: "test-glob",

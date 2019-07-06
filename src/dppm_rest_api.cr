@@ -27,7 +27,7 @@ module DppmRestApi
     host : String,
     port : Int32,
     data_dir : String,
-    prefix : String = DPPM.default_prefix,
+    prefix : String = DPPM::Prefix.default,
     access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->access_filter(HTTP::Server::Context, Access)
   )
     run host, port, data_dir, DPPM::Prefix.new(prefix), access_filter

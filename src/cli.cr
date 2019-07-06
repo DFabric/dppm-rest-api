@@ -8,6 +8,7 @@ module DppmRestApi::CLI
   DPPM::CLI.run(
     server: {
       info:      "DPPM REST API server",
+      inherit:   \%w(config),
       variables: {
         data_dir: {
           info:    "data directory",
@@ -18,6 +19,7 @@ module DppmRestApi::CLI
         run: {
           info:      "Run the server",
           action:    "DppmRestApi::CLI.run_server",
+          inherit:   \%w(config data_dir),
           variables: {
             host: {
               info:    "host to listen",
@@ -29,26 +31,10 @@ module DppmRestApi::CLI
             },
           },
         },
-        add_user: {
-          info:      "Add a user",
-          action:    "DppmRestApi::CLI.add_user",
-          variables: {
-            name: {
-              info: "Human-readable name of the user; use quotes if you want" +
-                    %<to have spaces in the name, like name="Scott Boggs">,
-            },
-            groups: {
-              info: "Comma-separated list of group IDs for which the user \
-                      should have access",
-            },
-            output_file: {
-              info: "the file to output the user's generated API key to (STDOUT if not specified)",
-            },
-          },
-        },
         user: {
-          alias:     "u",
+          alias:     'u',
           info:      "Update or delete users",
+          inherit:   \%w(data_dir),
           variables: {
             match_name: {
               info: "The name of the users to filter by",
@@ -62,10 +48,36 @@ module DppmRestApi::CLI
             },
           },
           commands: {
+            add: {
+              alias:     'a',
+              info:      "Add a user",
+              action:    "DppmRestApi::CLI.add_user",
+              inherit:   \%w(data_dir),
+              variables: {
+                name: {
+                  info: "Human-readable name of the user; use quotes if you want" +
+                        %<to have spaces in the name, like name="Scott Boggs">,
+                },
+                groups: {
+                  info: "Comma-separated list of group IDs for which the user \
+                          should have access",
+                },
+                output_file: {
+                  info: "the file to output the user's generated API key to (STDOUT if not specified)",
+                },
+              },
+            },
+            delete: {
+              alias:   'd',
+              info:    "Completely delete a user or set of users",
+              action:  "DppmRestApi::CLI.delete_users",
+              inherit: \%w(api_key data_dir match_groups match_name),
+            },
             edit: {
+              alias:     'e',
               info:      "Edit one or more user's groups",
               action:    "DppmRestApi::CLI.edit_users",
-              alias:     "e",
+              inherit:   \%w(api_key data_dir match_name match_groups),
               variables: {
                 new_name: {
                   info: "The name to change the selected user's name to",
@@ -74,29 +86,26 @@ module DppmRestApi::CLI
                   info: "Comma-separated groups to add to the selected users",
                 },
                 remove_groups: {
-                  info: "Comma-separated groups to remove from the selected \
-                          users. Groups that a selected user is already not a \
-                          member of will be ignored",
+                  info: "Comma-separated groups to remove from the selected users.",
                 },
               },
             },
             rekey: {
+              alias:     'r',
               info:      "Generate a new API key for this user/users and output that file",
               action:    "DppmRestApi::CLI.rekey_users",
+              inherit:   \%w(api_key data_dir match_groups match_name),
               variables: {
                 output_file: {
                   info: "Write the generated key to a file. Default is to print to stdout",
                 },
               },
             },
-            delete: {
-              info:   "Completely delete a user or set of users",
-              action: "DppmRestApi::CLI.delete_users",
-              alias:  "rm",
-            },
             show: {
+              alias:     's',
               info:      "Show the available information about a user",
               action:    "DppmRestApi::CLI.show_users",
+              inherit:   \%w(api_key data_dir match_groups match_name),
               variables: {
                 output_file: {
                   info: "The file to write the userdata to; defaults to stdout",
@@ -106,8 +115,9 @@ module DppmRestApi::CLI
           },
         },
         group: {
-          alias:     "g",
+          alias:     'g',
           info:      "Add, update, or delete groups",
+          inherit:   \%w(data_dir),
           variables: {
             id: {
               info: "The ID of the group to work with",
@@ -115,9 +125,10 @@ module DppmRestApi::CLI
           },
           commands: {
             add: {
+              alias:     'a',
               info:      "Add a group",
-              alias:     "a",
               action:    "DppmRestApi::CLI.add_group",
+              inherit:   \%w(id data_dir name permissions),
               variables: {
                 name: {
                   info: "A short description of this group",
@@ -131,8 +142,10 @@ module DppmRestApi::CLI
               },
             },
             add_route: {
+              alias:     "ar",
               info:      "Add permissions to a route",
               action:    "DppmRestApi::CLI.add_route",
+              inherit:   \%w(id data_dir),
               variables: {
                 path: {
                   info: "The path glob on which you want to add the permissions",
@@ -142,10 +155,17 @@ module DppmRestApi::CLI
                 },
               },
             },
+            delete: {
+              alias:  'd',
+              info:   "Delete the given group from the system",
+              action: "DppmRestApi::CLI.delete_group",
+              inherit:   \%w(id data_dir),
+            },
             edit_access: {
+              alias:     "ea",
               info:      "Change a group's permissions",
-              alias:     "e",
               action:    "DppmRestApi::CLI.edit_access",
+              inherit:   \%w(id data_dir),
               variables: {
                 path: {
                   info: "The path on which to update permissions",
@@ -156,9 +176,10 @@ module DppmRestApi::CLI
               },
             },
             edit_query: {
+              alias:     "eq",
               info:      "Update the allowed query parameters on this path",
-              alias:     "q",
               action:    "DppmRestApi::CLI.edit_group_query",
+              inherit:   \%w(id data_dir),
               variables: {
                 path: {
                   info: "The path on which to update allowed query parameters.",
@@ -170,15 +191,9 @@ module DppmRestApi::CLI
                   info: "A glob to add to the allowed globs on this path",
                 },
                 remove_glob: {
-                  short: "rm",
                   info:  "A glob to remove from the allowed globs on this path",
                 },
               },
-            },
-            delete: {
-              info:   "Delete the given group from the system",
-              alias:  "rm",
-              action: "DppmRestApi::CLI.delete_group",
             },
           },
         },
@@ -268,7 +283,7 @@ module DppmRestApi::CLI
     end
   end
 
-  def run_server(config, host, port, data_dir, **args)
+  def run_server(config, host, port, data_dir)
     if port.is_a? String
       port = port.to_i
     end
@@ -280,7 +295,7 @@ module DppmRestApi::CLI
     DppmRestApi.run host, port, data_dir
   end
 
-  def add_user(name, groups, data_dir, output_file, **args) : Nil
+  def add_user(name, groups, data_dir, output_file) : Nil
     required data_dir, groups, name
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
@@ -307,7 +322,7 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def edit_users(match_name, match_groups, api_key, new_name, add_groups, remove_groups, data_dir, **args)
+  def edit_users(match_name, match_groups, api_key, new_name, add_groups, remove_groups, data_dir)
     required data_dir
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
@@ -338,7 +353,7 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def rekey_users(match_name, match_groups, api_key, data_dir, output_file, **args)
+  def rekey_users(match_name, match_groups, api_key, data_dir, output_file)
     required data_dir
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
@@ -364,7 +379,7 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def delete_users(match_name, match_groups, api_key, data_dir, **args)
+  def delete_users(match_name, match_groups, api_key, data_dir)
     required data_dir
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
@@ -375,7 +390,7 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def show_users(data_dir, match_name, match_groups, api_key, output_file, **args)
+  def show_users(data_dir, match_name, match_groups, api_key, output_file)
     required data_dir
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
@@ -398,7 +413,7 @@ module DppmRestApi::CLI
     output_io.close unless using_stdout
   end
 
-  def add_group(id, name, permissions, data_dir, **args)
+  def add_group(id, name, permissions, data_dir)
     required id, name, permissions, data_dir
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
@@ -413,7 +428,7 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def edit_access(id, path, access, data_dir, **args)
+  def edit_access(id, path, access, data_dir)
     required id, path, access, data_dir
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
@@ -435,7 +450,7 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def add_route(id, access, path, data_dir, **args)
+  def add_route(id, access, path, data_dir)
     required id, path, access, data_dir
     group_id_number = id.to_i? || raise InvalidGroupID.new id
     permissions_file = Path[data_dir, "permissions.json"]
@@ -450,7 +465,7 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def edit_group_query(id, key, add_glob, remove_glob, path, data_dir, **args)
+  def edit_group_query(id, key, add_glob, remove_glob, path, data_dir)
     required id, key, path, data_dir
     group_id_number = id.to_i? || raise InvalidGroupID.new id
     permissions_file = Path[data_dir, "permissions.json"]
@@ -479,7 +494,7 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def delete_group(id, data_dir, **args)
+  def delete_group(id, data_dir)
     required id, data_dir
     group_id_number = id.to_i? || raise InvalidGroupID.new id
     permissions_file = Path[data_dir, "permissions.json"]

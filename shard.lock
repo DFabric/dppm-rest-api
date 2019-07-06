@@ -6,11 +6,11 @@ shards:
 
   clicr:
     github: j8r/clicr
-    version: 0.6.0
+    version: 0.7.0
 
   con:
     github: j8r/con
-    commit: 2000932bd51135fd4f6e60ff2bb89105cf101b81
+    version: 0.1.0
 
   cossack:
     github: crystal-community/cossack
@@ -22,7 +22,7 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: d369d9ed664abd0f12c4776ce5a2d681dd45263e
+    commit: d8ec86527dccdfb41c31e4ac85dee71f19abb6ef
 
   dynany:
     github: j8r/dynany
@@ -34,7 +34,7 @@ shards:
 
   exec:
     github: j8r/exec.cr
-    version: 0.4.0
+    version: 0.4.1
 
   inotify:
     github: petoem/inotify.cr
@@ -42,7 +42,7 @@ shards:
 
   jwt:
     github: crystal-community/jwt
-    version: 1.1.0
+    version: 1.1.1
 
   kemal:
     github: kemalcr/kemal
@@ -62,7 +62,7 @@ shards:
 
   mysql:
     github: crystal-lang/crystal-mysql
-    version: 0.6.0
+    version: 0.7.0
 
   openssl_ext:
     github: stakach/openssl_ext
@@ -73,8 +73,8 @@ shards:
     version: 0.3.9
 
   scrypt:
-    github: dscottboggs/scrypt-crystal
-    commit: 214f542c9ee2433e3dcc6fe9b726c6ccb774b10c
+    github: ysbaddaden/scrypt-crystal
+    version: 0.3.0
 
   semantic_compare:
     github: j8r/semantic_compare
@@ -82,7 +82,7 @@ shards:
 
   spec-kemal:
     github: kemalcr/spec-kemal
-    commit: 64b89c719234ceb92c0a14762dce3afc6257fffc
+    version: 0.5.0
 
   tail:
     github: j8r/tail
