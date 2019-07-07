@@ -1,7 +1,5 @@
 module DppmRestApi::Actions::Pkg
   extend self
-  ALL_PKGS = ""
-  ONE_PKG  = "/:id"
   include RouteHelpers
 
   def build_config_response(package, builder)
@@ -14,27 +12,19 @@ module DppmRestApi::Actions::Pkg
     end
   end
 
-  def clean_unused_packages(context : HTTP::Server::Context)
-    if result = Actions.prefix.clean_unused_packages(confirmation: false) { }
-      return {data: result} if result.any?
-      bug = InternalServerError.new context, "received empty set from Prefix#clean_unused_packages; please report this strange bug"
-      error = NoPkgsToClean.new context
-      error.cause = bug
-      raise error
-    end
-    raise NoPkgsToClean.new context
-  end
+  # TODO: List available sources.
 
   # List built packages
   #
   # TODO optional pagination
-  relative_get nil do |context|
+  relative_get "/:source_name" do |context|
     if Actions.has_access? context, Access::Read
+      prefix = get_prefix_with_source_name context
       JSON.build context.response do |json|
         json.object do
           json.field "data" do
             json.array do
-              Actions.prefix.each_pkg do |package|
+              prefix.each_pkg do |package|
                 json.object do
                   json.field "package", package.package
                   json.field "version", package.version
@@ -48,22 +38,31 @@ module DppmRestApi::Actions::Pkg
     end
     raise Unauthorized.new context
   end
+
   # Clean unused built packages
-  relative_delete "/clean" do |context|
+  relative_delete "/:source_name/clean" do |context|
     if Actions.has_access? context, Access::Delete
-      clean_unused_packages(context).to_json context.response
-      context.response.flush
-      next context
+      prefix = get_prefix_with_source_name context
+      result = prefix.clean_unused_packages(confirmation: false) { }
+      if result.empty?
+        raise NoPkgsToClean.new context
+      else
+        {data: result}.to_json(context.response)
+        context.response.flush
+        next context
+      end
     end
     raise Unauthorized.new context
   end
   # Query information about a given package
-  relative_get "/:id/query" do |context|
+  relative_get "/:source_name/:package_name/query" do |context|
     if Actions.has_access? context, Access::Read
-      package_name = URI.unescape context.params.url["id"]
+      prefix = get_prefix_with_source_name context
+      package_name = URI.unescape context.params.url["package_name"]
+
       version = context.params.query["version"]?.try { |v| URI.unescape v }
       # Iterate over the packages to find the relevant one.
-      selected_pkg = Actions.prefix.new_pkg package_name, version
+      selected_pkg = prefix.new_pkg package_name, version
       raise NoSuchPackage.new context, package_name unless selected_pkg.exists?
       # Stop here ^^ unless the package whose name was the :id URL parameter
       # was found and we can query it
@@ -99,10 +98,11 @@ module DppmRestApi::Actions::Pkg
     raise Unauthorized.new context
   end
   # Delete a given package
-  relative_delete "/:id/delete" do |context|
+  relative_delete "/:source_name/:package_name/delete" do |context|
     if Actions.has_access? context, Access::Delete
-      package_name = URI.unescape context.params.url["id"]
-      selected_pkg = Actions.prefix.new_pkg package_name,
+      prefix = get_prefix_with_source_name context
+      package_name = URI.unescape context.params.url["package_name"]
+      selected_pkg = prefix.new_pkg package_name,
         context.params.query["version"]?
       raise NoSuchPackage.new context, package_name if selected_pkg.nil?
       selected_pkg.delete confirmation: false { }
@@ -120,12 +120,14 @@ module DppmRestApi::Actions::Pkg
   # a result on completion.
   #
   # This route takes the optional query parameters "version" and "tag".
-  relative_post "/:id/build" do |context|
+  relative_post "/:source_name/:package_name/build" do |context|
     if Actions.has_access? context, Access::Create
-      package_name = URI.unescape context.params.url["id"]
+      package_name = URI.unescape context.params.url["package_name"]
+      prefix = get_prefix_with_source_name context
+
       init_done = false
       begin
-        pkg = Actions.prefix.new_pkg package_name, version: context.params.query["version"]?
+        pkg = prefix.new_pkg package_name, version: context.params.query["version"]?
         pkg.build confirmation: false { init_done = true }
       rescue ex
         raise InternalServerError.new context, cause: ex if init_done

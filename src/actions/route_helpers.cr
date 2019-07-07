@@ -12,7 +12,7 @@ module DppmRestApi::Actions::RouteHelpers
 
   {% for method in %w(get post put delete ws options) %}
   # Perform a relative {{method.id}} from the `ROOT_PATH`.
-  def relative_{{method.id}}(route : String?, &block : HTTP::Server::Context ->)
+  def relative_{{method.id}}(route : String? = nil, &block : HTTP::Server::Context ->)
     {{method.id}} fmt_route(route) do |context|
       #namespace = context.params.query["namespace"]? || DPPM::Prefix.default_group
       block.call context
@@ -66,5 +66,15 @@ module DppmRestApi::Actions::RouteHelpers
         json.field("data") { json.object { yield json } }
       end
     end
+  end
+
+  # Get a prefix from a context, which has a source name.
+  def get_prefix_with_source_name(context : HTTP::Server::Context) : DPPM::Prefix
+    DPPM::Prefix.new(
+      path: Actions.prefix.path.to_s,
+      group: Actions.prefix.group,
+      source_name: URI.unescape(context.params.url["source_name"]),
+      source_path: Actions.prefix.source_path
+    ).tap &.ensure_pkg_dir
   end
 end

@@ -7,12 +7,7 @@ module DppmRestApi::Actions::Pkg
       include JSON::Serializable
     end
     include JSON::Serializable
-    property data : Array(ListedPackageData)
-
-    def should_be_empty
-      data.empty?.should be_true
-      self
-    end
+    getter data : Array(ListedPackageData)
   end
 
   abstract struct StatusResponse
@@ -61,36 +56,36 @@ module DppmRestApi::Actions::Pkg
   describe DppmRestApi::Actions::Pkg do
     describe "list built packages" do
       it "responds with 401 Forbidden" do
-        get fmt_route nil
+        get fmt_route '/' + DPPM::Prefix.default_source_name
         assert_unauthorized response
       end
       it "responds with an empty array" do
         SpecHelper.without_authentication! do
-          get fmt_route nil
+          get fmt_route '/' + DPPM::Prefix.default_source_name
           response.status_code.should eq HTTP::Status::OK.value
-          ListBuiltPkgsResponse.from_json(response.body).should_be_empty
+          ListBuiltPkgsResponse.from_json(response.body).data.should be_empty
         end
       end
       it "responds with a recently built package (build -> list flow)" do
         SpecHelper.without_authentication! do
-          post fmt_route "/testapp/build"
+          post fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/build"
           if response.status_code != HTTP::Status::OK.value
             fail "building package 'testapp' (to test listing packages) due to " + ErrorResponse.from_json(response.body).errors.to_s
           end
-          get fmt_route nil
+          get fmt_route '/' + DPPM::Prefix.default_source_name
           ListBuiltPkgsResponse.from_json(response.body)
             .data.map(&.package).should contain "testapp"
         end
       end
     end
-    describe "clear unused packages (#{fmt_route "/clean"})" do
+    describe "clean unused packages" do
       it "responds with 401 Forbidden" do
-        delete fmt_route "/clean"
+        delete fmt_route "/#{DPPM::Prefix.default_source_name}/clean"
         assert_unauthorized response
       end
       it "responds that there are no packages to clean" do
         SpecHelper.without_authentication! do
-          delete fmt_route "/clean"
+          delete fmt_route "/#{DPPM::Prefix.default_source_name}/clean"
           # response.status_code.should eq 404
           data = ErrorResponse.from_json response.body
           error_msgs = data.errors.map &.message
@@ -101,7 +96,7 @@ module DppmRestApi::Actions::Pkg
       it "cleans a built package (build -> clean flow)" do
         SpecHelper.without_authentication! do
           build_test_package
-          delete fmt_route "/clean"
+          delete fmt_route "/#{DPPM::Prefix.default_source_name}/clean"
           CleanResponse.from_json(response.body).should_contain_value_matching /^testapp_\d+\.\d+\.\d+$/
           response.status_code.should eq HTTP::Status::OK.value
           Actions.prefix.each_pkg do |pkg|
@@ -111,15 +106,15 @@ module DppmRestApi::Actions::Pkg
         end
       end
     end
-    describe "get /:id/query" do
+    describe "query" do
       it "responds with 401 Forbidden" do
-        get fmt_route "/package-id/query"
+        get fmt_route "/#{DPPM::Prefix.default_source_name}/package-id/query"
         assert_unauthorized response
       end
       it "responds with all configuration data for a built package (build -> query flow)" do
         SpecHelper.without_authentication! do
           build_test_package
-          get fmt_route "/testapp/query"
+          get fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/query"
           response.status_code.should eq HTTP::Status::OK.value
           response.body.should eq %<{"data":{"testapp":{"port":1,"host":"[::1]"}}}>
         end
@@ -127,21 +122,21 @@ module DppmRestApi::Actions::Pkg
       it "responds with a particular configuration key" do
         SpecHelper.without_authentication! do
           build_test_package
-          get fmt_route "/testapp/query?get=port&prefix=" + Fixtures::PREFIX_PATH.to_s
+          get fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/query?get=port&prefix=" + Fixtures::PREFIX_PATH.to_s
           response.status_code.should eq HTTP::Status::OK.value
           QueryResponse.from_json(response.body).data["testapp"]["port"].should eq 1
         end
       end
     end
-    describe "delete a package (/:id/delete)" do
+    describe "delete a package" do
       it "responds with 401 Forbidden" do
-        delete fmt_route "/package-id/delete"
+        delete fmt_route "/#{DPPM::Prefix.default_source_name}/package-id/delete"
         assert_unauthorized response
       end
       it "successfully deletes a package (build -> delete flow)" do
         SpecHelper.without_authentication! do
           build_test_package
-          delete fmt_route "/testapp/delete"
+          delete fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/delete"
           if response.status_code != HTTP::Status::OK.value
             fail "deleting package 'testapp' due to " + ErrorResponse.from_json(response.body).errors.to_s
           end
@@ -150,23 +145,23 @@ module DppmRestApi::Actions::Pkg
       end
     end
   end
-  describe "post fmt_route \"/:id/build\"" do
+  describe "build a package" do
     it "responds with 401 Forbidden" do
-      post fmt_route "/some-package/build"
+      post fmt_route "/#{DPPM::Prefix.default_source_name}/some-package/build"
       assert_unauthorized response
     end
     it "builds a test package" do
       SpecHelper.without_authentication! do
-        post fmt_route "/testapp/build"
+        post fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/build"
         if response.status_code != HTTP::Status::OK.value
-          fail "POST '/testapp/build' received status code " + HTTP::Status.new(response.status_code).to_s
+          fail "POST '/#{DPPM::Prefix.default_source_name}/testapp/build' received status code " + HTTP::Status.new(response.status_code).to_s
         end
         BuildResponse.from_json(response.body).should_be_successful_for "testapp"
       end
     end
     it "responds with Bad Request when given an invalid package name" do
       SpecHelper.without_authentication! do
-        post fmt_route "/$(echo all your base are belong to us!)/build"
+        post fmt_route "/#{DPPM::Prefix.default_source_name}/$(echo all your base are belong to us!)/build"
         response.status_code.should eq HTTP::Status::BAD_REQUEST.value
       end
     end
