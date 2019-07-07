@@ -3,7 +3,7 @@ module DppmRestApi::Actions::Service
   include RouteHelpers
   # List the managed services. The `system` query parameter may be specified to
   # enumerate all system services rather than just the ones managed by DPPM.
-  relative_get nil do |context|
+  relative_get do |context|
     if Actions.has_access? context, Access::Read
       next context
     end

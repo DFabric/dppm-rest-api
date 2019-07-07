@@ -17,6 +17,41 @@ module DppmRestApi::Actions::User
     getter data : Status
   end
 
+  struct UserGetResponse
+    struct Data
+      include JSON::Serializable
+      getter users : Array(User)
+
+      struct User
+        include JSON::Serializable
+        getter name : String
+        @[JSON::Field(ignore: true)]
+        getter config_user : DppmRestApi::Config::User do
+          DppmRestApi.permissions_config.users.find do |user|
+            user.name == name
+          end || fail "no user found in #{DppmRestApi.permissions_config.users} with the name #{name}"
+        end
+
+        def which_should_be_in_groups(groups : Enumerable(Int32))
+          groups.each do |group|
+            unless config_user.group_ids.includes? group
+              fail "user #{config_user} is not a member of the group #{group}"
+            end
+          end
+        end
+      end
+    end
+
+    include JSON::Serializable
+    getter data : Data
+
+    def should_contain_user_named(name : String)
+      user = data.users.find { |u| u.name == name }
+      fail "user named #{name} was not found in #{data.users}" if user.nil?
+      user
+    end
+  end
+
   describe "POST #{fmt_route nil}" do
     it "responds with 401 Forbidden" do
       post fmt_route nil
@@ -73,6 +108,14 @@ module DppmRestApi::Actions::User
     it "responds with 401 Forbidden" do
       get fmt_route
       assert_unauthorized response
+    end
+    it "lists the currently present users" do
+      SpecHelper.without_authentication! do
+        get fmt_route
+        data = UserGetResponse.from_json(response.body)
+        data.should_contain_user_named("Administrator").which_should_be_in_groups({0})
+        data.should_contain_user_named("Jim Oliver").which_should_be_in_groups({499, 1000})
+      end
     end
   end
 end

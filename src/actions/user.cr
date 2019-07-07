@@ -19,9 +19,22 @@ module DppmRestApi
       end
     end
 
+    macro selected_users_from_query(&block)
+      selected_users(
+        match_name: optional_query_param(context, "match_name"),
+        match_groups: optional_query_param(context, "match_groups"),
+        api_key: optional_query_param(context, "api_key"),
+        from: DppmRestApi.permissions_config.users
+      ){% if block %}.each do |{{block.args.splat}}|
+        {{ block.body }}
+        {{block.args[0] || nil}}
+      end
+      {% end %}
+    end
+
     extend self
     include RouteHelpers
-    relative_post nil do |context|
+    relative_post do |context|
       if Actions.has_access? context, Access::Create
         userdata = begin
           if body = context.request.body
@@ -45,14 +58,9 @@ module DppmRestApi
       end
       raise Unauthorized.new context
     end
-    relative_delete nil do |context|
+    relative_delete do |context|
       if Actions.has_access? context, Access::Delete
-        users_to_delete = selected_users(
-          match_name: optional_query_param(context, "match_name"),
-          match_groups: optional_query_param(context, "match_groups"),
-          api_key: optional_query_param(context, "api_key"),
-          from: DppmRestApi.permissions_config.users
-        )
+        users_to_delete = selected_users_from_query
         DppmRestApi.permissions_config.users.reject! { |user| users_to_delete.includes? user }
         DppmRestApi.permissions_config.sync_to_disk
         build_json context.response do |json|
@@ -62,10 +70,19 @@ module DppmRestApi
       end
       raise Unauthorized.new context
     end
-    relative_get nil do |context|
+    relative_get do |context|
       if Actions.has_access? context, Access::Read
-        # userdata = AddUserBody.from_json context.request.body
-        # TODO delete a user
+        build_json context.response do |json|
+          json.field "users" do
+            json.array do
+              selected_users_from_query do |user|
+                json.object do
+                  json.field "name", value: user.name
+                end
+              end
+            end
+          end
+        end
         next context
       end
       raise Unauthorized.new context
