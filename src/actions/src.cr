@@ -1,17 +1,24 @@
 module DppmRestApi::Actions::Src
   extend self
   include RouteHelpers
-  relative_get "" do |context|
+
+  # Lists available sources.
+  relative_get do |context|
     if Actions.has_access? context, Access::Read
-      # TODO: List all available source packages
-      next context
-    end
-    raise Unauthorized.new context
-  end
-  # List all available source packages, of either the *lib* or *app* type.
-  relative_get "/:type" do |context|
-    if Actions.has_access? context, Access::Read
-      # TODO: List available source packages
+      JSON.build context.response do |json|
+        json.object do
+          json.field "data" do
+            json.array do
+              Actions.prefix.dppm_config.sources.each do |source_name, url|
+                json.object do
+                  json.field "source_name", source_name
+                  json.field "url", url
+                end
+              end
+            end
+          end
+        end
+      end
       next context
     end
     raise Unauthorized.new context
