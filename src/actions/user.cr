@@ -1,3 +1,5 @@
+require "../config/helpers"
+
 module DppmRestApi
   module Actions::User
     include Config::Helpers
