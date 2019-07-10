@@ -45,11 +45,13 @@ module Fixtures
     ),
   ], users: [
     DppmRestApi::Config::User.new(
+      id: UUID.random,
       name: "Administrator",
       group_ids: Set{0},
       api_key_hash: Scrypt::Password.create password: UserRawApiKeys::ADMIN
     ),
     DppmRestApi::Config::User.new(
+      id: UUID.random,
       name: "Jim Oliver",
       group_ids: Set{499, 1000},
       api_key_hash: Scrypt::Password.create password: UserRawApiKeys::NORMAL_USER

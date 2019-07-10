@@ -5,201 +5,202 @@ module DppmRestApi::CLI
   extend self
 
   macro run
-  DPPM::CLI.run(
-    server: {
-      info:      "DPPM REST API server",
-      inherit:   \%w(config),
-      variables: {
-        data_dir: {
-          info:    "data directory",
-          default: DppmRestApi::Actions::DEFAULT_DATA_DIR,
-        },
-      },
-      commands: {
-        run: {
-          info:      "Run the server",
-          action:    "DppmRestApi::CLI.run_server",
-          inherit:   \%w(config data_dir),
-          variables: {
-            host: {
-              info:    "host to listen",
-              default: DPPM::Prefix.default_dppm_config.host,
-            },
-            port: {
-              info:    "port to bind",
-              default: DPPM::Prefix.default_dppm_config.port,
-            },
+    DPPM::CLI.run(
+      server: {
+        info:      "DPPM REST API server",
+        inherit:   \%w(config),
+        variables: {
+          data_dir: {
+            info:    "data directory",
+            default: DppmRestApi::Actions::DEFAULT_DATA_DIR,
           },
         },
-        user: {
-          alias:     'u',
-          info:      "Update or delete users",
-          inherit:   \%w(data_dir),
-          variables: {
-            match_name: {
-              info: "The name of the users to filter by",
-            },
-            match_groups: {
-              info: "The groups that selected users must be a member of",
-            },
-            api_key: {
-              info: "The api key to select a user by. To change a user's \
-                      API key that you already know, use the rekey command",
+        commands: {
+          run: {
+            info:      "Run the server",
+            action:    "DppmRestApi::CLI.run_server",
+            inherit:   \%w(config data_dir),
+            variables: {
+              host: {
+                info:    "host to listen",
+                default: DPPM::Prefix.default_dppm_config.host,
+              },
+              port: {
+                info:    "port to bind",
+                default: DPPM::Prefix.default_dppm_config.port,
+              },
             },
           },
-          commands: {
-            add: {
-              alias:     'a',
-              info:      "Add a user",
-              action:    "DppmRestApi::CLI.add_user",
-              inherit:   \%w(data_dir),
-              variables: {
-                name: {
-                  info: "Human-readable name of the user; use quotes if you want" +
-                        %<to have spaces in the name, like name="Scott Boggs">,
+          user: {
+            alias:     'u',
+            info:      "Update or delete users",
+            inherit:   \%w(data_dir),
+            variables: {
+              user_id: "a users's UUID"
+            },
+            commands: {
+              add: {
+                alias:     'a',
+                info:      "Add a user",
+                action:    "DppmRestApi::CLI.add_user",
+                inherit:   \%w(data_dir),
+                variables: {
+                  name: {
+                    info: "Human-readable name of the user; use quotes if you want" +
+                          %<to have spaces in the name, like name="Scott Boggs">,
+                  },
+                  groups: {
+                    info: "Comma-separated list of group IDs for which the user \
+                            should have access",
+                  },
+                  output_file: {
+                    info: "the file to output the user's generated API key to (STDOUT if not specified)",
+                  },
                 },
-                groups: {
-                  info: "Comma-separated list of group IDs for which the user \
-                          should have access",
+              },
+              delete: {
+                alias:   'd',
+                info:    "Completely delete a user or set of users",
+                action:  "DppmRestApi::CLI.delete_users",
+                inherit: \%w(data_dir user_id),
+              },
+              edit: {
+                alias:     'e',
+                info:      "Edit one or more user's groups",
+                action:    "DppmRestApi::CLI.edit_users",
+                inherit:   \%w(data_dir user_id),
+                variables: {
+                  new_name: {
+                    info: "The name to change the selected user's name to",
+                  },
+                  add_groups: {
+                    info: "Comma-separated groups to add to the selected users",
+                  },
+                  remove_groups: {
+                    info: "Comma-separated groups to remove from the selected users.",
+                  },
                 },
-                output_file: {
-                  info: "the file to output the user's generated API key to (STDOUT if not specified)",
+              },
+              rekey: {
+                alias:     'r',
+                info:      "Generate a new API key for this user/users and output that file",
+                action:    "DppmRestApi::CLI.rekey_users",
+                inherit:   \%w(data_dir user_id),
+                variables: {
+                  output_file: {
+                    info: "Write the generated key to a file. Default is to print to stdout",
+                  },
+                },
+              },
+              show: {
+                alias:     's',
+                info:      "Show the available information about a user",
+                action:    "DppmRestApi::CLI.show_users",
+                inherit:   \%w(data_dir),
+                variables: {
+                  match_name: {
+                    info: "The name of the users to filter by",
+                  },
+                  match_groups: {
+                    info: "The groups that selected users must be a member of",
+                  },
+                  api_key: {
+                    info: "The api key to select a user by. To change a user's \
+                            API key that you already know, use the rekey command",
+                  },
+                  output_file: {
+                    info: "The file to write the userdata to; defaults to stdout",
+                  }
                 },
               },
             },
-            delete: {
-              alias:   'd',
-              info:    "Completely delete a user or set of users",
-              action:  "DppmRestApi::CLI.delete_users",
-              inherit: \%w(api_key data_dir match_groups match_name),
-            },
-            edit: {
-              alias:     'e',
-              info:      "Edit one or more user's groups",
-              action:    "DppmRestApi::CLI.edit_users",
-              inherit:   \%w(api_key data_dir match_name match_groups),
-              variables: {
-                new_name: {
-                  info: "The name to change the selected user's name to",
-                },
-                add_groups: {
-                  info: "Comma-separated groups to add to the selected users",
-                },
-                remove_groups: {
-                  info: "Comma-separated groups to remove from the selected users.",
-                },
+          },
+          group: {
+            alias:     'g',
+            info:      "Add, update, or delete groups",
+            inherit:   \%w(data_dir),
+            variables: {
+              id: {
+                info: "The ID of the group to work with",
               },
             },
-            rekey: {
-              alias:     'r',
-              info:      "Generate a new API key for this user/users and output that file",
-              action:    "DppmRestApi::CLI.rekey_users",
-              inherit:   \%w(api_key data_dir match_groups match_name),
-              variables: {
-                output_file: {
-                  info: "Write the generated key to a file. Default is to print to stdout",
+            commands: {
+              add: {
+                alias:     'a',
+                info:      "Add a group",
+                action:    "DppmRestApi::CLI.add_group",
+                inherit:   \%w(id data_dir name permissions),
+                variables: {
+                  name: {
+                    info: "A short description of this group",
+                  },
+                  permissions: {
+                    info: "\
+                      JSON-formatted permissions, mapping a path to the query \
+                      parameters and type of access allowed on that path",
+                    default: DppmRestApi::Config::Group::DEFAULT_PERMISSIONS.to_json,
+                  },
                 },
               },
-            },
-            show: {
-              alias:     's',
-              info:      "Show the available information about a user",
-              action:    "DppmRestApi::CLI.show_users",
-              inherit:   \%w(api_key data_dir match_groups match_name),
-              variables: {
-                output_file: {
-                  info: "The file to write the userdata to; defaults to stdout",
+              add_route: {
+                alias:     "ar",
+                info:      "Add permissions to a route",
+                action:    "DppmRestApi::CLI.add_route",
+                inherit:   \%w(id data_dir),
+                variables: {
+                  path: {
+                    info: "The path glob on which you want to add the permissions",
+                  },
+                  access: {
+                    info: "the kinds of access to allow on this path",
+                  },
+                },
+              },
+              delete: {
+                alias:  'd',
+                info:   "Delete the given group from the system",
+                action: "DppmRestApi::CLI.delete_group",
+                inherit:   \%w(id data_dir),
+              },
+              edit_access: {
+                alias:     "ea",
+                info:      "Change a group's permissions",
+                action:    "DppmRestApi::CLI.edit_access",
+                inherit:   \%w(id data_dir),
+                variables: {
+                  path: {
+                    info: "The path on which to update permissions",
+                  },
+                  access: {
+                    info: "The access level to give this group on the given path",
+                  },
+                },
+              },
+              edit_query: {
+                alias:     "eq",
+                info:      "Update the allowed query parameters on this path",
+                action:    "DppmRestApi::CLI.edit_group_query",
+                inherit:   \%w(id data_dir),
+                variables: {
+                  path: {
+                    info: "The path on which to update allowed query parameters.",
+                  },
+                  key: {
+                    info: "the query key to match for",
+                  },
+                  add_glob: {
+                    info: "A glob to add to the allowed globs on this path",
+                  },
+                  remove_glob: {
+                    info:  "A glob to remove from the allowed globs on this path",
+                  },
                 },
               },
             },
           },
         },
-        group: {
-          alias:     'g',
-          info:      "Add, update, or delete groups",
-          inherit:   \%w(data_dir),
-          variables: {
-            id: {
-              info: "The ID of the group to work with",
-            },
-          },
-          commands: {
-            add: {
-              alias:     'a',
-              info:      "Add a group",
-              action:    "DppmRestApi::CLI.add_group",
-              inherit:   \%w(id data_dir name permissions),
-              variables: {
-                name: {
-                  info: "A short description of this group",
-                },
-                permissions: {
-                  info: "\
-                    JSON-formatted permissions, mapping a path to the query \
-                    parameters and type of access allowed on that path",
-                  default: DppmRestApi::Config::Group::DEFAULT_PERMISSIONS.to_json,
-                },
-              },
-            },
-            add_route: {
-              alias:     "ar",
-              info:      "Add permissions to a route",
-              action:    "DppmRestApi::CLI.add_route",
-              inherit:   \%w(id data_dir),
-              variables: {
-                path: {
-                  info: "The path glob on which you want to add the permissions",
-                },
-                access: {
-                  info: "the kinds of access to allow on this path",
-                },
-              },
-            },
-            delete: {
-              alias:  'd',
-              info:   "Delete the given group from the system",
-              action: "DppmRestApi::CLI.delete_group",
-              inherit:   \%w(id data_dir),
-            },
-            edit_access: {
-              alias:     "ea",
-              info:      "Change a group's permissions",
-              action:    "DppmRestApi::CLI.edit_access",
-              inherit:   \%w(id data_dir),
-              variables: {
-                path: {
-                  info: "The path on which to update permissions",
-                },
-                access: {
-                  info: "The access level to give this group on the given path",
-                },
-              },
-            },
-            edit_query: {
-              alias:     "eq",
-              info:      "Update the allowed query parameters on this path",
-              action:    "DppmRestApi::CLI.edit_group_query",
-              inherit:   \%w(id data_dir),
-              variables: {
-                path: {
-                  info: "The path on which to update allowed query parameters.",
-                },
-                key: {
-                  info: "the query key to match for",
-                },
-                add_glob: {
-                  info: "A glob to add to the allowed globs on this path",
-                },
-                remove_glob: {
-                  info:  "A glob to remove from the allowed globs on this path",
-                },
-              },
-            },
-          },
-        },
-      },
-    }
-  )
+      }
+    )
   end
 
   # A helper method for the select_users method -- splits a comma-separated
@@ -308,17 +309,17 @@ module DppmRestApi::CLI
                 else
                   STDOUT
                 end
-    api_key = Random::Secure.base64 24
+    group_list = split_numbers groups
+    api_key, user = DppmRestApi::Config::User.create group_list, name
     output_io.puts "API key for user named '#{name}'"
     output_io.puts api_key
     if using_stdout
+      print "ok? (Y/n) "
       raise "cancelled" if gets(chomp: true).try &.downcase.starts_with?('n')
     else
       output_io.close
     end
-    api_key_hash = Scrypt::Password.create api_key
-    group_list = split_numbers groups
-    current_config.users << DppmRestApi::Config::User.new api_key_hash, group_list, name
+    current_config.users << user
     current_config.write_to permissions_file
   end
 
