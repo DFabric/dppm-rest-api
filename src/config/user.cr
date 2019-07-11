@@ -54,7 +54,11 @@ struct DppmRestApi::Config::User
   end
 
   def self.deserialize(groups : String)
-    groups.split(',').map { |id| id.to_i base: 16 }.to_set
+    set = Set(Int32).new
+    groups.split separator: ',', remove_empty: true do |id|
+      set << id.to_i base: 16
+    end
+    set
   end
 
   def join_group(id : Int32)
