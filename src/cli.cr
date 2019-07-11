@@ -36,7 +36,9 @@ module DppmRestApi::CLI
             info:      "Update or delete users",
             inherit:   \%w(data_dir),
             variables: {
-              user_id: "a users's UUID"
+              user_id: {
+                info: "a users's UUID"
+              }
             },
             commands: {
               add: {
@@ -314,8 +316,7 @@ module DppmRestApi::CLI
     output_io.puts "API key for user named '#{name}'"
     output_io.puts api_key
     if using_stdout
-      print "ok? (Y/n) "
-      raise "cancelled" if gets(chomp: true).try &.downcase.starts_with?('n')
+      DPPM::CLI.confirm_prompt { raise "cancelled" }
     else
       output_io.close
     end
@@ -323,39 +324,35 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def edit_users(match_name, match_groups, api_key, new_name, add_groups, remove_groups, data_dir)
-    required data_dir
+  def edit_users(user_id, new_name, add_groups, remove_groups, data_dir)
+    required data_dir, user_id
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
     end
-    selected_users match_name, match_groups, api_key, from: current_config.users do |user|
-      modified = false
-      # edit the users that have made it through all the filters, based on the
-      # non-nil arguments given by the user
-      new_name.try do |specified_new_name|
-        modified = true
-        user.name = specified_new_name
-      end
-      add_groups.try do |groups_to_add|
-        split_numbers groups_to_add do |id|
-          modified = true
-          user.join_group id
-        end
-      end
-      remove_groups.try do |groups_to_remove|
-        split_numbers groups_to_remove do |id|
-          modified = true
-          user.leave_group id
-        end
-      end
-      modified ? user : nil
+    user_index = current_config.users.index { |usr| usr.id == user_id }
+    raise "no user found with id #{user_id}" if user_index.nil?
+    user = current_config.users[user_index]
+    # edit the user based on the non-nil arguments given by the user
+    new_name.try do |specified_new_name|
+      user.name = specified_new_name
     end
+    add_groups.try do |groups_to_add|
+      split_numbers groups_to_add do |id|
+        user.join_group id
+      end
+    end
+    remove_groups.try do |groups_to_remove|
+      split_numbers groups_to_remove do |id|
+        user.leave_group id
+      end
+    end
+    current_config.users[user_index] = user
     current_config.write_to permissions_file
   end
 
-  def rekey_users(match_name, match_groups, api_key, data_dir, output_file)
-    required data_dir
+  def rekey_users(user_id, data_dir, output_file)
+    required data_dir, user_id
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
@@ -367,27 +364,28 @@ module DppmRestApi::CLI
                 else
                   STDOUT
                 end
-    selected_users match_name, match_groups, api_key, from: current_config.users do |user|
-      # Rekey the users that have made it through the filters
-      new_key = Random::Secure.base64 24
-      output_io.puts "user named #{user.name} who has access to the \
+
+    user_index = current_config.users.index { |user| user.id == user_id }
+    raise "no user found with id #{user_id}" if user_index.nil?
+    user = current_config.users[user_index]
+    # Rekey the users that have made it through the filters
+    new_key = Random::Secure.base64 24
+    output_io.puts "user named #{user.name} who has access to the \
                       groups #{current_config.group_view(user).groups} is now accessible via API key:"
-      output_io.puts new_key
-      user.api_key_hash = Scrypt::Password.create new_key
-      user
-    end
+    output_io.puts new_key
+    user.api_key_hash = Scrypt::Password.create new_key
     output_io.close unless using_stdout
+    current_config.users[user_index] = user
     current_config.write_to permissions_file
   end
 
-  def delete_users(match_name, match_groups, api_key, data_dir)
-    required data_dir
+  def delete_users(user_id, data_dir)
+    required data_dir, user_id
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
     end
-    selected = selected_users match_name, match_groups, api_key, from: current_config.users
-    current_config.users.reject! { |user| selected.includes? user }
+    current_config.users.reject! { |user| user.id == user_id }
     current_config.write_to permissions_file
   end
 

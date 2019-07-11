@@ -85,9 +85,8 @@ module DppmRestApi::CLI
   end
   describe "#edit_users" do
     it "edits a user" do
-      edit_users match_name: "/^Jim/",
-        match_groups: nil,
-        api_key: nil,
+      user_id = Fixtures.new_config.users.find { |user| user.name.starts_with? "Jim" }.not_nil!.id
+      edit_users user_id: user_id,
         new_name: "changed name",
         add_groups: "500",
         remove_groups: "499",
@@ -96,11 +95,22 @@ module DppmRestApi::CLI
       config.users.find { |usr| usr.name == "Jim Oliver" }.should be_nil
       config.users.find { |usr| usr.name == "changed name" }.try(&.group_ids).should eq Set{500, 1000}
     end
+    it "requires a valid user's UUID" do
+      bogus_id = UUID.random
+      expect_raises Exception, message: "no user found with id #{bogus_id}" do
+        edit_users user_id: bogus_id, new_name: "xyz", data_dir: Fixtures::DIR, add_groups: nil, remove_groups: nil
+      end
+    end
     require_arg "data-dir" do
-      edit_users match_name: nil,
-        match_groups: nil,
-        api_key: nil,
+      edit_users user_id: nil,
         data_dir: nil,
+        new_name: nil,
+        add_groups: nil,
+        remove_groups: nil
+    end
+    require_arg "user-id" do
+      edit_users user_id: nil,
+        data_dir: Fixtures::DIR,
         new_name: nil,
         add_groups: nil,
         remove_groups: nil
@@ -109,32 +119,33 @@ module DppmRestApi::CLI
   describe "#rekey_users" do
     it "rekeys a user" do
       data_file = File.tempfile
-      orig_key_hash = DppmRestApi.permissions_config
+      admin = DppmRestApi.permissions_config
         .users
         .find { |usr| usr.name == "Administrator" }
         .not_nil!
-        .api_key_hash
-      rekey_users match_name: "Administrator",
-
-        match_groups: nil,
-        api_key: nil,
+      orig_key_hash = admin.api_key_hash
+      rekey_users user_id: admin.id,
         data_dir: Fixtures::DIR,
         output_file: data_file.path
       new_key = File.read_lines(data_file.path)[1]
-      Fixtures.new_config.users.find { |usr| usr.name == "Administrator" }.not_nil!.api_key_hash.verify(new_key).should be_true
-      orig_key_hash.should_not eq new_key
+      admin = Fixtures.new_config.users.find { |usr| usr.name == "Administrator" }.not_nil!
+      admin.api_key_hash.verify(new_key).should be_true
+      orig_key_hash.verify(new_key).should be_false
     end
     require_arg "data-dir" do
-      delete_users match_name: nil, match_groups: nil, api_key: nil, data_dir: nil
+      rekey_users user_id: nil, data_dir: nil, output_file: nil
     end
   end
   describe "#delete_users" do
     it "deletes a user" do
-      delete_users match_name: nil, match_groups: "0", api_key: nil, data_dir: Fixtures::DIR
+      delete_users user_id: Fixtures.new_config.users.find { |usr| usr.name == "Administrator" }.not_nil!.id, data_dir: Fixtures::DIR
       Fixtures.new_config.users.find { |usr| usr.name == "Administrator" }.should be_nil
     end
     require_arg "data-dir" do
-      delete_users match_name: nil, match_groups: nil, api_key: nil, data_dir: nil
+      delete_users user_id: nil, data_dir: nil
+    end
+    require_arg "user-id" do
+      delete_users user_id: nil, data_dir: Fixtures::DIR
     end
   end
   describe "#show_users" do
@@ -153,7 +164,7 @@ module DppmRestApi::CLI
       File.delete tmp
     end
     require_arg "data-dir" do
-      delete_users match_name: nil, match_groups: nil, api_key: nil, data_dir: nil
+      show_users match_name: nil, match_groups: nil, api_key: nil, data_dir: nil, output_file: nil
     end
   end
   describe "#add_group" do

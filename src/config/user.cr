@@ -1,6 +1,7 @@
 require "json"
-require "./group"
+require "uuid"
 require "uuid/json"
+require "./group"
 
 struct DppmRestApi::Config::User
   API_KEY_SIZE = 63_u8
