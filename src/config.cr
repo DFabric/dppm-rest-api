@@ -39,6 +39,7 @@ struct DppmRestApi::Config
   end
 
   def write_to(path : Path) : Nil
+    @filepath ||= path
     prefix = path.basename suffix: ".json"
     suffix = path.extension
     tmp_file = File.tempfile prefix, suffix, dir: path.dirname do |file|

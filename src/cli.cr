@@ -205,7 +205,7 @@ module DppmRestApi::CLI
   # error instructing the user to include the variable value.
   private macro required(*args)
     {% for arg in args %}
-    {{arg.id}} || raise RequiredArgument.new "{{arg.id}}"
+      {{arg.id}} || raise RequiredArgument.new "{{arg.id}}"
     {% end %}
   end
 
@@ -222,6 +222,9 @@ module DppmRestApi::CLI
       webui_folder: webui_folder ? Path[webui_folder] : nil
   end
 
+  # Add a user. The user's API key will be output to `output_file`, or `STDOUT`
+  # if not specified. If the key is output to STDOUT, the user is also given
+  # the chance to cancel the process after being shown their API key.
   def add_user(name, groups, data_dir) : String
     required data_dir, groups, name
     permissions_file = Path[data_dir, "permissions.json"]
@@ -291,6 +294,7 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
+  # Returns thes information about the selected users.
   def show_users(data_dir, match_name, match_groups, api_key) : Array(DppmRestApi::Config::User)
     required data_dir
     permissions_file = Path[data_dir, "permissions.json"]
@@ -309,6 +313,7 @@ module DppmRestApi::CLI
     users
   end
 
+  # Adds a group with the given values
   def add_group(id, name, permissions, data_dir)
     required id, name, permissions, data_dir
     permissions_file = Path[data_dir, "permissions.json"]
@@ -325,8 +330,9 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
+  # Edits the given group's access level on the given path
   def edit_access(id, path, access, data_dir)
-    required id, path, access, data_dir
+    required id, access, path, data_dir
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
@@ -335,7 +341,7 @@ module DppmRestApi::CLI
     group = current_config.groups.find do |grp|
       grp.id == id_number
     end
-    group || raise NoSuchGroup.new id_number
+    raise NoSuchGroup.new id_number if group.nil?
     current_config.groups.delete group
     parsed_access = Access.parse?(access) ||
                     Access.from_value access.to_i? ||
@@ -347,8 +353,10 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
+  # Allow the group with the given id to access the given request path at the
+  # given access level.
   def add_route(id, access, path, data_dir)
-    required id, path, access, data_dir
+    required id, access, path, data_dir
     group_id_number = id.to_i? || raise InvalidGroupID.new id
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
