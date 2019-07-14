@@ -35,57 +35,48 @@ module DppmRestApi
     extend self
     include RouteHelpers
     relative_post do |context|
-      if Actions.has_access? context, Access::Create
-        userdata = begin
-          if body = context.request.body
-            AddUserBody.from_json body
-          else
-            raise BadRequest.new context, "adding a user requires a request body"
-          end
-        rescue e : JSON::ParseException
-          raise BadRequest.new context, cause: e
+      raise Unauthorized.new context unless Actions.has_access? context, Access::Create
+      userdata = begin
+        if body = context.request.body
+          AddUserBody.from_json body
+        else
+          raise BadRequest.new context, "adding a user requires a request body"
         end
-        config_key, user = Config::User.create userdata.groups, userdata.name
-        DppmRestApi.permissions_config.users << user
-        DppmRestApi.permissions_config.sync_to_disk
-        build_json context.response do |resp|
-          resp.field "SuccessfullyAddedUser" do
-            user.to_json resp, except: :api_key_hash
-          end
-          resp.field "AccessKey", config_key
-        end
-        next context
+      rescue e : JSON::ParseException
+        raise BadRequest.new context, cause: e
       end
-      raise Unauthorized.new context
+      config_key, user = Config::User.create userdata.groups, userdata.name
+      DppmRestApi.permissions_config.users << user
+      DppmRestApi.permissions_config.sync_to_disk
+      build_json context.response do |resp|
+        resp.field "SuccessfullyAddedUser" do
+          user.to_json resp, except: :api_key_hash
+        end
+        resp.field "AccessKey", config_key
+      end
     end
     relative_delete do |context|
-      if Actions.has_access? context, Access::Delete
-        users_to_delete = selected_users_from_query
-        DppmRestApi.permissions_config.users.reject! { |user| users_to_delete.includes? user }
-        DppmRestApi.permissions_config.sync_to_disk
-        build_json context.response do |json|
-          json.field "status", "success"
-        end
-        next context
+      raise Unauthorized.new context unless Actions.has_access? context, Access::Delete
+      users_to_delete = selected_users_from_query
+      DppmRestApi.permissions_config.users.reject! { |user| users_to_delete.includes? user }
+      DppmRestApi.permissions_config.sync_to_disk
+      build_json context.response do |json|
+        json.field "status", "success"
       end
-      raise Unauthorized.new context
     end
     relative_get do |context|
-      if Actions.has_access? context, Access::Read
-        build_json context.response do |json|
-          json.field "users" do
-            json.array do
-              selected_users_from_query do |user|
-                json.object do
-                  json.field "name", value: user.name
-                end
+      raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+      build_json context.response do |json|
+        json.field "users" do
+          json.array do
+            selected_users_from_query do |user|
+              json.object do
+                json.field "name", value: user.name
               end
             end
           end
         end
-        next context
       end
-      raise Unauthorized.new context
     end
   end
 end
