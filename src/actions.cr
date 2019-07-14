@@ -7,14 +7,17 @@ module DppmRestApi::Actions
   extend self
   include RouteHelpers
 
-  ROUTE_MODULES    = [Pkg, App, Service, Src, User, Users, Groups]
   DEFAULT_DATA_DIR = "./data/"
   API_DOCUMENT     = DEFAULT_DATA_DIR + "api-options.json"
   alias ConfigKeyError = DPPM::Prefix::Base::ConfigKeyError
 
-  {% for route_module in [Pkg, App, Service, Src, User, Users, Groups] %}
-  include {{ route_module }}
-  {% end %}
+  include Pkg
+  include App
+  include Service
+  include Src
+  include User
+  include Users
+  include Groups
 
   before_all do |context|
     context.response.content_type = "application/json"
