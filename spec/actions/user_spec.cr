@@ -60,32 +60,28 @@ module DppmRestApi::Actions::User
     it "adds a user" do
       SpecHelper.without_authentication! do
         post fmt_route(nil), body: Fixtures::USER_BODY.to_json
-        if response.status_code == HTTP::Status::OK.value
-          key, user = nil, nil
-          json = JSON::PullParser.new response.body
-          json.read_object do |json_key|
-            fail "received unexpected top-level key #{json_key}" if json_key != "data"
-            json.read_object do |data_key|
-              case data_key
-              when "AccessKey"             then key = json.read_string
-              when "SuccessfullyAddedUser" then user = UserAddResponse.new json
-              else
-                fail "received unexpected response key #{json_key}"
-              end
+        assert_no_error in: response
+        key, user = nil, nil
+        json = JSON::PullParser.new response.body
+        json.read_object do |json_key|
+          fail "received unexpected top-level key #{json_key}" if json_key != "data"
+          json.read_object do |data_key|
+            case data_key
+            when "AccessKey"             then key = json.read_string
+            when "SuccessfullyAddedUser" then user = UserAddResponse.new json
+            else
+              fail "received unexpected response key #{json_key}"
             end
           end
-          fail "response did not contain AccessKey" if key.nil?
-          fail "response did not contain SuccessfullyAddedUser" if user.nil?
-          user.name.should eq "Mock user"
-          if config_user = DppmRestApi.permissions_config.users.find { |u| u.name == user.name }
-            user.group_ids.should eq config_user.group_ids
-            fail "key fails to authenticate user" unless config_user.api_key_hash.verify key
-          else
-            fail "did not find user in permissions config"
-          end
+        end
+        fail "response did not contain AccessKey" if key.nil?
+        fail "response did not contain SuccessfullyAddedUser" if user.nil?
+        user.name.should eq "Mock user"
+        if config_user = DppmRestApi.permissions_config.users.find { |u| u.name == user.name }
+          user.group_ids.should eq config_user.group_ids
+          fail "key fails to authenticate user" unless config_user.api_key_hash.verify key
         else
-          puts ErrorResponse.from_json response.body
-          fail "received error response from 'POST #{fmt_route nil}' with status code #{HTTP::Status.new response.status_code}"
+          fail "did not find user in permissions config"
         end
       end
     end
@@ -98,7 +94,7 @@ module DppmRestApi::Actions::User
     it "successfully deletes a user from the configuration" do
       SpecHelper.without_authentication! do
         delete fmt_route "?match_name=#{URI.escape "Jim Oliver"}"
-        response.status_code.should eq HTTP::Status::OK.value
+        assert_no_error in: response
         UserDeleteResponse.from_json(response.body).data.status.should eq "success"
         DppmRestApi.permissions_config.users.find { |user| user.name == "Jim Oliver" }.should be_nil
       end
@@ -112,6 +108,7 @@ module DppmRestApi::Actions::User
     it "lists the currently present users" do
       SpecHelper.without_authentication! do
         get fmt_route
+        assert_no_error in: response
         data = UserGetResponse.from_json(response.body)
         data.should_contain_user_named("Administrator").which_should_be_in_groups({0})
         data.should_contain_user_named("Jim Oliver").which_should_be_in_groups({499, 1000})
