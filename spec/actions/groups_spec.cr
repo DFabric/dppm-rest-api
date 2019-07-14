@@ -1,3 +1,5 @@
+require "../spec_helper"
+
 module DppmRestApi::Actions::Groups
   describe "post #{self}" do
     it "responds with 401 Forbidden" do

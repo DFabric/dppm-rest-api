@@ -85,11 +85,10 @@ module DppmRestApi::Actions::Pkg
       it "responds that there are no packages to clean" do
         SpecHelper.without_authentication! do
           delete fmt_route "/#{DPPM::Prefix.default_source_name}/clean"
-          # response.status_code.should eq 404
           data = ErrorResponse.from_json response.body
           error_msgs = data.errors.map &.message
           error_msgs.should contain "no packages to clean"
-          error_msgs.should_not contain "received empty set from Prefix#clean_unused_packages; please report this strange bug"
+          response.status_code.should eq HTTP::Status::NOT_FOUND.value
         end
       end
       it "cleans a built package (build -> clean flow)" do

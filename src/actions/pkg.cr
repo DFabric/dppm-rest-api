@@ -12,8 +12,6 @@ module DppmRestApi::Actions::Pkg
     end
   end
 
-  # TODO: List available sources.
-
   # List built packages
   #
   # TODO optional pagination
