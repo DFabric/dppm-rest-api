@@ -34,10 +34,7 @@ module DppmRestApi::Actions::Pkg
     end
   end
 
-  struct QueryResponse
-    include JSON::Serializable
-    property data : Hash(String, Hash(String, String | Int64))
-  end
+  alias QueryResponse = APIResponse(Hash(String, Hash(String, String | Int64)))
 
   struct CleanResponse
     include JSON::Serializable

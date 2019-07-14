@@ -72,6 +72,10 @@ end
 Spec.after_suite do
   FileUtils.rm_rf Fixtures::DIR
 end
+struct APIResponse(T)
+  include JSON::Serializable
+  property data : T
+end
 
 # Set all configs back to the expected values, in case they changed
 Spec.before_each do
