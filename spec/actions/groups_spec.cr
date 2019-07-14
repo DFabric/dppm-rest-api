@@ -101,10 +101,35 @@ module DppmRestApi::Actions::Groups
       end
     end
   end
-  describe "delete #{fmt_route "/:id/route"}" do
+  describe "delete #{fmt_route "/:id/route/:path"}" do
     it "responds with 401 Forbidden" do
-      delete fmt_route "/some%2Froute/route"
+      delete fmt_route "/123/route/" + URI.escape "/some/path"
       assert_unauthorized response
+    end
+    it "revokes a user's permission on a given route" do
+      SpecHelper.without_authentication! do
+        DppmRestApi.permissions_config
+          .groups
+          .find { |grp| grp.id == 499 }
+          .not_nil!
+          .permissions["/fake/path"] = DppmRestApi::Config::Route.new Access::Read
+        delete fmt_route "/499/route/" + URI.escape "/fake/path"
+        assert_no_error in: response
+        DppmRestApi.permissions_config
+          .groups
+          .find { |grp| grp.id == 499 }
+          .not_nil!
+          .permissions["/fake/path"]?.should be_nil
+      end
+    end
+    it "responds with NOT FOUND when the path has already been deleted" do
+      SpecHelper.without_authentication! do
+        delete fmt_route "/499/route/" + URI.escape "/fake/path"
+        errors = ErrorResponse.from_json(response.body).errors
+        errors.map(&.type).should contain "DppmRestApi::Actions::NotFound"
+        errors.map(&.message).should contain "no permissions found at the specified path (possibly already deleted?)"
+        response.status_code.should eq HTTP::Status::NOT_FOUND.value
+      end
     end
   end
   describe "delete #{fmt_route "/:id/param/:path"}" do
@@ -122,7 +147,7 @@ module DppmRestApi::Actions::Groups
         default_group.permissions["/fake/path"] = Config::Route.new Access::Read, {"test" => ["param"]}
         DppmRestApi.permissions_config.groups[default_group_idx] = default_group
         DppmRestApi.permissions_config.sync_to_disk
-        delete fmt_route "/499/param/#{URI.escape "/fake/path"}"
+        delete fmt_route("/499/param/#{URI.escape "/fake/path"}"), body: {queryParameters: nil}.to_json
         assert_no_error in: response
         DppmRestApi.permissions_config
           .groups[default_group_idx]

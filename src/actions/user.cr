@@ -2,8 +2,6 @@ require "../config/helpers"
 
 module DppmRestApi
   module Actions::User
-    include Config::Helpers
-
     struct AddUserBody
       include JSON::Serializable
       getter name : String
@@ -14,6 +12,8 @@ module DppmRestApi
       # For testing
       def initialize(@name, @groups); end
     end
+
+    include Config::Helpers
 
     def optional_query_param(context : HTTP::Server::Context, key : String)
       context.params.query[key]?.try do |value|

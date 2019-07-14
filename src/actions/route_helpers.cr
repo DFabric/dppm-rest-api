@@ -3,11 +3,10 @@ require "./errors/*"
 # A series of route utilities functions that are useful to all of the Action blocks.
 module DppmRestApi::Actions::RouteHelpers
   macro included
-    ROOT_PATH = {{ "/" + @type.stringify.downcase.split("::").last }}
-
+    {% root_path = "/" + @type.stringify.downcase.split("::").last %}
     # Transform a relative route to an absolute one from the `ROOT_PATH`.
     def fmt_route(relative_route : String? = nil, namespace : Bool = false)
-      ROOT_PATH + (namespace ? "/:namespace" : "") + relative_route.to_s
+      {{root_path}} + (namespace ? "/:namespace" : "") + relative_route.to_s
     end
 
     {% for method in %w(get post put delete ws options) %}

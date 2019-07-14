@@ -34,6 +34,9 @@ def assert_no_error(in response : HTTP::Client::Response) : Nil
       str << "\n\t resulting in status_code code " << error.status_code if error.status_code
       str << "\n\n"
     end
+  rescue e : JSON::ParseException
+    puts "STATUS CODE WAS #{HTTP::Status.new response.status_code}"
+    fail "Response body <<HERE produced invalid JSON and raised #{e}.\n#{response.body}\nHERE\n"
   end
   fail response_errors
 end
@@ -72,6 +75,7 @@ end
 Spec.after_suite do
   FileUtils.rm_rf Fixtures::DIR
 end
+
 struct APIResponse(T)
   include JSON::Serializable
   property data : T
