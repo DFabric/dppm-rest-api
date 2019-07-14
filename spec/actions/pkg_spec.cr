@@ -134,6 +134,7 @@ module DppmRestApi::Actions::Pkg
       it "successfully deletes a package (build -> delete flow)" do
         build_test_package
         SpecHelper.without_authentication! do
+          build_test_package
           delete fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/delete"
           assert_no_error in: response
           DeleteResponse.from_json(response.body).should_be_successful_for "testapp"

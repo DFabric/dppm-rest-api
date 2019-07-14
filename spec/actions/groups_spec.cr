@@ -24,7 +24,7 @@ module DppmRestApi::Actions::Groups
         test_group = Config::Group.new id: 789, name: "Test group",
           permissions: {"/**" => Config::Route.new Access.deny, {"test" => ["param"]}}
         post fmt_route, body: test_group.to_json
-        pp! response.body
+        assert_no_error in: response
         response_data = AddGroupResponse.from_json response.body
         response_data.data[:successfullyAddedGroup].should eq test_group
       end
