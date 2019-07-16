@@ -72,5 +72,16 @@ module DppmRestApi
         end
       end
     end
+    relative_get "/me" do |context|
+      raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+      if me = Config::User.from_h context.current_user
+        build_json context.response do |response|
+          me.to_json response, except: :api_key_hash
+        end
+      else
+        raise InternalServerError.new context, "Parsing of #{context.current_user} failed!"
+      end
+      context.response.flush
+    end
   end
 end
