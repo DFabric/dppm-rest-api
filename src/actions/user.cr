@@ -55,10 +55,10 @@ module DppmRestApi
         resp.field "AccessKey", config_key
       end
     end
-    relative_delete do |context|
+    relative_delete "/:id" do |context|
       raise Unauthorized.new context unless Actions.has_access? context, Access::Delete
-      users_to_delete = selected_users_from_query
-      DppmRestApi.permissions_config.users.reject! { |user| users_to_delete.includes? user }
+      user_id = UUID.new context.params.url["id"]
+      DppmRestApi.permissions_config.users.reject! { |user| user.id == user_id }
       DppmRestApi.permissions_config.sync_to_disk
       build_json context.response do |json|
         json.field "status", "success"
@@ -66,15 +66,9 @@ module DppmRestApi
     end
     relative_get do |context|
       raise Unauthorized.new context unless Actions.has_access? context, Access::Read
-      build_json context.response do |json|
-        json.field "users" do
-          json.array do
-            selected_users_from_query do |user|
-              json.object do
-                json.field "name", value: user.name
-              end
-            end
-          end
+      build_json context.response do |response|
+        response.field "users" do
+          selected_users_from_query.to_json response
         end
       end
     end

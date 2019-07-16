@@ -1,6 +1,5 @@
 require "json"
-require "uuid"
-require "uuid/json"
+require "../ext/uuid"
 require "./group"
 
 struct DppmRestApi::Config::User

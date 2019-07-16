@@ -88,12 +88,13 @@ module DppmRestApi::Actions::User
   end
   describe "DELETE #{fmt_route nil}" do
     it "responds with 401 Forbidden" do
-      delete fmt_route
+      delete fmt_route '/' + UUID.random.to_s
       assert_unauthorized response
     end
     it "successfully deletes a user from the configuration" do
       SpecHelper.without_authentication! do
-        delete fmt_route "?match_name=#{URI.escape "Jim Oliver"}"
+        user_id = DppmRestApi.permissions_config.users.find { |user| user.name == "Jim Oliver" }.try &.id
+        delete fmt_route '/' + user_id.to_s
         assert_no_error in: response
         UserDeleteResponse.from_json(response.body).data.status.should eq "success"
         DppmRestApi.permissions_config.users.find { |user| user.name == "Jim Oliver" }.should be_nil
