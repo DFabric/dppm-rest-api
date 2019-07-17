@@ -46,7 +46,7 @@ module DppmRestApi::Actions::User
     getter data : Data
 
     def should_contain_user_named(name : String)
-      user = data.users.find { |u| u.name == name }
+      user = data.users.find &.name.== name
       fail "user named #{name} was not found in #{data.users}" if user.nil?
       user
     end
@@ -77,7 +77,7 @@ module DppmRestApi::Actions::User
         fail "response did not contain AccessKey" if key.nil?
         fail "response did not contain SuccessfullyAddedUser" if user.nil?
         user.name.should eq "Mock user"
-        if config_user = DppmRestApi.permissions_config.users.find { |u| u.name == user.name }
+        if config_user = DppmRestApi.permissions_config.users.find &.name.== user.name
           user.group_ids.should eq config_user.group_ids
           fail "key fails to authenticate user" unless config_user.api_key_hash.verify key
         else

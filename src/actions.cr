@@ -16,7 +16,6 @@ module DppmRestApi::Actions
   include Service
   include Src
   include User
-  include Users
   include Groups
 
   before_all do |context|

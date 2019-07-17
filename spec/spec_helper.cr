@@ -32,7 +32,7 @@ def assert_no_error(in response : HTTP::Client::Response) : Nil
     DppmRestApi::Actions::ErrorResponse.from_json(response.body).errors.each do |error|
       str << '\t' << error.type << ": " << error.message
       str << "\n\t resulting in status_code code " << error.status_code if error.status_code
-      str << '\n' << '\n'
+      str << "\n\n"
     end
   end
   fail response_errors
