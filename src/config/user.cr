@@ -16,7 +16,7 @@ struct DppmRestApi::Config::User
   end
 
   def self.new(api_key_hash string : String,
-               groups : Set(Int32),
+               groups : Enumerable(Int32),
                name : String,
                id : UUID)
     new Scrypt::Password.new(string), groups.to_set, name, id
@@ -82,7 +82,7 @@ struct DppmRestApi::Config::User
     builder.object do
       {% for ivar in @type.instance_vars %}
         unless except.includes? {{ivar.name.symbolize}}
-          builder.field({{ivar.name.stringify}}) { {{ivar}}.to_json builder }
+          builder.field({{ivar.name.stringify}}) { @{{ivar}}.to_json builder }
         end
       {% end %}
     end

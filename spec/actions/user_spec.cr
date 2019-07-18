@@ -17,6 +17,17 @@ module DppmRestApi::Actions::User
     getter data : Status
   end
 
+  # Reopen the handler to allow external encoding
+  class ::KemalJWTAuth::Handler < Kemal::Handler
+    def __test_encode(data)
+      encode data
+    end
+  end
+
+  def find_auth_handler
+    Kemal.config.handlers.find &.is_a? ::KemalJWTAuth::Handler
+  end
+
   struct UserGetResponse
     struct Data
       include JSON::Serializable
@@ -114,6 +125,27 @@ module DppmRestApi::Actions::User
         data.should_contain_user_named("Administrator").which_should_be_in_groups({0})
         data.should_contain_user_named("Jim Oliver").which_should_be_in_groups({499, 1000})
       end
+    end
+  end
+  describe "GET #{fmt_route "/me"}" do
+    it "responds with 401 Forbidden" do
+      get fmt_route "/me"
+      assert_unauthorized response
+    end
+    it "returns information about the user defined in the JWT" do
+      handler = (find_auth_handler || fail "failed to find the auth handler").as ::KemalJWTAuth::Handler
+      jim = DppmRestApi.permissions_config.users.find &.name.starts_with? "Jim"
+      fail "didn't find 'Jim' in config" if jim.nil?
+      jwt = handler.__test_encode jim.to_h
+      headers = HTTP::Headers.new
+      headers.add "X-Token", jwt
+      SpecHelper.without_authentication! do
+        get fmt_route("/me"), headers
+      end
+      assert_no_error in: response
+      data = JSON.parse(response.body)["data"]
+      data["currentUser"]["name"].as_s.should eq "Jim Oliver"
+      data["currentUser"]["group_ids"].as_a.should eq [499, 1000]
     end
   end
 end

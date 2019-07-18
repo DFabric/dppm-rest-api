@@ -76,9 +76,15 @@ module DppmRestApi
       raise Unauthorized.new context unless Actions.has_access? context, Access::Read
       if me = Config::User.from_h context.current_user
         build_json context.response do |response|
-          me.to_json response, except: :api_key_hash
+          response.field "currentUser" do
+            me.to_json response, except: :api_key_hash
+          end
         end
       else
+        log "\
+          Reaching this branch is genuinely a bug, probably in the generation \
+          of the JWT, perhaps in the kemal-jwt-auth external shard. See the \
+          logged exception."
         raise InternalServerError.new context, "Parsing of #{context.current_user} failed!"
       end
       context.response.flush
