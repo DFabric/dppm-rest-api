@@ -55,7 +55,8 @@ struct Fixtures
       group_ids: Set{499, 1000},
       api_key_hash: Scrypt::Password.create password: Fixtures::UserRawApiKeys::NORMAL_USER
     ),
-  ]
+  ],
+    filepath: Path[DIR, "permissions.json"]
 
   # Set all configs to the expected values.
   def reset_config
@@ -68,4 +69,7 @@ struct Fixtures
       DppmRestApi::Config.from_json file
     end
   end
+
+  # Used by the user add route
+  USER_BODY = DppmRestApi::Actions::User::AddUserBody.new name: "Mock user", groups: Set{0}
 end

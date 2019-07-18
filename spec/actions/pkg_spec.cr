@@ -62,17 +62,16 @@ module DppmRestApi::Actions::Pkg
       it "responds with an empty array" do
         SpecHelper.without_authentication! do
           get fmt_route '/' + DPPM::Prefix.default_source_name
-          response.status_code.should eq HTTP::Status::OK.value
+          assert_no_error in: response
           ListBuiltPkgsResponse.from_json(response.body).data.should be_empty
         end
       end
       it "responds with a recently built package (build -> list flow)" do
         SpecHelper.without_authentication! do
           post fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/build"
-          if response.status_code != HTTP::Status::OK.value
-            fail "building package 'testapp' (to test listing packages) due to " + ErrorResponse.from_json(response.body).errors.to_s
-          end
+          assert_no_error in: response
           get fmt_route '/' + DPPM::Prefix.default_source_name
+          assert_no_error in: response
           ListBuiltPkgsResponse.from_json(response.body)
             .data.map(&.package).should contain "testapp"
         end
@@ -86,19 +85,18 @@ module DppmRestApi::Actions::Pkg
       it "responds that there are no packages to clean" do
         SpecHelper.without_authentication! do
           delete fmt_route "/#{DPPM::Prefix.default_source_name}/clean"
-          # response.status_code.should eq 404
           data = ErrorResponse.from_json response.body
           error_msgs = data.errors.map &.message
           error_msgs.should contain "no packages to clean"
-          error_msgs.should_not contain "received empty set from Prefix#clean_unused_packages; please report this strange bug"
+          response.status_code.should eq HTTP::Status::NOT_FOUND.value
         end
       end
       it "cleans a built package (build -> clean flow)" do
         SpecHelper.without_authentication! do
           build_test_package
           delete fmt_route "/#{DPPM::Prefix.default_source_name}/clean"
+          assert_no_error in: response
           CleanResponse.from_json(response.body).should_contain_value_matching /^testapp_\d+\.\d+\.\d+$/
-          response.status_code.should eq HTTP::Status::OK.value
           Actions.prefix.each_pkg do |pkg|
             # There shouldn't be any packages
             fail "found package #{pkg.name} after cleaning"
@@ -115,7 +113,7 @@ module DppmRestApi::Actions::Pkg
         SpecHelper.without_authentication! do
           build_test_package
           get fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/query"
-          response.status_code.should eq HTTP::Status::OK.value
+          assert_no_error in: response
           response.body.should eq %<{"data":{"testapp":{"port":1,"host":"[::1]"}}}>
         end
       end
@@ -123,7 +121,7 @@ module DppmRestApi::Actions::Pkg
         SpecHelper.without_authentication! do
           build_test_package
           get fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/query?get=port&prefix=" + Fixtures::PREFIX_PATH.to_s
-          response.status_code.should eq HTTP::Status::OK.value
+          assert_no_error in: response
           QueryResponse.from_json(response.body).data["testapp"]["port"].should eq 1
         end
       end
@@ -134,12 +132,10 @@ module DppmRestApi::Actions::Pkg
         assert_unauthorized response
       end
       it "successfully deletes a package (build -> delete flow)" do
+        build_test_package
         SpecHelper.without_authentication! do
-          build_test_package
           delete fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/delete"
-          if response.status_code != HTTP::Status::OK.value
-            fail "deleting package 'testapp' due to " + ErrorResponse.from_json(response.body).errors.to_s
-          end
+          assert_no_error in: response
           DeleteResponse.from_json(response.body).should_be_successful_for "testapp"
         end
       end
@@ -153,9 +149,7 @@ module DppmRestApi::Actions::Pkg
     it "builds a test package" do
       SpecHelper.without_authentication! do
         post fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/build"
-        if response.status_code != HTTP::Status::OK.value
-          fail "POST '/#{DPPM::Prefix.default_source_name}/testapp/build' received status code " + HTTP::Status.new(response.status_code).to_s
-        end
+        assert_no_error in: response
         BuildResponse.from_json(response.body).should_be_successful_for "testapp"
       end
     end

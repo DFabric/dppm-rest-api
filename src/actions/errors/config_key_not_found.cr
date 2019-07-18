@@ -1,3 +1,5 @@
+require "./http_status_errors"
+
 module DppmRestApi::Actions
   class ConfigKeyNotFound < NotFound
     def self.new(context : HTTP::Server::Context,

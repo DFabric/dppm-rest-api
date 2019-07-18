@@ -2,6 +2,7 @@ require "./ext/scrypt_password"
 require "json"
 require "kemal_jwt_auth"
 require "dppm/prefix"
+require "./config/helpers"
 
 struct DppmRestApi::Config
   include JSON::Serializable
@@ -9,12 +10,15 @@ struct DppmRestApi::Config
   property groups : Array(Group)
   property users : Array(User)
 
+  @[JSON::Field(ignore: true)]
+  property filepath : Path { raise "the config filepath has not been set, cannot write to file." }
+
   def group_view(user : User) : GroupView
     GroupView.new user, groups
   end
 
   # :nodoc:
-  def initialize(@groups : Array(Group), @users : Array(User))
+  def initialize(@groups : Array(Group), @users : Array(User), @filepath = nil)
   end
 
   def find_and_authenticate!(body) : Config::User?
@@ -27,8 +31,12 @@ struct DppmRestApi::Config
     nil
   end
 
+  def sync_to_disk : Nil
+    write_to filepath
+  end
+
   @[AlwaysInline]
-  def write_to(path : String)
+  def write_to(path : String) : Nil
     write_to Path.new path
   end
 

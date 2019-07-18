@@ -25,6 +25,19 @@ macro assert_unauthorized(response)
   fail "expected error response not found" unless found
 end
 
+def assert_no_error(in response : HTTP::Client::Response) : Nil
+  return if response.status_code == 200
+  response_errors = String.build do |str|
+    str << "Failure! Reponse status code was #{response.status_code}\n"
+    DppmRestApi::Actions::ErrorResponse.from_json(response.body).errors.each do |error|
+      str << '\t' << error.type << ": " << error.message
+      str << "\n\t resulting in status_code code " << error.status_code if error.status_code
+      str << "\n\n"
+    end
+  end
+  fail response_errors
+end
+
 module DppmRestApi::SpecHelper
   def SpecHelper.without_authentication!
     Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) { true }

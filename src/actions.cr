@@ -15,6 +15,8 @@ module DppmRestApi::Actions
   include App
   include Service
   include Src
+  include User
+  include Groups
 
   before_all do |context|
     context.response.content_type = "application/json"

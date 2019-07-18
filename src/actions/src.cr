@@ -4,23 +4,20 @@ module DppmRestApi::Actions::Src
 
   # Lists available sources.
   relative_get do |context|
-    if Actions.has_access? context, Access::Read
-      JSON.build context.response do |json|
-        json.object do
-          json.field "data" do
-            json.array do
-              Actions.prefix.dppm_config.sources.each do |source_name, url|
-                json.object do
-                  json.field "source_name", source_name
-                  json.field "url", url
-                end
+    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    JSON.build context.response do |json|
+      json.object do
+        json.field "data" do
+          json.array do
+            Actions.prefix.dppm_config.sources.each do |source_name, url|
+              json.object do
+                json.field "source_name", source_name
+                json.field "url", url
               end
             end
           end
         end
       end
-      next context
     end
-    raise Unauthorized.new context
   end
 end

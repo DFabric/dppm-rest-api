@@ -18,7 +18,7 @@ module DppmRestApi::Actions
 
     getter context : HTTP::Server::Context
     def initialize(@context : HTTP::Server::Context, message : String? = nil, cause : ::Exception? = nil)
-      @context.response.status_code = self.status_code.value
+      @context.response.status_code = HTTP::Status::{{status_code}}.value
       message ||= HTTP::Status::{{status_code}}.description || {{status_code.stringify.capitalize.gsub /_/, " "}}
       super message, cause
     end
