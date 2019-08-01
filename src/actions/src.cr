@@ -5,18 +5,10 @@ module DppmRestApi::Actions::Src
   # Lists available sources.
   relative_get do |context|
     raise Unauthorized.new context unless Actions.has_access? context, Access::Read
-    JSON.build context.response do |json|
-      json.object do
-        json.field "data" do
-          json.array do
-            Actions.prefix.dppm_config.sources.each do |source_name, url|
-              json.object do
-                json.field "source_name", source_name
-                json.field "url", url
-              end
-            end
-          end
-        end
+    filters = RouteHelpers::Filters.new context
+    build_json context.response do |response|
+      response.field "sources" do
+        filters.srcs_json response, keys: context.params.query.fetch_all "return"
       end
     end
   end
