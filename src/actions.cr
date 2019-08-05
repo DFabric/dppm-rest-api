@@ -3,6 +3,7 @@ require "./ext/path"
 require "./ext/dppm_prefix_pkg_file"
 require "./access"
 require "./actions/route_helpers"
+require "./config"
 require "./actions/*"
 
 module DppmRestApi::Actions

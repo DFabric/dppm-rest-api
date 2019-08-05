@@ -18,11 +18,11 @@ shards:
 
   db:
     github: crystal-lang/crystal-db
-    version: 0.5.1
+    version: 0.6.0
 
   dppm:
     github: DFabric/dppm
-    commit: 9934bc5c0176e571f00f618b8999734c732ca026
+    commit: 1e0186ed46857d9eae2a02b2b30eb2345edc751a
 
   dynany:
     github: j8r/dynany
@@ -58,11 +58,11 @@ shards:
 
   libcrown:
     github: j8r/libcrown
-    version: 0.2.0
+    version: 0.2.1
 
   mysql:
     github: crystal-lang/crystal-mysql
-    version: 0.7.0
+    version: 0.8.0
 
   openssl_ext:
     github: stakach/openssl_ext
