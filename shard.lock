@@ -10,7 +10,7 @@ shards:
 
   con:
     github: j8r/con
-    version: 0.1.0
+    version: 0.2.0
 
   cossack:
     github: crystal-community/cossack
@@ -22,7 +22,7 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: 1e0186ed46857d9eae2a02b2b30eb2345edc751a
+    commit: 0275b36b2cc47a10be056f1e81827fe3415fb023
 
   dynany:
     github: j8r/dynany
@@ -46,7 +46,7 @@ shards:
 
   kemal:
     github: kemalcr/kemal
-    version: 0.25.2
+    version: 0.26.0
 
   kemal_jwt_auth:
     github: dscottboggs/kemal-jwt-auth
