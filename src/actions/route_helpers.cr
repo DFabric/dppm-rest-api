@@ -52,7 +52,7 @@ module DppmRestApi::Actions::RouteHelpers
   # example...
   # ```
   # build_json do
-  #   raise InternalServerError.new "oh no!"
+  #   raise InternalServerError.new "Oh no!"
   # end
   # ```
   # ...would result in the following response body...

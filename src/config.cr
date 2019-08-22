@@ -11,7 +11,7 @@ struct DppmRestApi::Config
   property users : Array(User)
 
   @[JSON::Field(ignore: true)]
-  property filepath : Path { raise "the config filepath has not been set, cannot write to file." }
+  property filepath : Path { raise "The config filepath has not been set, cannot write to file." }
 
   def group_view(user : User) : GroupView
     GroupView.new user, groups

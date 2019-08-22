@@ -246,7 +246,7 @@ module DppmRestApi::CLI
     output_io.puts "API key for user named '#{name}'"
     output_io.puts api_key
     if using_stdout
-      DPPM::CLI.confirm_prompt { raise "cancelled" }
+      DPPM::CLI.confirm_prompt { raise "Cancelled" }
     else
       output_io.close
     end
@@ -261,7 +261,7 @@ module DppmRestApi::CLI
       DppmRestApi::Config.from_json file
     end
     user_index = current_config.users.index { |usr| usr.id == user_id }
-    raise "no user found with id #{user_id}" if user_index.nil?
+    raise "No user found with id #{user_id}" if user_index.nil?
     user = current_config.users[user_index]
     # edit the user based on the non-nil arguments given by the user
     new_name.try do |specified_new_name|
@@ -296,11 +296,11 @@ module DppmRestApi::CLI
                 end
 
     user_index = current_config.users.index { |user| user.id == user_id }
-    raise "no user found with id #{user_id}" if user_index.nil?
+    raise "No user found with id #{user_id}" if user_index.nil?
     user = current_config.users[user_index]
     # Rekey the users that have made it through the filters
     new_key = Random::Secure.base64 24
-    output_io.puts "user named #{user.name} who has access to the \
+    output_io.puts "User named #{user.name} who has access to the \
                       groups #{current_config.group_view(user).groups} is now accessible via API key:"
     output_io.puts new_key
     user.api_key_hash = Scrypt::Password.create new_key
@@ -349,8 +349,9 @@ module DppmRestApi::CLI
       DppmRestApi::Config.from_json file
     end
     id_number = id.to_i? || abort "failed to convert group ID #{id} to an integer"
-    raise "a group with the id #{id} already exists" if current_config
-                                                          .groups.map(&.id).includes? id
+    if group = current_config.groups.find &.id.== id
+      raise "A group with the id #{id} already exists: " + group.name
+    end
     perms = Hash(String, DppmRestApi::Config::Route).from_json permissions
     new_group = DppmRestApi::Config::Group.new name, id_number, perms
     current_config.groups << new_group

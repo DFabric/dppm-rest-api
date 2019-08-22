@@ -55,7 +55,7 @@ enum DppmRestApi::Access : UInt8
   end
 
   def self.from_value(value : Int)
-    raise "invalid variant of Access recieved: #{value}" if value > Access::All.value || value < 0
+    raise "Invalid variant of Access recieved: #{value}" if 0 > value > Access::All.value
     variant = Access::None
     {% for variant in @type.constants %}
       variant |= {{variant.id}} if (value & {{variant.id}}.value) > 0

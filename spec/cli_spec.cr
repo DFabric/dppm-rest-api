@@ -99,7 +99,7 @@ module DppmRestApi::CLI
     end
     it "requires a valid user's UUID" do
       bogus_id = UUID.random
-      expect_raises Exception, message: "no user found with id #{bogus_id}" do
+      expect_raises Exception, message: "No user found with id #{bogus_id}" do
         edit_users user_id: bogus_id, new_name: "xyz", data_dir: Fixtures::DIR, add_groups: nil, remove_groups: nil
       end
     end

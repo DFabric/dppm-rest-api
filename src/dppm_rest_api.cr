@@ -8,7 +8,7 @@ module DppmRestApi
   PERMISSIONS_FILE = "permissions.json"
 
   class_property permissions_config : Config do
-    raise "no permissions file is defined!"
+    raise "No permissions file is defined!"
   end
 
   def self.access_filter(context : HTTP::Server::Context, permission : Access) : Bool
