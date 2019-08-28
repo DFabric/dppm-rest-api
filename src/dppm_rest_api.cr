@@ -28,10 +28,11 @@ module DppmRestApi
     host : String,
     port : Int32,
     data_dir : String,
+    webui_folder : Path? = nil,
     prefix : String = DPPM::Prefix.default,
     access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->access_filter(HTTP::Server::Context, Access)
   )
-    run host, port, data_dir, DPPM::Prefix.new(prefix), access_filter
+    run host, port, data_dir, DPPM::Prefix.new(prefix), webui_folder, access_filter
   end
 
   def self.run(
@@ -39,6 +40,7 @@ module DppmRestApi
     port : Int32,
     data_dir : String,
     prefix : DPPM::Prefix,
+    webui_folder : Path? = nil,
     access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->access_filter(HTTP::Server::Context, Access)
   )
     filepath = Path[data_dir, PERMISSIONS_FILE]
@@ -67,6 +69,7 @@ module DppmRestApi
     end
     {% end %}
 
+    public_folder path: webui_folder.to_s if webui_folder
     # Kemal doesn't like IPV6 brackets
     Kemal.config.host_binding = host.lchop('[').rchop(']')
     Kemal.run port: port

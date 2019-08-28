@@ -31,6 +31,10 @@ module DppmRestApi::CLI
                 info:    "port to bind",
                 default: DPPM::Prefix.default_dppm_config.port,
               },
+              webui_folder: {
+                info: "the directory where the compile web interface has been placed.",
+                default: nil
+              }
             },
           },
           user: {
@@ -216,7 +220,7 @@ module DppmRestApi::CLI
     {% end %}
   end
 
-  def run_server(config, host, port, data_dir)
+  def run_server(config, host, port, data_dir, webui_folder)
     if port.is_a? String
       port = port.to_i
     end
@@ -225,7 +229,8 @@ module DppmRestApi::CLI
       port ||= dppm_config.port
       host ||= dppm_config.host
     end
-    DppmRestApi.run host, port, data_dir
+    DppmRestApi.run host: host, port: port, data_dir: data_dir,
+      webui_folder: webui_folder ? Path[webui_folder] : nil
   end
 
   def add_user(name, groups, data_dir, output_file) : Nil
