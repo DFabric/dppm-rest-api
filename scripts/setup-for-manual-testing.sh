@@ -19,7 +19,7 @@ make_admin() {
           "query_parameters": { }
         }
       }'
-  bin/dppm server add_user name=admin groups=0
+  bin/dppm server user add name=admin groups=0
 }
 
 DATA_DIR="${DATA_DIR:-"$PWD/data"}"
@@ -32,7 +32,7 @@ echo '{"groups":[], "users": []}' > $DATA_DIR/permissions.json
 
 shards build
 bin/dppm server group add "name=${DPPM_USER}s group" id=$GROUP_ID
-bin/dppm server add_user "name=$DPPM_USER" groups=$GROUP_ID
+bin/dppm server user add "name=$DPPM_USER" groups=$GROUP_ID
 
 if [ $ADMIN = yes ]; then
   make_admin
