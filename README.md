@@ -6,6 +6,10 @@
 
 REST API for [DPPM](https://github.com/DFabric/dppm), an installer/manager of server applications.
 
+## Documentation
+
+https://dfabric.github.io/dppm-rest-api
+
 ## Development
 
 You will need a [Crystal](https://crystal-lang.org) development environment.
