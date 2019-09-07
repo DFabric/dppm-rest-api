@@ -35,6 +35,7 @@ struct DppmRestApi::Config::Group
 
   DEFAULT_PERMISSIONS = {
     "/**"                       => Route.new(Access.deny),
+    "/user/me"                  => Route.new(Access::Read),
     "/{app,pkg,src,service}/**" => Route.new(
       Access::All,
       {"namespace" => ["default-namespace"]}),
