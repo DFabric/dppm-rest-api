@@ -50,9 +50,9 @@ module DppmRestApi::Actions::Pkg
   relative_get "/:source_name/:package_name/query" do |context|
     raise Unauthorized.new context unless Actions.has_access? context, Access::Read
     prefix = get_prefix_with_source_name context
-    package_name = URI.unescape context.params.url["package_name"]
+    package_name = URI.decode context.params.url["package_name"]
 
-    version = context.params.query["version"]?.try { |v| URI.unescape v }
+    version = context.params.query["version"]?.try { |v| URI.decode v }
     # Iterate over the packages to find the relevant one.
     selected_pkg = prefix.new_pkg package_name, version
     raise NoSuchPackage.new context, package_name unless selected_pkg.exists?
@@ -90,9 +90,9 @@ module DppmRestApi::Actions::Pkg
   relative_delete "/:source_name/:package_name/delete" do |context|
     raise Unauthorized.new context unless Actions.has_access? context, Access::Delete
     prefix = get_prefix_with_source_name context
-    package_name = URI.unescape context.params.url["package_name"]
+    package_name = URI.decode context.params.url["package_name"]
     selected_pkg = prefix.new_pkg package_name,
-      context.params.query["version"]?
+      context.params.query["version"]?.try { |v| URI.decode v }
     raise NoSuchPackage.new context, package_name if selected_pkg.nil?
     selected_pkg.delete confirmation: false { }
     build_json context.response do |json|
@@ -108,7 +108,7 @@ module DppmRestApi::Actions::Pkg
   # This route takes the optional query parameters "version" and "tag".
   relative_post "/:source_name/:package_name/build" do |context|
     raise Unauthorized.new context unless Actions.has_access? context, Access::Create
-    package_name = URI.unescape context.params.url["package_name"]
+    package_name = URI.decode context.params.url["package_name"]
     prefix = get_prefix_with_source_name context
 
     init_done = false

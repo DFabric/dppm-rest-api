@@ -73,7 +73,7 @@ module DppmRestApi::Actions::RouteHelpers
     DPPM::Prefix.new(
       path: Actions.prefix.path.to_s,
       group: Actions.prefix.group,
-      source_name: URI.unescape(context.params.url["source_name"]),
+      source_name: URI.decode(context.params.url["source_name"]),
       source_path: Actions.prefix.source_path
     ).tap &.ensure_pkg_dir
   end

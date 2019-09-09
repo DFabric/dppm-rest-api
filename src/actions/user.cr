@@ -15,7 +15,7 @@ module DppmRestApi
 
     def optional_query_param(context : HTTP::Server::Context, key : String)
       context.params.query[key]?.try do |value|
-        URI.unescape value
+        URI.decode value
       end
     end
 
