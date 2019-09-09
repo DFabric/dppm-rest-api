@@ -10,7 +10,7 @@ shards:
 
   con:
     github: j8r/con
-    version: 0.2.0
+    version: 0.2.1
 
   cossack:
     github: crystal-community/cossack
@@ -22,7 +22,7 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: 2196fc2b3e77df119ff534d2b8b9c264466e107e
+    commit: 092a25c128ce6191af95cb45d63a5506b5760848
 
   dynany:
     github: j8r/dynany
@@ -38,7 +38,7 @@ shards:
 
   inotify:
     github: petoem/inotify.cr
-    version: 1.0.0
+    version: 1.0.1
 
   jwt:
     github: crystal-community/jwt
