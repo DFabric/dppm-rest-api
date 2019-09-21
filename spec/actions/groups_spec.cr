@@ -6,12 +6,6 @@ module DppmRestApi::Actions::Groups
     include JSON::Serializable
   end
 
-  struct ChangedGroup
-    include JSON::Serializable
-    property from : Config::Group
-    property to : Config::Group
-  end
-
   describe "post #{self}" do
     it "responds with 401 Forbidden" do
       post fmt_route
@@ -31,8 +25,7 @@ module DppmRestApi::Actions::Groups
           permissions: {"/**" => Config::Route.new Access.deny, {"test" => ["param"]}}
         post fmt_route, body: test_group.to_json
         assert_no_error in: response
-        response_data = AddGroupResponse.from_json response.body
-        response_data.data[:successfullyAddedGroup].should eq test_group
+        DppmRestApi.permissions_config.groups.find(&.id.== 789).should eq test_group
       end
     end
   end
@@ -46,8 +39,8 @@ module DppmRestApi::Actions::Groups
         put fmt_route("/1000/route/#{URI.escape "/fake/path"}/create?name=test%20group"),
           body: {"q" => ["param"]}.to_json
         assert_no_error in: response
-        resp = APIResponse(NamedTuple(successfullyModifiedGroup: ChangedGroup)).from_json response.body
-        new_grp = resp.data[:successfullyModifiedGroup].to
+        new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
+        fail "group with ID 1000 not found" if new_grp.nil?
         new_grp.permissions["/fake/path"].permissions.should eq Access::Create
         new_grp.permissions["/fake/path"].query_parameters["q"].should eq ["param"]
         new_grp.name.should eq "test group"
@@ -57,15 +50,15 @@ module DppmRestApi::Actions::Groups
       SpecHelper.without_authentication! do
         put fmt_route("/1000/route/#{URI.escape "/fake/path"}/create?name=test%20group")
         assert_no_error in: response
-        resp = APIResponse(NamedTuple(successfullyModifiedGroup: ChangedGroup)).from_json response.body
-        new_grp = resp.data[:successfullyModifiedGroup].to
+        new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
+        fail "group with ID 1000 not found" if new_grp.nil?
         new_grp.permissions["/fake/path"].permissions.should eq Access::Create
         new_grp.permissions["/fake/path"].query_parameters.empty?.should be_true
         put fmt_route("/1000/route/#{URI.escape "/fake/path"}/create?name=test%20group"),
           body: {"q" => ["param"]}.to_json
         assert_no_error in: response
-        resp = APIResponse(NamedTuple(successfullyModifiedGroup: ChangedGroup)).from_json response.body
-        new_grp = resp.data[:successfullyModifiedGroup].to
+        new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
+        fail "group with ID 1000 not found" if new_grp.nil?
         new_grp.permissions["/fake/path"].permissions.should eq Access::Create
         new_grp.permissions["/fake/path"].query_parameters["q"].should eq ["param"]
       end
@@ -75,15 +68,15 @@ module DppmRestApi::Actions::Groups
         put fmt_route("/1000/route/#{URI.escape "/fake/path"}/create?name=test%20group"),
           body: {"q" => ["param"]}.to_json
         assert_no_error in: response
-        resp = APIResponse(NamedTuple(successfullyModifiedGroup: ChangedGroup)).from_json response.body
-        new_grp = resp.data[:successfullyModifiedGroup].to
+        new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
+        fail "group with ID 1000 not found" if new_grp.nil?
         new_grp.permissions["/fake/path"].permissions.should eq Access::Create
         new_grp.permissions["/fake/path"].query_parameters["q"].should eq ["param"]
         put fmt_route("/1000/route/#{URI.escape "/fake/path"}/create?name=test%20group"),
           body: {"q" => ["another-param"]}.to_json
         assert_no_error in: response
-        resp = APIResponse(NamedTuple(successfullyModifiedGroup: ChangedGroup)).from_json response.body
-        new_grp = resp.data[:successfullyModifiedGroup].to
+        new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
+        fail "group with ID 1000 not found" if new_grp.nil?
         new_grp.permissions["/fake/path"].permissions.should eq Access::Create
         new_grp.permissions["/fake/path"].query_parameters["q"].should eq ["param", "another-param"]
       end

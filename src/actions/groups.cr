@@ -34,9 +34,6 @@ module DppmRestApi::Actions::Groups
     group = Config::Group.from_json body
     DppmRestApi.permissions_config.groups << group
     DppmRestApi.permissions_config.sync_to_disk
-    build_json context.response do |response|
-      response.field("successfullyAddedGroup") { group.to_json response }
-    end
   end
   # Regardless of whether the given path exists on the given group, set the
   # group's access level on that path to the given access level.
@@ -74,14 +71,6 @@ module DppmRestApi::Actions::Groups
     group.permissions[path] = Config::Route.new access_level, existing_params
     # and overwrite the current value.
     DppmRestApi.permissions_config.groups[index] = group
-    build_json context.response do |response|
-      response.field "successfullyModifiedGroup" do
-        response.object do
-          response.field("from") { old_group.to_json response }
-          response.field("to") { group.to_json response }
-        end
-      end
-    end
   end
   # Remove specific query parameters from this path/access-level for this
   # group. The query parameters may be specified via query parameters like:
@@ -131,9 +120,6 @@ module DppmRestApi::Actions::Groups
     group.permissions[path] = route
     DppmRestApi.permissions_config.groups[group_idx] = group
     DppmRestApi.permissions_config.sync_to_disk
-    build_json context.response do |json|
-      json.field "status", "success"
-    end
   end
 
   relative_delete "/:id/route/:path" do |context|
@@ -149,9 +135,6 @@ module DppmRestApi::Actions::Groups
       "no permissions found at the specified path (possibly already \
         deleted?)" if deleted.nil?
     DppmRestApi.permissions_config.sync_to_disk
-    build_json context.response do |response|
-      response.field ("deleted") { deleted.to_json response }
-    end
   end
 
   relative_delete "/:id" do |context|
@@ -163,11 +146,7 @@ module DppmRestApi::Actions::Groups
       .groups
       .index { |group| group.id == group_id }
     raise NoSuchGroup.new context, group_id_s if to_be_deleted.nil?
-    group = DppmRestApi.permissions_config.groups[to_be_deleted]
     DppmRestApi.permissions_config.groups.delete_at to_be_deleted
     DppmRestApi.permissions_config.sync_to_disk
-    build_json context.response do |response|
-      response.field("successfullyDeletedGroup") { group.to_json response }
-    end
   end
 end
