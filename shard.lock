@@ -18,11 +18,11 @@ shards:
 
   db:
     github: crystal-lang/crystal-db
-    version: 0.6.0
+    version: 0.7.0
 
   dppm:
     github: DFabric/dppm
-    commit: d94145d4a44e0877691cff28673aa7f07b684f00
+    commit: d5e1d66b28b6200e15041915b94c6b28baa2775d
 
   dynany:
     github: j8r/dynany
@@ -62,7 +62,7 @@ shards:
 
   mysql:
     github: crystal-lang/crystal-mysql
-    version: 0.8.0
+    version: 0.9.0
 
   openssl_ext:
     github: stakach/openssl_ext
@@ -78,7 +78,7 @@ shards:
 
   semantic_compare:
     github: j8r/semantic_compare
-    version: 0.4.0
+    version: 0.5.0
 
   spec-kemal:
     github: kemalcr/spec-kemal
