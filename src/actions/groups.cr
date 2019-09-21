@@ -120,14 +120,17 @@ module DppmRestApi::Actions::Groups
         on the path glob #{path}."
     next route.query_parameters.clear if context.request.query_params.empty?
     route.query_parameters.each do |key, values|
-      next unless route.query_parameters.has_key? key
-      specified = context.request.query_params.fetch_all key
+      next unless context.request.query_params.has_key? key
+      specified = context.request.query_params.fetch_all(key).reject &.empty?
       if specified.empty?
         route.query_parameters.delete key
       else
-        pp!(values, specified, (route.query_parameters[key] = values - specified))
+        route.query_parameters[key] = values - specified
       end
     end
+    group.permissions[path] = route
+    DppmRestApi.permissions_config.groups[group_idx] = group
+    DppmRestApi.permissions_config.sync_to_disk
     build_json context.response do |json|
       json.field "status", "success"
     end

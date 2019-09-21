@@ -168,7 +168,7 @@ module DppmRestApi::Actions::Groups
           {"test1" => ["param1", "param2"], "test2" => ["param1", "param2"]}
         DppmRestApi.permissions_config.groups[default_group_idx] = default_group
         DppmRestApi.permissions_config.sync_to_disk
-        delete fmt_route "/499/param/#{URI.escape "/fake/path"}?key=test1"
+        delete fmt_route "/499/param/#{URI.escape "/fake/path"}?test1"
         assert_no_error in: response
         DppmRestApi.permissions_config
           .groups[default_group_idx]
@@ -187,7 +187,7 @@ module DppmRestApi::Actions::Groups
           {"test1" => ["param1", "param2"], "test2" => ["param1", "param2"]}
         DppmRestApi.permissions_config.groups[default_group_idx] = default_group
         DppmRestApi.permissions_config.sync_to_disk
-        delete fmt_route "/499/param/#{URI.escape "/fake/path"}?key=test1&value=param1"
+        delete fmt_route "/499/param/#{URI.escape "/fake/path"}?test1=param1"
         assert_no_error in: response
         DppmRestApi.permissions_config
           .groups[default_group_idx]

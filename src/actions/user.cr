@@ -37,7 +37,7 @@ module DppmRestApi
     extend self
     include RouteHelpers
     relative_post do |context|
-      Actions.has_access? context, Access::Create
+      raise Unauthorized.new context unless Actions.has_access? context, Access::Create
       userdata = begin
         if body = context.request.body
           AddUserBody.from_json body
@@ -47,31 +47,14 @@ module DppmRestApi
       rescue e : JSON::ParseException
         raise BadRequest.new context, cause: e
       end
-    end
-
-    extend self
-    include RouteHelpers
-    relative_post nil do |context|
-      if Actions.has_access? context, Access::Create
-        userdata = begin
-          if body = context.request.body
-            AddUserBody.from_json body
-          else
-            raise BadRequest.new context, "adding a user requires a request body"
-          end
-        rescue e : JSON::ParseException
-          raise BadRequest.new context, cause: e
+      config_key, user = Config::User.create userdata.groups, userdata.name
+      DppmRestApi.permissions_config.users << user
+      DppmRestApi.permissions_config.sync_to_disk
+      build_json context.response do |resp|
+        resp.field "SuccessfullyAddedUser" do
+          user.to_json resp, except: :api_key_hash
         end
-        config_key, user = Config::User.create userdata.groups, userdata.name
-        DppmRestApi.permissions_config.users << user
-        DppmRestApi.permissions_config.sync_to_disk
-        build_json context.response do |resp|
-          resp.field "SuccessfullyAddedUser" do
-            user.to_json resp, except: :api_key_hash
-          end
-          resp.field "AccessKey", config_key
-        end
-        next context
+        resp.field "AccessKey", config_key
       end
     end
     relative_delete "/:id" do |context|
