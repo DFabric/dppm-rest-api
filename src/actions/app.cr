@@ -1,4 +1,5 @@
 require "dppm"
+# require "../config/route"
 require "dppm/prefix"
 
 module DppmRestApi::Actions::App
@@ -26,7 +27,7 @@ module DppmRestApi::Actions::App
           json.field name: key, value: app.get_config key
         rescue error : ConfigKeyError
           raise NotFound.new context,
-            message: "while iterating over each config key (this probably indicates a bug -- please let us know!)",
+            message: "Error while iterating over each config key (this probably indicates a bug -- please let us know!)",
             cause: error
         end
       end
@@ -49,86 +50,163 @@ module DppmRestApi::Actions::App
       end
     end
   end
+
   relative_post "/:app_name/config/:key" do |context|
     Actions.has_access? context, Access::Create
     set_config context, context.params.url["key"], context.params.url["app_name"]
   end
+
   relative_put "/:app_name/config/:key" do |context|
     Actions.has_access? context, Access::Update
     set_config context, context.params.url["key"], context.params.url["app_name"]
   end
+
   relative_delete "/:app_name/config/:key" do |context|
     Actions.has_access? context, Access::Delete
     Actions.prefix
       .new_app(context.params.url["app_name"])
       .del_config context.params.url["key"]
   end
+
   # All keys, or all config options
   relative_get "/:app_name/config" do |context|
-    app_name = context.params.url["app_name"]
     Actions.has_access? context, Access::Read
+    app_name = context.params.url["app_name"]
     dump_config context, Actions.prefix.new_app(app_name)
   end
+
   # start the service associated with the given application
   relative_put "/:app_name/service/boot" do |context|
     Actions.has_access? context, Access::Update
-    # TODO: boot the service
+    app_name = context.params.url["app_name"]
+    app = Actions.prefix.new_app(app_name)
+    # TODO: rescue and raise an error if service does not exist
+    app.service.boot(parse_boolean_param "value", context)
   end
-  # reload the service associated with the given application
-  relative_put "/:app_name/service/reload" do |context|
+
+  {% for action in %w(reload restart start stop) %}
+  # {[action.id]} the service associated with the given application
+  relative_put "/:app_name/service/{{action.id}}" do |context|
     Actions.has_access? context, Access::Update
-    # TODO: reload the service
+    app_name = context.params.url["app_name"]
+    app = Actions.prefix.new_app(app_name)
+    # TODO: rescue and raise an error if service does not exist
+    app.service.{{action.id}}
   end
-  # restart the service associated with the given application
-  relative_put "/:app_name/service/restart" do |context|
-    Actions.has_access? context, Access::Update
-    # TODO: reboot the service
-  end
-  # start the service associated with the given application
-  relative_put "/:app_name/service/start" do |context|
-    Actions.has_access? context, Access::Update
-    # TODO: start the service
-  end
+
+  {% end %}
+
   # get the status of the service associated with the given application
   relative_get "/:app_name/service/status" do |context|
     Actions.has_access? context, Access::Read
+    app_name = context.params.url["app_name"]
     # TODO: get the status of the service
   end
-  # stop the service associated with the given application
-  relative_put "/:app_name/service/stop" do |context|
-    Actions.has_access? context, Access::Update
-    # TODO: stop the service
-  end
+
   # lists dependent library packages
   relative_get "/:app_name/libs" do |context|
     Actions.has_access? context, Access::Read
     # TODO: list dependencies
   end
+
   # return the base application package
   relative_get "/:app_name/app" do |context|
     Actions.has_access? context, Access::Read
-    # TODO: return the base application package
+    app_name = context.params.url["app_name"]
+    build_json context.response do |builder|
+      builder.field(app_name) do
+        # Actions.prefix.new_app(app_name).to_json builder
+      end
+    end
   end
+
   # returns information present in pkg.con as JSON
   relative_get "/:app_name/pkg" do |context|
     Actions.has_access? context, Access::Read
-    # TODO: return package data
+    app_name = context.params.url["app_name"]
+    build_json context.response do |builder|
+      builder.field(app_name) do
+        # Actions.prefix.new_app(app_name).pkg.to_json builder
+      end
+    end
   end
+
+  def valid_streams_for(app : DPPM::Prefix::App)
+    Array(String).new.tap do |streams|
+      app.each_log_stream { |stream| streams << stream }
+    end
+  end
+
+  relative_get "/:app_name/valid-log-streams" do |context|
+    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    build_json context.response do |builder|
+      builder.array do
+        Actions
+          .prefix
+          .new_app(context.params.url["app_name"])
+          .each_log_stream { |stream| builder.string stream }
+      end
+    end
+  end
+
   # if the `"stream"` query parameter is set, attempt to upgrade to a websocket
   # and stream the results. Otherwise return a JSON-formatted output of the
   # current log data.
   relative_get "/:app_name/logs" do |context|
-    Actions.has_access? context, Access::Read
-    # TODO: upgrade to websocket or output logs to date
+    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    app_name = context.params.url["app_name"]
+    app = Actions.prefix.new_app app_name
+    valid_streams = valid_streams_for app
+    stream_names = context.params.query.fetch_all("stream_type") || valid_streams
+    # filter irrellevant values
+    stream_names &= valid_streams
+    if context.params.query["stream"]?
+      raise BadRequest.new context, "\
+        You must use separate requests to stream more than one log stream. A \
+        stream can be selected using the query parameter stream_type." if stream_names.size != 1
+      context.response.upgrade do |socket|
+        app.get_logs(
+          stream_names.first,
+          follow: true,
+          lines: context.params.query["lines"]?.try &.to_i
+        ) { |line| socket.puts line }
+      end
+    else
+      JSON.build context.response do |builder|
+        builder.object do
+          builder.field "data" do
+            builder.object do
+              stream_names.each do |stream|
+                builder.field stream do
+                  builder.array do
+                    app.get_logs stream, follow: false, lines: context.params.query["lines"]?.try(&.to_i) do |line|
+                      builder.string line
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
   end
+
   # Install the given package
   relative_put "/:app_name" do |context|
     Actions.has_access? context, Access::Create
     # TODO: install the package and return its name
   end
+
   # Delete the given application
   relative_delete "/:app_name" do |context|
     Actions.has_access? context, Access::Delete
-    # TODO: delete the app
+    app_name = context.params.url["app_name"]
+    Actions.prefix
+      .new_app(app_name)
+      .delete(
+        false,
+        parse_boolean_param("preserve_database", from: context),
+        parse_boolean_param("keep_user_group", from: context)) { true }
   end
 end
