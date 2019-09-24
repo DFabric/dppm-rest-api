@@ -12,21 +12,21 @@ enum DppmRestApi::Access : UInt8
 
   def self.new(pull parser : JSON::PullParser) : Access
     case parser.kind
-    when :int
+    when .int?
       number = parser.read_int
       from_value number
-    when :string
+    when .string?
       read = parser.read_string
       if read.includes? '|'
         value = Access::None
-        read.split('|').each do |substr|
+        read.split '|' do |substr|
           value |= parse substr.strip
         end
         value
       else
         parse read
       end
-    when :begin_array
+    when .begin_array?
       value = Access::None
       parser.read_array do
         str = parser.read_string

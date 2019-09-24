@@ -32,7 +32,7 @@ steps:
   - name: cache
     path: /root/.cache
   commands:
-  - crystal spec --warnings all
+  - crystal spec --warnings all --error-on-warning
 
 - name: build docs
   image: jrei/crystal-alpine
