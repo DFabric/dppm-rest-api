@@ -47,7 +47,7 @@ module DppmRestApi::SpecHelper
   end
 end
 
-DPPM::Log.output = DPPM::Log.error = File.open File::NULL, "w"
+DPPM::Logger.output = DPPM::Logger.error = File.open File::NULL, "w"
 Kemal.config.env = "test"
 FileUtils.mkdir_p Fixtures::DIR.to_s
 at_exit { FileUtils.rm_rf Fixtures::DIR.to_s }

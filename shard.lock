@@ -10,7 +10,7 @@ shards:
 
   con:
     github: j8r/con
-    version: 0.2.1
+    version: 0.2.2
 
   cossack:
     github: crystal-community/cossack
@@ -22,7 +22,7 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: d5e1d66b28b6200e15041915b94c6b28baa2775d
+    commit: 2d57d194787db33b5ed679f866fb19445fa20884
 
   dynany:
     github: j8r/dynany
@@ -42,7 +42,7 @@ shards:
 
   jwt:
     github: crystal-community/jwt
-    version: 1.1.1
+    version: 1.1.2
 
   kemal:
     github: kemalcr/kemal
@@ -58,7 +58,7 @@ shards:
 
   libcrown:
     github: j8r/libcrown
-    version: 0.2.1
+    version: 0.3.0
 
   mysql:
     github: crystal-lang/crystal-mysql
@@ -74,7 +74,7 @@ shards:
 
   scrypt:
     github: ysbaddaden/scrypt-crystal
-    version: 0.3.0
+    version: 0.3.1
 
   semantic_compare:
     github: j8r/semantic_compare
@@ -85,6 +85,6 @@ shards:
     version: 0.5.0
 
   tail:
-    github: j8r/tail
-    version: 0.2.2
+    github: j8r/tail.cr
+    version: 0.3.0
 
