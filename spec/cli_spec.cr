@@ -63,9 +63,7 @@ module DppmRestApi::CLI
     end
     describe "#add_user" do
       it "adds a user" do
-        tmp = File.tempname
-        add_user name: "added user", groups: "500", data_dir: Fixtures::DIR, output_file: tmp
-        key = File.read_lines(tmp)[1]
+        key = add_user name: "added user", groups: "500", data_dir: Fixtures::DIR
         config = Fixtures.new_config
         if user = config.users.find { |usr| usr.name == "added user" }
           user.api_key_hash.verify(key).should be_true
@@ -76,13 +74,13 @@ module DppmRestApi::CLI
       end
     end
     require_arg "data-dir" do
-      add_user name: "something", groups: "1,2,3", data_dir: nil, output_file: nil
+      add_user name: "something", groups: "1,2,3", data_dir: nil
     end
     require_arg :name do
-      add_user name: nil, groups: "1,2,3", data_dir: "/tmp", output_file: nil
+      add_user name: nil, groups: "1,2,3", data_dir: "/tmp"
     end
     require_arg :groups do
-      add_user name: "somethign", groups: nil, data_dir: "/tmp", output_file: nil
+      add_user name: "somethign", groups: nil, data_dir: "/tmp"
     end
   end
   describe "#edit_users" do
@@ -120,22 +118,19 @@ module DppmRestApi::CLI
   end
   describe "#rekey_users" do
     it "rekeys a user" do
-      data_file = File.tempfile
       admin = DppmRestApi.permissions_config
         .users
         .find { |usr| usr.name == "Administrator" }
         .not_nil!
       orig_key_hash = admin.api_key_hash
-      rekey_users user_id: admin.id,
-        data_dir: Fixtures::DIR,
-        output_file: data_file.path
-      new_key = File.read_lines(data_file.path)[1]
+      new_key = rekey_users user_id: admin.id, data_dir: Fixtures::DIR
+
       admin = Fixtures.new_config.users.find { |usr| usr.name == "Administrator" }.not_nil!
       admin.api_key_hash.verify(new_key).should be_true
       orig_key_hash.verify(new_key).should be_false
     end
     require_arg "data-dir" do
-      rekey_users user_id: nil, data_dir: nil, output_file: nil
+      rekey_users user_id: nil, data_dir: nil
     end
   end
   describe "#delete_users" do
@@ -152,21 +147,16 @@ module DppmRestApi::CLI
   end
   describe "#show_users" do
     it "outputs the known userdata" do
-      tmp = File.tempname "permissions", ".json"
-      show_users data_dir: Fixtures::DIR,
-        output_file: tmp,
+      config = show_users data_dir: Fixtures::DIR,
         match_name: "/.*/",
         match_groups: nil,
         api_key: nil
-      File.open tmp do |file|
-        config = Array(Config::User).from_json file
-        config.find(&.name.==("Administrator")).not_nil!.group_ids.should eq Set{0}
-        config.find(&.name.==("Jim Oliver")).not_nil!.group_ids.should eq Set{499, 1000}
-      end
-      File.delete tmp
+
+      config.find(&.name.==("Administrator")).not_nil!.group_ids.should eq Set{0}
+      config.find(&.name.==("Jim Oliver")).not_nil!.group_ids.should eq Set{499, 1000}
     end
     require_arg "data-dir" do
-      show_users match_name: nil, match_groups: nil, api_key: nil, data_dir: nil, output_file: nil
+      show_users match_name: nil, match_groups: nil, api_key: nil, data_dir: nil
     end
   end
   describe "#add_group" do

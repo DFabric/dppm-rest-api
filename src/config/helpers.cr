@@ -22,7 +22,7 @@ module DppmRestApi
 
       # select the users from the current configuration according to the name,
       # groups the user is a member of, and/or the user's API key.
-      def selected_users(match_name, match_groups, api_key, from users_list)
+      def selected_users(match_name, match_groups, api_key, from users_list) : Array(DppmRestApi::Config::User)
         # Filter by name
         if name = match_name
           if stripped_name = name.lchop?('/').try(&.rchop?('/'))

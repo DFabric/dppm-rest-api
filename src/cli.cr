@@ -49,20 +49,17 @@ module DppmRestApi::CLI
             commands: {
               add: {
                 alias:     'a',
-                info:      "Add a user",
-                action:    "DppmRestApi::CLI.add_user",
+                info:      "Add an user, and returns an API key",
+                action:    "DPPM::Logger.output.puts DppmRestApi::CLI.add_user",
                 inherit:   \%w(data_dir),
                 variables: {
                   name: {
                     info: "Human-readable name of the user; use quotes if you want" +
-                          %<to have spaces in the name, like name="Scott Boggs">,
+                          %<to have spaces in the name, like name="Foo Bar">,
                   },
                   groups: {
                     info: "Comma-separated list of group IDs for which the user \
                             should have access",
-                  },
-                  output_file: {
-                    info: "the file to output the user's generated API key to (STDOUT if not specified)",
                   },
                 },
               },
@@ -92,13 +89,8 @@ module DppmRestApi::CLI
               rekey: {
                 alias:     'r',
                 info:      "Generate a new API key for this user/users and output that file",
-                action:    "DppmRestApi::CLI.rekey_users",
+                action:    "DPPM::Logger.output.puts DppmRestApi::CLI.rekey_users",
                 inherit:   \%w(data_dir user_id),
-                variables: {
-                  output_file: {
-                    info: "Write the generated key to a file. Default is to print to stdout",
-                  },
-                },
               },
               show: {
                 alias:     's',
@@ -116,9 +108,6 @@ module DppmRestApi::CLI
                     info: "The api key to select a user by. To change a user's \
                             API key that you already know, use the rekey command",
                   },
-                  output_file: {
-                    info: "The file to write the userdata to; defaults to stdout",
-                  }
                 },
               },
             },
@@ -233,30 +222,18 @@ module DppmRestApi::CLI
       webui_folder: webui_folder ? Path[webui_folder] : nil
   end
 
-  def add_user(name, groups, data_dir, output_file) : Nil
+  def add_user(name, groups, data_dir) : String
     required data_dir, groups, name
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
     end
-    using_stdout = true
-    output_io = if output_file
-                  using_stdout = false
-                  File.open output_file, mode: "w"
-                else
-                  STDOUT
-                end
+
     group_list = split_numbers groups
     api_key, user = DppmRestApi::Config::User.create group_list, name
-    output_io.puts "API key for user named '#{name}'"
-    output_io.puts api_key
-    if using_stdout
-      DPPM::CLI.confirm_prompt { raise "Cancelled" }
-    else
-      output_io.close
-    end
     current_config.users << user
     current_config.write_to permissions_file
+    api_key
   end
 
   def edit_users(user_id, new_name, add_groups, remove_groups, data_dir)
@@ -286,32 +263,22 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def rekey_users(user_id, data_dir, output_file)
+  def rekey_users(user_id, data_dir) : String
     required data_dir, user_id
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
     end
-    using_stdout = true
-    output_io = if o = output_file
-                  using_stdout = false
-                  File.open o, mode: "w"
-                else
-                  STDOUT
-                end
 
     user_index = current_config.users.index { |user| user.id == user_id }
     raise "No user found with id #{user_id}" if user_index.nil?
     user = current_config.users[user_index]
     # Rekey the users that have made it through the filters
     new_key = Random::Secure.base64 24
-    output_io.puts "User named #{user.name} who has access to the \
-                      groups #{current_config.group_view(user).groups} is now accessible via API key:"
-    output_io.puts new_key
     user.api_key_hash = Scrypt::Password.create new_key
-    output_io.close unless using_stdout
     current_config.users[user_index] = user
     current_config.write_to permissions_file
+    new_key
   end
 
   def delete_users(user_id, data_dir)
@@ -324,27 +291,22 @@ module DppmRestApi::CLI
     current_config.write_to permissions_file
   end
 
-  def show_users(data_dir, match_name, match_groups, api_key, output_file)
+  def show_users(data_dir, match_name, match_groups, api_key) : Array(DppmRestApi::Config::User)
     required data_dir
     permissions_file = Path[data_dir, "permissions.json"]
     current_config = File.open permissions_file do |file|
       DppmRestApi::Config.from_json file
     end
-    using_stdout = true
-    output_io = if o = output_file
-                  using_stdout = false
-                  File.open o, mode: "w"
-                else
-                  STDOUT
-                end
-    JSON.build output_io, indent: 2 do |builder|
+
+    users = selected_users(
+      match_name, match_groups, api_key, from: current_config.users
+    )
+    JSON.build DPPM::Logger.output, indent: 2 do |builder|
       # TODO: Exclude password hashes
-      selected_users(
-        match_name, match_groups, api_key, from: current_config.users
-      ).to_json builder
+      users.to_json builder
     end
-    output_io.puts
-    output_io.close unless using_stdout
+    DPPM::Logger.output.puts
+    users
   end
 
   def add_group(id, name, permissions, data_dir)
