@@ -47,16 +47,22 @@ module DppmRestApi::SpecHelper
   end
 end
 
-DPPM::Logger.output = DPPM::Logger.error = File.open File::NULL, "w"
-Kemal.config.env = "test"
-FileUtils.mkdir_p Fixtures::DIR.to_s
-at_exit { FileUtils.rm_rf Fixtures::DIR.to_s }
-Fixtures.new.reset_config
-# Run the server
-DppmRestApi.run Socket::IPAddress::LOOPBACK,
-  DPPM::Prefix.default_dppm_config.port,
-  Fixtures::DIR,
-  DPPM::Prefix.new(Fixtures::PREFIX_PATH.to_s).tap &.create
+Spec.before_suite do
+  DPPM::Logger.output = DPPM::Logger.error = File.open File::NULL, "w"
+  Kemal.config.env = "test"
+  FileUtils.mkdir_p Fixtures::DIR
+
+  Fixtures.new.reset_config
+  # Run the server
+  DppmRestApi.run Socket::IPAddress::LOOPBACK,
+    DPPM::Prefix.default_dppm_config.port,
+    Fixtures::DIR,
+    DPPM::Prefix.new(Fixtures::PREFIX_PATH.to_s).tap &.create
+end
+
+Spec.after_suite do
+  FileUtils.rm_rf Fixtures::DIR
+end
 
 # Set all configs back to the expected values, in case they changed
 Spec.before_each do
