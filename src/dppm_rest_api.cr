@@ -70,8 +70,7 @@ module DppmRestApi
     {% end %}
 
     public_folder path: webui_folder.to_s if webui_folder
-    # Kemal doesn't like IPV6 brackets
-    Kemal.config.host_binding = host.lchop('[').rchop(']')
+    Kemal.config.host_binding = host
     Kemal.run port: port
   end
 end

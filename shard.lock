@@ -2,7 +2,11 @@ version: 1.0
 shards:
   ameba:
     github: crystal-ameba/ameba
-    version: 0.10.1
+    version: 0.11.0
+
+  bindata:
+    github: spider-gazelle/bindata
+    version: 1.2.0
 
   clicr:
     github: j8r/clicr
@@ -18,11 +22,11 @@ shards:
 
   db:
     github: crystal-lang/crystal-db
-    version: 0.7.0
+    version: 0.8.0
 
   dppm:
     github: DFabric/dppm
-    commit: 2d57d194787db33b5ed679f866fb19445fa20884
+    commit: 5084ee7073ee234fea2945ecde2185c8a12e6e57
 
   dynany:
     github: j8r/dynany
@@ -42,11 +46,11 @@ shards:
 
   jwt:
     github: crystal-community/jwt
-    version: 1.1.2
+    version: 1.4.0
 
   kemal:
     github: kemalcr/kemal
-    version: 0.26.0
+    version: 0.26.1
 
   kemal_jwt_auth:
     github: dscottboggs/kemal-jwt-auth
@@ -62,11 +66,11 @@ shards:
 
   mysql:
     github: crystal-lang/crystal-mysql
-    version: 0.9.0
+    version: 0.10.0
 
   openssl_ext:
     github: stakach/openssl_ext
-    version: 1.0.0
+    version: 1.2.0
 
   radix:
     github: luislavena/radix
