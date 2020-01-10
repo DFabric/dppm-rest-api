@@ -37,7 +37,7 @@ module DppmRestApi::Actions::App
   relative_get "/:app_name/config/:key" do |context|
     app_name = context.params.url["app_name"]
     key = context.params.url["key"]
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    Actions.has_access? context, Access::Read
     app = Actions.prefix.new_app app_name
     if key == "."
       dump_config context, app
@@ -50,15 +50,15 @@ module DppmRestApi::Actions::App
     end
   end
   relative_post "/:app_name/config/:key" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Create
+    Actions.has_access? context, Access::Create
     set_config context, context.params.url["key"], context.params.url["app_name"]
   end
   relative_put "/:app_name/config/:key" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     set_config context, context.params.url["key"], context.params.url["app_name"]
   end
   relative_delete "/:app_name/config/:key" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Delete
+    Actions.has_access? context, Access::Delete
     Actions.prefix
       .new_app(context.params.url["app_name"])
       .del_config context.params.url["key"]
@@ -66,69 +66,69 @@ module DppmRestApi::Actions::App
   # All keys, or all config options
   relative_get "/:app_name/config" do |context|
     app_name = context.params.url["app_name"]
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    Actions.has_access? context, Access::Read
     dump_config context, Actions.prefix.new_app(app_name)
   end
   # start the service associated with the given application
   relative_put "/:app_name/service/boot" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     # TODO: boot the service
   end
   # reload the service associated with the given application
   relative_put "/:app_name/service/reload" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     # TODO: reload the service
   end
   # restart the service associated with the given application
   relative_put "/:app_name/service/restart" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     # TODO: reboot the service
   end
   # start the service associated with the given application
   relative_put "/:app_name/service/start" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     # TODO: start the service
   end
   # get the status of the service associated with the given application
   relative_get "/:app_name/service/status" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    Actions.has_access? context, Access::Read
     # TODO: get the status of the service
   end
   # stop the service associated with the given application
   relative_put "/:app_name/service/stop" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     # TODO: stop the service
   end
   # lists dependent library packages
   relative_get "/:app_name/libs" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    Actions.has_access? context, Access::Read
     # TODO: list dependencies
   end
   # return the base application package
   relative_get "/:app_name/app" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    Actions.has_access? context, Access::Read
     # TODO: return the base application package
   end
   # returns information present in pkg.con as JSON
   relative_get "/:app_name/pkg" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    Actions.has_access? context, Access::Read
     # TODO: return package data
   end
   # if the `"stream"` query parameter is set, attempt to upgrade to a websocket
   # and stream the results. Otherwise return a JSON-formatted output of the
   # current log data.
   relative_get "/:app_name/logs" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    Actions.has_access? context, Access::Read
     # TODO: upgrade to websocket or output logs to date
   end
   # Install the given package
   relative_put "/:app_name" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Create
+    Actions.has_access? context, Access::Create
     # TODO: install the package and return its name
   end
   # Delete the given application
   relative_delete "/:app_name" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Delete
+    Actions.has_access? context, Access::Delete
     # TODO: delete the app
   end
 end

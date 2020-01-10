@@ -114,7 +114,7 @@ module DppmRestApi::Actions::Pkg
           build_test_package
           get fmt_route "/#{DPPM::Prefix.default_source_name}/testapp/query"
           assert_no_error in: response
-          response.body.should eq %<{"data":{"testapp":{"port":1,"host":"[::1]"}}}>
+          NamedTuple(data: NamedTuple(testapp: Hash(String, String | Int64 | Nil))).from_json response.body
         end
       end
       it "responds with a particular configuration key" do

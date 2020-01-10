@@ -1,4 +1,5 @@
 require "kemal"
+require "jwt"
 require "./ext/path"
 require "./ext/dppm_prefix_pkg_file"
 require "./access"
@@ -25,16 +26,58 @@ module DppmRestApi::Actions
     context.response.content_type = "application/json"
   end
 
-  relative_options "/api" do |context|
-    File.open API_DOCUMENT do |file|
-      IO.copy file, context.response
+  relative_post "/api/sign_in" do |context|
+    raise BadRequest.new(context) unless body = context.request.body
+
+    if user_info = DppmRestApi.permissions_config.find_and_authenticate! body
+      data = {
+        token: encode user_info,
+      }
+      context.response.content_type = "application/json"
+      data.to_json context.response
+      context.response.flush
+    else
+      raise Unauthorized.new context
     end
   end
 
-  def has_access?(context : HTTP::Server::Context, access : Access) : Bool
-    access_filter.call context, access
+  def self.encode(user_info)
+    JWT.encode(payload: user_info.to_h, key: @@secret_key, algorithm: @@algorithm)
+  end
+
+  relative_options "/api" do |context|
+    File.open API_DOCUMENT do |file|
+      context.response << file
+    end
   end
 
   class_property prefix : DPPM::Prefix { raise "No prefix set" }
-  protected class_property access_filter : Proc(HTTP::Server::Context, Access, Bool) = ->(context : HTTP::Server::Context, access : Access) { false }
+
+  def has_access?(context : HTTP::Server::Context, access : Access) : Config::User
+    @@access_filter.call context, access
+  end
+
+  @@access_filter : Proc(HTTP::Server::Context, Access, Config::User) = ->default_access_filter(HTTP::Server::Context, Access)
+  @@algorithm = JWT::Algorithm::HS256
+  @@secret_key : String = Random::Secure.base64(32)
+
+  # Returns the user if authorized.
+  def self.default_access_filter(context : HTTP::Server::Context, permission : Access) : Config::User
+    if token = (context.request.headers["X-Token"]? || context.params.query["auth"]?)
+      payload, _ = JWT.decode token: token, key: @@secret_key, algorithm: @@algorithm
+      user_hash = JWTCompatibleHash.new payload.size
+      payload.as_h.each { |k, v| user_hash[k] = v.as_s? || v.as_i? || v.as_bool? }
+
+      if received_user = Config::User.from_h hash: user_hash
+        return received_user if DppmRestApi.permissions_config.group_view(received_user).find_group? do |group|
+                                  group.can_access?(
+                                    context.request.path,
+                                    context.request.query_params,
+                                    permission
+                                  )
+                                end
+      end
+    end
+    raise Unauthorized.new context
+  end
 end

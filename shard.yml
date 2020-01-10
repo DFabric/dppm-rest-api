@@ -12,8 +12,8 @@ dependencies:
     github: kemalcr/spec-kemal
   scrypt:
     github: ysbaddaden/scrypt-crystal
-  kemal_jwt_auth:
-    github: dscottboggs/kemal-jwt-auth
+  jwt:
+    github: crystal-community/jwt
   dppm:
     github: DFabric/dppm
 

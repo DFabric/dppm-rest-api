@@ -24,7 +24,7 @@ struct DppmRestApi::Config::User
 
   @[AlwaysInline]
   def self.create(groups : Set(Group), name : String) : {String, self}
-    create groups.map { |g| g.id }, name
+    create groups.map(&.id), name
   end
 
   def self.create(groups : Set(Int), name : String) : {String, self}
@@ -35,7 +35,7 @@ struct DppmRestApi::Config::User
   def to_h : JWTCompatibleHash
     JWTCompatibleHash{"groups"       => serialized_groups,
                       "name"         => @name,
-                      "API key hash" => api_key_hash.to_s,
+                      "api-key-hash" => api_key_hash.to_s,
                       "id"           => @id.to_s}
   end
 
@@ -43,7 +43,7 @@ struct DppmRestApi::Config::User
     if (groups = data["groups"]?).is_a?(String) &&
        (name = data["name"]?).is_a?(String) &&
        (id = data["id"]?).is_a?(String) &&
-       (key = data["API key hash"]?).is_a? String
+       (key = data["api-key-hash"]?).is_a? String
       new key, deserialize(groups), name, UUID.new id
     end
   rescue ArgumentError
@@ -51,7 +51,7 @@ struct DppmRestApi::Config::User
   end
 
   private def serialized_groups : String
-    @group_ids.map(&.to_s base: 16).join(",")
+    @group_ids.map(&.to_s base: 16).join ','
   end
 
   def self.deserialize(groups : String)
@@ -90,8 +90,6 @@ struct DppmRestApi::Config::User
 
   # :ditto:
   def to_json(builder : JSON::Builder, *, except : Symbol)
-    to_json builder, except: StaticArray[except]
+    to_json builder, except: {except}
   end
 end
-
-alias JWTCompatibleHash = Hash(String, String | Int32 | Bool?)

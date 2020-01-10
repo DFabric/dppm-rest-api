@@ -17,17 +17,6 @@ module DppmRestApi::Actions::User
     getter data : Status
   end
 
-  # Reopen the handler to allow external encoding
-  class ::KemalJWTAuth::Handler < Kemal::Handler
-    def __test_encode(data)
-      encode data
-    end
-  end
-
-  def find_auth_handler
-    Kemal.config.handlers.find &.is_a? ::KemalJWTAuth::Handler
-  end
-
   struct UserGetResponse
     struct Data
       include JSON::Serializable
@@ -133,15 +122,12 @@ module DppmRestApi::Actions::User
       assert_unauthorized response
     end
     it "returns information about the user defined in the JWT" do
-      handler = (find_auth_handler || fail "failed to find the auth handler").as ::KemalJWTAuth::Handler
       jim = DppmRestApi.permissions_config.users.find &.name.starts_with? "Jim"
       fail "didn't find 'Jim' in config" if jim.nil?
-      jwt = handler.__test_encode jim.to_h
+      jwt = Actions.encode jim
       headers = HTTP::Headers.new
       headers.add "X-Token", jwt
-      SpecHelper.without_authentication! do
-        get fmt_route("/me"), headers
-      end
+      get fmt_route("/me"), headers
       assert_no_error in: response
       data = JSON.parse(response.body)["data"]
       data["currentUser"]["name"].as_s.should eq "Jim Oliver"

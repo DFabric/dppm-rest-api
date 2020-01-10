@@ -38,12 +38,21 @@ def assert_no_error(in response : HTTP::Client::Response) : Nil
   fail response_errors
 end
 
-module DppmRestApi::SpecHelper
-  def SpecHelper.without_authentication!
-    Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) { true }
-    yield
-  ensure
-    Actions.access_filter = ->DppmRestApi.access_filter(HTTP::Server::Context, Access)
+module DppmRestApi
+  def Actions.access_filter=(@@access_filter)
+  end
+
+  module SpecHelper
+    @@mock_user = Config::User.new Scrypt::Password.new("password"), Set(Int32).new, "mock user", UUID.random
+
+    def self.without_authentication!
+      Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) do
+        @@mock_user
+      end
+      yield
+    ensure
+      Actions.access_filter = ->DppmRestApi::Actions.default_access_filter(HTTP::Server::Context, Access)
+    end
   end
 end
 

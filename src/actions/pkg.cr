@@ -16,7 +16,7 @@ module DppmRestApi::Actions::Pkg
   #
   # TODO optional pagination
   relative_get "/:source_name" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    Actions.has_access? context, Access::Read
     prefix = get_prefix_with_source_name context
     JSON.build context.response do |json|
       json.object do
@@ -36,7 +36,7 @@ module DppmRestApi::Actions::Pkg
 
   # Clean unused built packages
   relative_delete "/:source_name/clean" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Delete
+    Actions.has_access? context, Access::Delete
     prefix = get_prefix_with_source_name context
     result = prefix.clean_unused_packages(confirmation: false) { }
     if result.empty?
@@ -48,7 +48,7 @@ module DppmRestApi::Actions::Pkg
   end
   # Query information about a given package
   relative_get "/:source_name/:package_name/query" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
+    Actions.has_access? context, Access::Read
     prefix = get_prefix_with_source_name context
     package_name = URI.decode context.params.url["package_name"]
 
@@ -88,7 +88,7 @@ module DppmRestApi::Actions::Pkg
   end
   # Delete a given package
   relative_delete "/:source_name/:package_name/delete" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Delete
+    Actions.has_access? context, Access::Delete
     prefix = get_prefix_with_source_name context
     package_name = URI.decode context.params.url["package_name"]
     selected_pkg = prefix.new_pkg package_name,
@@ -107,7 +107,7 @@ module DppmRestApi::Actions::Pkg
   #
   # This route takes the optional query parameters "version" and "tag".
   relative_post "/:source_name/:package_name/build" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Create
+    Actions.has_access? context, Access::Create
     package_name = URI.decode context.params.url["package_name"]
     prefix = get_prefix_with_source_name context
 

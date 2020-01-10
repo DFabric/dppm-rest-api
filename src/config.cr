@@ -1,12 +1,10 @@
 require "./ext/scrypt_password"
 require "json"
-require "kemal_jwt_auth"
 require "dppm/prefix"
 require "./config/helpers"
 
 struct DppmRestApi::Config
   include JSON::Serializable
-  include KemalJWTAuth::UsersCollection
   property groups : Array(Group)
   property users : Array(User)
 
@@ -24,7 +22,7 @@ struct DppmRestApi::Config
   def find_and_authenticate!(body) : Config::User?
     data = ReceivedUser.from_json body
     if key = data.auth?
-      users.find { |user| user.api_key_hash.verify key }
+      users.find &.api_key_hash.verify key
     end
   rescue JSON::ParseException
     # Body was not formatted properly.
