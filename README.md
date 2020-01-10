@@ -78,4 +78,4 @@ of groups 2 and 4.
 
 ## License
 
-Copyright (c) 2018-2019 DFabric members - ISC License
+Copyright (c) 2018-2020 DFabric members - ISC License
