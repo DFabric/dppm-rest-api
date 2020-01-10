@@ -38,18 +38,20 @@ module DppmRestApi
     Actions.prefix = prefix
 
     # Add error handlers
-    {% for code in HTTP::Status.constants %}
-    if HTTP::Status::{{code}}.value >= 400
-      Kemal.config.add_error_handler HTTP::Status::{{code.id}}.value do |context, exception|
-        context.response.status_code = exception.status_code.value if exception.responds_to? :status_code
-        response_data = Actions::ErrorResponse.new exception
-        response_data.to_json context.response
-        context.response.flush
-        response_data.log
-        nil
+    HTTP::Status.each do |status|
+      if status.value >= 400
+        Kemal.config.add_error_handler status.value do |context, exception|
+          if exception.is_a? Actions::HTTPStatusError
+            context.response.status_code = exception.status_code.value
+          end
+          response_data = Actions::ErrorResponse.new exception
+          response_data.to_json context.response
+          context.response.flush
+          response_data.log
+          nil
+        end
       end
     end
-    {% end %}
 
     public_folder path: webui_folder.to_s if webui_folder
     Kemal.config.host_binding = host
