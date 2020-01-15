@@ -33,8 +33,9 @@ module DppmRestApi::Actions::Groups
 
   extend self
   include RouteHelpers
+
   relative_post do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Create
+    Actions.has_access? context, Access::Create
     body = context.request.body
     raise BadRequest.new context, "One must specify a group to add." if body.nil?
     DppmRestApi.permissions_config.groups << Config::Group.from_json body
@@ -44,12 +45,12 @@ module DppmRestApi::Actions::Groups
   # Regardless of whether the given path exists on the given group, set the
   # group's access level on that path to the given access level.
   relative_put "/:id/route/:path/:access_level" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     group_id_s = context.params.url["id"]
     group_id = group_id_s.to_i? || raise BadRequest.new context,
       %[Group ID #{group_id_s} was not a valid integer]
     group_already_found = false
-    path = URI.unescape context.params.url["path"]
+    path = URI.encode context.params.url["path"]
     access_level = Access.parse?(context.params.url["access_level"])
     raise InvalidAccessLevel.new context if access_level.nil?
     DppmRestApi.permissions_config.groups.map! do |group|
@@ -60,7 +61,7 @@ module DppmRestApi::Actions::Groups
       # empty Hash) if group doesn't already have a path with query params on
       # it.
       existing_params = group.permissions[path]?
-        .try &.query_parameters || {} of String => Array(String)
+        .try &.query_parameters || Hash(String, Array(String)).new
       # if there were query parameters specified in the body, override
       # existing values
       existing_params.merge! query_params_in_body?(of: context) do |_path, existing, new_val|
@@ -100,7 +101,7 @@ module DppmRestApi::Actions::Groups
   #  - access to any route which requires `param2` or `param3` to be specified
   #  - access to "value2" and "value3" on "param4"
   relative_delete "/:id/param/:path" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     path = context.params.url["path"]
     group_id_s = context.params.url["id"]
     group_id = group_id_s.to_i? || raise BadRequest.new context,
@@ -135,7 +136,7 @@ module DppmRestApi::Actions::Groups
   end
 
   relative_delete "/:id/route/:path" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     group_id = (group_id_s = context.params.url["id"]).to_i?
     raise BadRequest.new context,
       %[Group ID "#{group_id_s}" was not an integer] if group_id.nil?
@@ -144,11 +145,9 @@ module DppmRestApi::Actions::Groups
       next group if group.id != group_id
       raise DuplicateGroup.new context, group_id_s if group_already_found
       group_already_found = true
-      group.permissions.delete(
-        context.params.url["path"]
-      ) || raise NotFound.new context, "\
-                              no permissions found at the specified path \
-                              (possibly already deleted?)"
+      group.permissions.delete context.params.url["path"] do
+        raise NotFound.new context, "No permissions found at the specified path (possibly already deleted?)"
+      end
       group
     end
     raise NoSuchGroup.new context, group_id_s unless group_already_found
@@ -156,20 +155,18 @@ module DppmRestApi::Actions::Groups
   end
 
   relative_delete "/:id" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Update
+    Actions.has_access? context, Access::Update
     group_id = (group_id_s = context.params.url["id"]).to_i?
     raise BadRequest.new context,
       %[Group ID "#{group_id_s}" was not an integer] if group_id.nil?
     group_already_found = false
-    DppmRestApi.permissions_config
-      .groups
-      .reject! do |group|
-        if group.id == group_id
-          raise DuplicateGroup.new context, group_id_s if group_already_found
-          next group_already_found = true
-        end
-        false
+    DppmRestApi.permissions_config.groups.reject! do |group|
+      if group.id == group_id
+        raise DuplicateGroup.new context, group_id_s if group_already_found
+        next group_already_found = true
       end
+      false
+    end
     raise NoSuchGroup.new context, group_id_s unless group_already_found
     DppmRestApi.permissions_config.sync_to_disk
   end

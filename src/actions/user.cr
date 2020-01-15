@@ -36,8 +36,9 @@ module DppmRestApi
 
     extend self
     include RouteHelpers
+
     relative_post do |context|
-      raise Unauthorized.new context unless Actions.has_access? context, Access::Create
+      Actions.has_access? context, Access::Create
       userdata = begin
         if body = context.request.body
           AddUserBody.from_json body
@@ -57,6 +58,7 @@ module DppmRestApi
         resp.field "AccessKey", config_key
       end
     end
+
     relative_delete "/:id" do |context|
       Actions.has_access? context, Access::Delete
       user_id = UUID.new context.params.url["id"]
@@ -66,6 +68,7 @@ module DppmRestApi
         json.field "status", "success"
       end
     end
+
     relative_get do |context|
       Actions.has_access? context, Access::Read
       build_json context.response do |response|
@@ -74,6 +77,7 @@ module DppmRestApi
         end
       end
     end
+
     relative_get "/me" do |context|
       me = Actions.has_access? context, Access::Read
       build_json context.response do |response|
