@@ -29,8 +29,8 @@ struct DppmRestApi::Config
       File.open config_file do |data|
         permissions_config = Config.from_json data
         permissions_config.file_path = config_file
+        permissions_config
       end
-      permissions_config.as Config
     else
       Config.new data_dir: data_dir
     end

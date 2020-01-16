@@ -21,17 +21,13 @@ module DppmRestApi
       end
     end
 
-    macro selected_users_from_query(&block)
+    def selected_users_from_query(context)
       selected_users(
         match_name: optional_query_param(context, "match_name"),
         match_groups: optional_query_param(context, "match_groups"),
         api_key: optional_query_param(context, "api_key"),
         from: DppmRestApi.permissions_config.users
-      ){% if block %}.each do |{{block.args.splat}}|
-        {{ block.body }}
-        {{block.args[0] || nil}}
-      end
-      {% end %}
+      )
     end
 
     extend self
@@ -73,7 +69,7 @@ module DppmRestApi
       Actions.has_access? context, Access::Read
       build_json context.response do |response|
         response.field "users" do
-          selected_users_from_query.to_json response
+          selected_users_from_query(context).to_json response
         end
       end
     end

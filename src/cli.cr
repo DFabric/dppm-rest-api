@@ -214,12 +214,13 @@ module DppmRestApi::CLI
       port = port.to_i
     end
     if config
-      dppm_config = DPPM::Prefix::Config.new File.read config
+      dppm_config = File.open config do |file|
+        DPPM::Prefix::Config.new file
+      end
       port ||= dppm_config.port
       host ||= dppm_config.host
     end
-    DppmRestApi.run host: host, port: port, data_dir: data_dir,
-      webui_folder: webui_folder
+    DppmRestApi.run host: host, port: port, data_dir: data_dir, webui_folder: webui_folder
   end
 
   # Add a user. The user's API key will be output to `output_file`, or `STDOUT`
@@ -319,10 +320,8 @@ module DppmRestApi::CLI
     current_config = Config.read data_dir
 
     id_number = id.to_i? || raise InvalidGroupID.new id
-    group = current_config.groups.find do |grp|
-      grp.id == id_number
-    end
-    raise NoSuchGroup.new id_number if group.nil?
+    group = current_config.groups.find &.id.== id_number
+    raise NoSuchGroup.new id_number if !group
     current_config.groups.delete group
     parsed_access = Access.parse?(access) ||
                     Access.from_value access.to_i? ||
@@ -355,19 +354,19 @@ module DppmRestApi::CLI
     current_config = Config.read data_dir
     relevant_group = current_config.groups.find { |grp| grp.id == group_id_number }
     relevant_group || raise NoSuchGroup.new group_id_number
-    if glob_to_add = add_glob
+    if add_glob
       if route = relevant_group.permissions[path]?
         if route.query_parameters[key]?
-          relevant_group.permissions[path].query_parameters[key] << glob_to_add
+          relevant_group.permissions[path].query_parameters[key] << add_glob
         else
-          relevant_group.permissions[path].query_parameters[key] = [glob_to_add]
+          relevant_group.permissions[path].query_parameters[key] = [add_glob]
         end
       else
         raise NoRouteMatchForThisGroup.new path, group_id_number
       end
     end
-    if glob_to_rm = remove_glob
-      relevant_group.permissions[path].query_parameters[key].delete glob_to_rm
+    if remove_glob
+      relevant_group.permissions[path].query_parameters[key].delete remove_glob
       if relevant_group.permissions[path].query_parameters[key].empty?
         relevant_group.permissions[path].query_parameters.delete key
       end
