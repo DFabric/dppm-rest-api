@@ -14,7 +14,7 @@ module DppmRestApi::CLI
         variables: {
           data_dir: {
             info:    "data directory",
-            default: DppmRestApi::Actions::DEFAULT_DATA_DIR,
+            default: DppmRestApi::Config::DEFAULT_DATA_DIR,
           },
         },
         commands: {
@@ -219,7 +219,7 @@ module DppmRestApi::CLI
       host ||= dppm_config.host
     end
     DppmRestApi.run host: host, port: port, data_dir: data_dir,
-      webui_folder: webui_folder ? Path[webui_folder] : nil
+      webui_folder: webui_folder
   end
 
   # Add a user. The user's API key will be output to `output_file`, or `STDOUT`
@@ -227,24 +227,18 @@ module DppmRestApi::CLI
   # the chance to cancel the process after being shown their API key.
   def add_user(name, groups, data_dir) : String
     required data_dir, groups, name
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
-
+    current_config = Config.read data_dir
     group_list = split_numbers groups
     api_key, user = DppmRestApi::Config::User.create group_list, name
     current_config.users << user
-    current_config.write_to permissions_file
+    current_config.sync_to_disk
     api_key
   end
 
   def edit_users(user_id, new_name, add_groups, remove_groups, data_dir)
     required data_dir, user_id
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
+    current_config = Config.read data_dir
+
     user_index = current_config.users.index { |usr| usr.id == user_id }
     raise "No user found with id #{user_id}" if user_index.nil?
     user = current_config.users[user_index]
@@ -263,15 +257,12 @@ module DppmRestApi::CLI
       end
     end
     current_config.users[user_index] = user
-    current_config.write_to permissions_file
+    current_config.sync_to_disk
   end
 
   def rekey_users(user_id, data_dir) : String
     required data_dir, user_id
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
+    current_config = Config.read data_dir
 
     user_index = current_config.users.index { |user| user.id == user_id }
     raise "No user found with id #{user_id}" if user_index.nil?
@@ -280,27 +271,21 @@ module DppmRestApi::CLI
     new_key = Random::Secure.base64 24
     user.api_key_hash = Scrypt::Password.create new_key
     current_config.users[user_index] = user
-    current_config.write_to permissions_file
+    current_config.sync_to_disk
     new_key
   end
 
   def delete_users(user_id, data_dir)
     required data_dir, user_id
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
+    current_config = Config.read data_dir
     current_config.users.reject! { |user| user.id == user_id }
-    current_config.write_to permissions_file
+    current_config.sync_to_disk
   end
 
   # Returns thes information about the selected users.
   def show_users(data_dir, match_name, match_groups, api_key) : Array(DppmRestApi::Config::User)
     required data_dir
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
+    current_config = Config.read data_dir
 
     users = selected_users(
       match_name, match_groups, api_key, from: current_config.users
@@ -316,10 +301,8 @@ module DppmRestApi::CLI
   # Adds a group with the given values
   def add_group(id, name, permissions, data_dir)
     required id, name, permissions, data_dir
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
+    current_config = Config.read data_dir
+
     id_number = id.to_i? || abort "failed to convert group ID #{id} to an integer"
     if group = current_config.groups.find &.id.== id
       raise "A group with the id #{id} already exists: " + group.name
@@ -327,16 +310,14 @@ module DppmRestApi::CLI
     perms = Hash(String, DppmRestApi::Config::Route).from_json permissions
     new_group = DppmRestApi::Config::Group.new name, id_number, perms
     current_config.groups << new_group
-    current_config.write_to permissions_file
+    current_config.sync_to_disk
   end
 
   # Edits the given group's access level on the given path
   def edit_access(id, path, access, data_dir)
     required id, access, path, data_dir
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
+    current_config = Config.read data_dir
+
     id_number = id.to_i? || raise InvalidGroupID.new id
     group = current_config.groups.find do |grp|
       grp.id == id_number
@@ -350,7 +331,7 @@ module DppmRestApi::CLI
     original_cfg.permissions = parsed_access
     group.permissions[path] = original_cfg
     current_config.groups << group
-    current_config.write_to permissions_file
+    current_config.sync_to_disk
   end
 
   # Allow the group with the given id to access the given request path at the
@@ -358,25 +339,20 @@ module DppmRestApi::CLI
   def add_route(id, access, path, data_dir)
     required id, access, path, data_dir
     group_id_number = id.to_i? || raise InvalidGroupID.new id
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
+    current_config = Config.read data_dir
+
     relevant_group = current_config.groups
       .find { |grp| grp.id == group_id_number } || raise NoSuchGroup.new group_id_number
     parsed_access = DppmRestApi::Access.parse access
     route = DppmRestApi::Config::Route.new parsed_access
     relevant_group.permissions[path] = route
-    current_config.write_to permissions_file
+    current_config.sync_to_disk
   end
 
   def edit_group_query(id, key, add_glob, remove_glob, path, data_dir)
     required id, key, path, data_dir
     group_id_number = id.to_i? || raise InvalidGroupID.new id
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
+    current_config = Config.read data_dir
     relevant_group = current_config.groups.find { |grp| grp.id == group_id_number }
     relevant_group || raise NoSuchGroup.new group_id_number
     if glob_to_add = add_glob
@@ -396,17 +372,14 @@ module DppmRestApi::CLI
         relevant_group.permissions[path].query_parameters.delete key
       end
     end
-    current_config.write_to permissions_file
+    current_config.sync_to_disk
   end
 
   def delete_group(id, data_dir)
     required id, data_dir
     group_id_number = id.to_i? || raise InvalidGroupID.new id
-    permissions_file = Path[data_dir, "permissions.json"]
-    current_config = File.open permissions_file do |file|
-      DppmRestApi::Config.from_json file
-    end
+    current_config = Config.read data_dir
     current_config.groups.reject! { |group| group.id == group_id_number }
-    current_config.write_to permissions_file
+    current_config.sync_to_disk
   end
 end

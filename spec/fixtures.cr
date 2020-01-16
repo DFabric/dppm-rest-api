@@ -1,9 +1,8 @@
 struct Fixtures
   # Set up the mock permissions.json
   # the location
-  PERMISSION_FILE = Path[DIR, "permissions.json"].to_s
-  DIR             = File.tempname "temp_dppm_api_dir"
-  PREFIX_PATH     = Path[DIR, "temp_dppm_prefix"]
+  DIR         = File.tempname "temp_dppm_api_dir"
+  PREFIX_PATH = Path[DIR, "temp_dppm_prefix"]
 
   # The size of the test api keys.
   TEST_KEY_SIZE = 24
@@ -55,19 +54,18 @@ struct Fixtures
       group_ids: Set{499, 1000},
       api_key_hash: Scrypt::Password.create password: Fixtures::UserRawApiKeys::NORMAL_USER
     ),
-  ],
-    filepath: Path[DIR, "permissions.json"]
+  ], data_dir: DIR
 
   # Set all configs to the expected values.
   def reset_config
     DppmRestApi.permissions_config = @permissions_config
-    DppmRestApi.permissions_config.write_to Path[DIR, "permissions.json"]
+    DppmRestApi.permissions_config.sync_to_disk
   end
 
   def self.new_config : DppmRestApi::Config
-    File.open Path[DIR, "permissions.json"] do |file|
-      DppmRestApi::Config.from_json file
-    end
+    config = DppmRestApi::Config.read DIR
+    config.sync_to_disk
+    config
   end
 
   # Used by the user add route

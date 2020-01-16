@@ -1,6 +1,6 @@
 /docs/
 /lib/
 /bin/
-/.shards/
+/data/
 *.dwarf
 .vscode/settings.json

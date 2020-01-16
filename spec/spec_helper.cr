@@ -91,6 +91,6 @@ Spec.before_each do
 end
 # Clean up after ourselves
 Spec.after_each do
-  File.delete Fixtures::PERMISSION_FILE if File.exists? Fixtures::PERMISSION_FILE
+  FileUtils.rm_rf Fixtures::DIR
   FileUtils.rm_rf DppmRestApi::Actions.prefix.path.to_s
 end

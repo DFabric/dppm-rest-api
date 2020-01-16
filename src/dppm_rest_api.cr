@@ -6,17 +6,16 @@ require "./actions"
 module DppmRestApi
   alias JWTCompatibleHash = Hash(String, String | Int32 | Bool | Nil)
 
-  PERMISSIONS_FILE = "permissions.json"
+  class_property permissions_config : Config = Config.new
 
-  class_property permissions_config : Config do
-    raise "No permissions file is defined!"
+  def self.read_permissions_config(data_dir : String = Actions::DEFAULT_DATA_DIR)
   end
 
   def self.run(
     host : String,
     port : Int32,
     data_dir : String,
-    webui_folder : Path? = nil,
+    webui_folder : String? = nil,
     prefix : String = DPPM::Prefix.default
   )
     run host, port, data_dir, DPPM::Prefix.new(prefix), webui_folder
@@ -27,13 +26,9 @@ module DppmRestApi
     port : Int32,
     data_dir : String,
     prefix : DPPM::Prefix,
-    webui_folder : Path? = nil
+    webui_folder : String? = nil
   )
-    filepath = Path[data_dir, PERMISSIONS_FILE]
-    ::File.open filepath do |data|
-      @@permissions_config = Config.from_json data
-    end
-    permissions_config.filepath = filepath
+    @@permissions_config = Config.read data_dir
 
     Actions.prefix = prefix
 
@@ -53,7 +48,7 @@ module DppmRestApi
       end
     end
 
-    public_folder path: webui_folder.to_s if webui_folder
+    public_folder path: webui_folder if webui_folder
     Kemal.config.host_binding = host
     Kemal.run port: port
   end

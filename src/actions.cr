@@ -11,8 +11,7 @@ module DppmRestApi::Actions
   extend self
   include RouteHelpers
 
-  DEFAULT_DATA_DIR = "./data/"
-  API_DOCUMENT     = DEFAULT_DATA_DIR + "api-options.json"
+  API_DOCUMENT = Config::DEFAULT_DATA_DIR + "api-options.json"
   alias ConfigKeyError = DPPM::Prefix::Base::ConfigKeyError
 
   include Pkg

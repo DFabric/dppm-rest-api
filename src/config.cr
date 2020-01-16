@@ -1,22 +1,39 @@
 require "./ext/scrypt_password"
 require "json"
-require "dppm/prefix"
 require "./config/helpers"
 
 struct DppmRestApi::Config
   include JSON::Serializable
+
+  DEFAULT_DATA_DIR = "./data/"
+  private FILE             = "permissions.json"
   property groups : Array(Group)
   property users : Array(User)
 
   @[JSON::Field(ignore: true)]
-  property filepath : Path { raise "The config filepath has not been set, cannot write to file." }
+  property file_path : Path = Path[DEFAULT_DATA_DIR, FILE]
 
   def group_view(user : User) : GroupView
     GroupView.new user, groups
   end
 
   # :nodoc:
-  def initialize(@groups : Array(Group), @users : Array(User), @filepath = nil)
+  def initialize(@groups : Array(Group) = Array(Group).new, @users : Array(User) = Array(User).new, data_dir : String = DEFAULT_DATA_DIR)
+    @file_path = Path[data_dir, FILE]
+  end
+
+  def self.read(data_dir : String = DEFAULT_DATA_DIR) : self
+    config_file = Path[data_dir, FILE]
+    if File.exists? config_file
+      permissions_config = nil
+      File.open config_file do |data|
+        permissions_config = Config.from_json data
+        permissions_config.file_path = config_file
+      end
+      permissions_config.as Config
+    else
+      Config.new data_dir: data_dir
+    end
   end
 
   def find_and_authenticate!(body) : Config::User?
@@ -29,30 +46,22 @@ struct DppmRestApi::Config
     nil
   end
 
+  # Saves the configuration to a file at `filepath`.
   def sync_to_disk : Nil
-    write_to filepath
-  end
-
-  @[AlwaysInline]
-  def write_to(path : String) : Nil
-    write_to Path.new path
-  end
-
-  def write_to(path : Path) : Nil
-    @filepath ||= path
-    prefix = path.basename suffix: ".json"
-    suffix = path.extension
-    tmp_file = File.tempfile prefix, suffix, dir: path.dirname do |file|
-      self.to_json file, indent: 2
+    prefix = @file_path.basename suffix: ".json"
+    suffix = @file_path.extension
+    dirname = @file_path.dirname
+    Dir.mkdir dirname if !Dir.exists? dirname
+    tmp_file = File.tempfile prefix, suffix, dir: dirname do |file|
+      to_json file, indent: 2
     end
     # to prevent data loss in case of loss of power during the file write.
-    File.rename tmp_file.path, path.to_s
+    File.rename tmp_file.path, @file_path.to_s
   ensure
     begin
       tmp_file.try &.delete
     rescue Errno
     end
-    self
   end
 
   def to_json(io : IO, *, indent : String | Int32? = nil)
