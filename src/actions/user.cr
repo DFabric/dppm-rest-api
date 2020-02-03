@@ -34,7 +34,6 @@ module DppmRestApi
     include RouteHelpers
 
     relative_post do |context|
-      Actions.has_access? context, Access::Create
       userdata = begin
         if body = context.request.body
           AddUserBody.from_json body
@@ -56,7 +55,6 @@ module DppmRestApi
     end
 
     relative_delete "/:id" do |context|
-      Actions.has_access? context, Access::Delete
       user_id = UUID.new context.params.url["id"]
       DppmRestApi.permissions_config.users.reject! { |user| user.id == user_id }
       DppmRestApi.permissions_config.sync_to_disk
@@ -66,7 +64,6 @@ module DppmRestApi
     end
 
     relative_get do |context|
-      Actions.has_access? context, Access::Read
       build_json context.response do |response|
         response.field "users" do
           selected_users_from_query(context).to_json response
@@ -74,11 +71,10 @@ module DppmRestApi
       end
     end
 
-    relative_get "/me" do |context|
-      me = Actions.has_access? context, Access::Read
+    relative_get "/me" do |context, user|
       build_json context.response do |response|
         response.field "currentUser" do
-          me.to_json response, except: :api_key_hash
+          user.to_json response, except: :api_key_hash
         end
       end
       context.response.flush

@@ -35,7 +35,6 @@ module DppmRestApi::Actions::Groups
   include RouteHelpers
 
   relative_post do |context|
-    Actions.has_access? context, Access::Create
     body = context.request.body
     raise BadRequest.new context, "One must specify a group to add." if body.nil?
     DppmRestApi.permissions_config.groups << Config::Group.from_json body
@@ -45,7 +44,6 @@ module DppmRestApi::Actions::Groups
   # Regardless of whether the given path exists on the given group, set the
   # group's access level on that path to the given access level.
   relative_put "/:id/route/:path/:access_level" do |context|
-    Actions.has_access? context, Access::Update
     group_id_s = context.params.url["id"]
     group_id = group_id_s.to_i? || raise BadRequest.new context,
       %[Group ID #{group_id_s} was not a valid integer]
@@ -101,7 +99,6 @@ module DppmRestApi::Actions::Groups
   #  - access to any route which requires `param2` or `param3` to be specified
   #  - access to "value2" and "value3" on "param4"
   relative_delete "/:id/param/:path" do |context|
-    Actions.has_access? context, Access::Update
     path = context.params.url["path"]
     group_id_s = context.params.url["id"]
     group_id = group_id_s.to_i? || raise BadRequest.new context,
@@ -136,7 +133,6 @@ module DppmRestApi::Actions::Groups
   end
 
   relative_delete "/:id/route/:path" do |context|
-    Actions.has_access? context, Access::Update
     group_id = (group_id_s = context.params.url["id"]).to_i?
     raise BadRequest.new context,
       %[Group ID "#{group_id_s}" was not an integer] if group_id.nil?
@@ -155,7 +151,6 @@ module DppmRestApi::Actions::Groups
   end
 
   relative_delete "/:id" do |context|
-    Actions.has_access? context, Access::Update
     group_id = (group_id_s = context.params.url["id"]).to_i?
     raise BadRequest.new context,
       %[Group ID "#{group_id_s}" was not an integer] if group_id.nil?

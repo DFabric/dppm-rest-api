@@ -52,7 +52,7 @@ module DppmRestApi::Actions
 
   class_property prefix : DPPM::Prefix { raise "No prefix set" }
 
-  def has_access?(context : HTTP::Server::Context, access : Access) : Config::User
+  def authorized_user(context : HTTP::Server::Context, access : Access) : Config::User
     @@access_filter.call context, access
   end
 

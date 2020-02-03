@@ -4,34 +4,34 @@ module DppmRestApi::Actions::Service
   # List the managed services. The `system` query parameter may be specified to
   # enumerate all system services rather than just the ones managed by DPPM.
   relative_get do |context|
-    Actions.has_access? context, Access::Read
+    context
   end
   # List each managed service along with its status output.
   relative_get "/status" do |context|
-    Actions.has_access? context, Access::Read
+    context
   end
   # start the service associated with the given application
   relative_put "/:service/boot" do |context|
-    Actions.has_access? context, Access::Update
+    context
   end
   # reload the service associated with the given application
   relative_put "/:service/reload" do |context|
-    Actions.has_access? context, Access::Update
+    context
   end
   # restart the service associated with the given application
   relative_put "/:service/restart" do |context|
-    Actions.has_access? context, Access::Update
+    context
   end
   # start the service associated with the given application
   relative_put "/:service/start" do |context|
-    Actions.has_access? context, Access::Update
+    context
   end
   # get the status of the service associated with the given application
   relative_get "/:service/status" do |context|
-    Actions.has_access? context, Access::Read
+    context
   end
   # stop the service associated with the given application
   relative_put "/:service/stop" do |context|
-    Actions.has_access? context, Access::Update
+    context
   end
 end

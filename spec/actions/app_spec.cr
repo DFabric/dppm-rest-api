@@ -99,14 +99,14 @@ module DppmRestApi::Actions::App
       end
     end
 
-    describe (fmt_route "/:app_name/install") do
+    describe (fmt_route "/:app_name") do
       it "responds with 401 Forbidden" do
-        put fmt_route "/some-pkg"
+        post fmt_route "/some-pkg"
         assert_unauthorized response
       end
     end
 
-    describe (fmt_route "/:app_name/remove") do
+    describe (fmt_route "/:app_name") do
       it "responds with 401 Forbidden" do
         delete fmt_route "/some-app"
         assert_unauthorized response

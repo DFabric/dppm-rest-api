@@ -38,7 +38,6 @@ module DppmRestApi::Actions::App
   relative_get "/:app_name/config/:key" do |context|
     app_name = context.params.url["app_name"]
     key = context.params.url["key"]
-    Actions.has_access? context, Access::Read
     app = Actions.prefix.new_app app_name
     if key == "."
       dump_config context, app
@@ -52,17 +51,14 @@ module DppmRestApi::Actions::App
   end
 
   relative_post "/:app_name/config/:key" do |context|
-    Actions.has_access? context, Access::Create
     set_config context, context.params.url["key"], context.params.url["app_name"]
   end
 
   relative_put "/:app_name/config/:key" do |context|
-    Actions.has_access? context, Access::Update
     set_config context, context.params.url["key"], context.params.url["app_name"]
   end
 
   relative_delete "/:app_name/config/:key" do |context|
-    Actions.has_access? context, Access::Delete
     Actions.prefix
       .new_app(context.params.url["app_name"])
       .del_config context.params.url["key"]
@@ -70,14 +66,12 @@ module DppmRestApi::Actions::App
 
   # All keys, or all config options
   relative_get "/:app_name/config" do |context|
-    Actions.has_access? context, Access::Read
     app_name = context.params.url["app_name"]
     dump_config context, Actions.prefix.new_app(app_name)
   end
 
   # start the service associated with the given application
   relative_put "/:app_name/service/boot" do |context|
-    Actions.has_access? context, Access::Update
     app_name = context.params.url["app_name"]
     app = Actions.prefix.new_app(app_name)
     # TODO: rescue and raise an error if service does not exist
@@ -87,7 +81,6 @@ module DppmRestApi::Actions::App
   {% for action in %w(reload restart start stop) %}
   # {[action.id]} the service associated with the given application
   relative_put "/:app_name/service/{{action.id}}" do |context|
-    Actions.has_access? context, Access::Update
     app_name = context.params.url["app_name"]
     app = Actions.prefix.new_app(app_name)
     # TODO: rescue and raise an error if service does not exist
@@ -98,20 +91,17 @@ module DppmRestApi::Actions::App
 
   # get the status of the service associated with the given application
   relative_get "/:app_name/service/status" do |context|
-    Actions.has_access? context, Access::Read
     app_name = context.params.url["app_name"]
     # TODO: get the status of the service
   end
 
   # lists dependent library packages
   relative_get "/:app_name/libs" do |context|
-    Actions.has_access? context, Access::Read
     # TODO: list dependencies
   end
 
   # return the base application package
   relative_get "/:app_name/app" do |context|
-    Actions.has_access? context, Access::Read
     app_name = context.params.url["app_name"]
     build_json context.response do |builder|
       builder.field(app_name) do
@@ -122,7 +112,6 @@ module DppmRestApi::Actions::App
 
   # returns information present in pkg.con as JSON
   relative_get "/:app_name/pkg" do |context|
-    Actions.has_access? context, Access::Read
     app_name = context.params.url["app_name"]
     build_json context.response do |builder|
       builder.field(app_name) do
@@ -138,7 +127,6 @@ module DppmRestApi::Actions::App
   end
 
   relative_get "/:app_name/valid-log-streams" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
     build_json context.response do |builder|
       builder.array do
         Actions
@@ -153,7 +141,6 @@ module DppmRestApi::Actions::App
   # and stream the results. Otherwise return a JSON-formatted output of the
   # current log data.
   relative_get "/:app_name/logs" do |context|
-    raise Unauthorized.new context unless Actions.has_access? context, Access::Read
     app_name = context.params.url["app_name"]
     app = Actions.prefix.new_app app_name
     valid_streams = valid_streams_for app
@@ -193,14 +180,12 @@ module DppmRestApi::Actions::App
   end
 
   # Install the given package
-  relative_put "/:app_name" do |context|
-    Actions.has_access? context, Access::Create
+  relative_post "/:app_name" do |context|
     # TODO: install the package and return its name
   end
 
   # Delete the given application
   relative_delete "/:app_name" do |context|
-    Actions.has_access? context, Access::Delete
     app_name = context.params.url["app_name"]
     Actions.prefix
       .new_app(app_name)
