@@ -203,7 +203,7 @@ module DppmRestApi::CLI
   # All variables are received by a method as a `String | Nil`. This macro
   # converts an argument, by name, to its `String` value, or raises an
   # error instructing the user to include the variable value.
-  private macro required(*args)
+  macro required(*args)
     {% for arg in args %}
       {{arg.id}} || raise RequiredArgument.new "{{arg.id}}"
     {% end %}
