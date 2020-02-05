@@ -3,15 +3,6 @@ require "spec-kemal"
 require "../src/dppm_rest_api"
 require "./fixtures"
 
-CRLF = "\r\n"
-
-def new_test_context(verb = "GET", path = "/api/test")
-  backing_io = IO::Memory.new
-  request = HTTP::Request.new verb, path
-  response = HTTP::Server::Response.new backing_io
-  {backing_io, HTTP::Server::Context.new(request, response)}
-end
-
 # The only reason this is a macro is that a macro shows the location where it
 # is expanded on failure, a def shows the location of the def.
 macro assert_unauthorized(response)

@@ -25,7 +25,7 @@ module DppmRestApi::Actions
     context.response.content_type = "application/json"
   end
 
-  relative_post "/api/sign_in" do |context|
+  relative_post "/sign_in" do |context|
     raise BadRequest.new(context) unless body = context.request.body
 
     if user_info = DppmRestApi.permissions_config.find_and_authenticate! body
@@ -44,7 +44,7 @@ module DppmRestApi::Actions
     JWT.encode(payload: user_info.to_h, key: @@secret_key, algorithm: @@algorithm)
   end
 
-  relative_options "/api" do |context|
+  relative_options "/" do |context|
     File.open API_DOCUMENT do |file|
       context.response << file
     end
