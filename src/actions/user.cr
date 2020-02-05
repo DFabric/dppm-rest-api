@@ -1,38 +1,37 @@
 require "../config/helpers"
 
-module DppmRestApi
-  module Actions::User
-    struct AddUserBody
-      include JSON::Serializable
-      getter name : String
-      getter groups : Set(Int32)
+module DppmRestApi::Actions::User
+  extend self
+  include RouteHelpers
+  include Config::Helpers
 
-      # :nodoc:
-      #
-      # For testing
-      def initialize(@name, @groups); end
+  struct AddUserBody
+    include JSON::Serializable
+    getter name : String
+    getter groups : Set(Int32)
+
+    # :nodoc:
+    #
+    # For testing
+    def initialize(@name, @groups); end
+  end
+
+  def optional_query_param(context : HTTP::Server::Context, key : String)
+    context.params.query[key]?.try do |value|
+      URI.decode value
     end
+  end
 
-    include Config::Helpers
+  def selected_users_from_query(context)
+    selected_users(
+      match_name: optional_query_param(context, "match_name"),
+      match_groups: optional_query_param(context, "match_groups"),
+      api_key: optional_query_param(context, "api_key"),
+      from: DppmRestApi.permissions_config.users
+    )
+  end
 
-    def optional_query_param(context : HTTP::Server::Context, key : String)
-      context.params.query[key]?.try do |value|
-        URI.decode value
-      end
-    end
-
-    def selected_users_from_query(context)
-      selected_users(
-        match_name: optional_query_param(context, "match_name"),
-        match_groups: optional_query_param(context, "match_groups"),
-        api_key: optional_query_param(context, "api_key"),
-        from: DppmRestApi.permissions_config.users
-      )
-    end
-
-    extend self
-    include RouteHelpers
-
+  RelativeRoute.new "/user" do
     relative_post do |context|
       userdata = begin
         if body = context.request.body

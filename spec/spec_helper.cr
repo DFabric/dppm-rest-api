@@ -35,18 +35,18 @@ end
 module DppmRestApi
   def Actions.access_filter=(@@access_filter)
   end
+end
 
-  module SpecHelper
-    @@mock_user = Config::User.new Scrypt::Password.new("password"), Set(Int32).new, "mock user", UUID.random
+module SpecHelper
+  @@mock_user = DppmRestApi::Config::User.new Scrypt::Password.new("password"), Set(Int32).new, "mock user", UUID.random
 
-    def self.without_authentication!
-      Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) do
-        @@mock_user
-      end
-      yield
-    ensure
-      Actions.access_filter = ->DppmRestApi::Actions.default_access_filter(HTTP::Server::Context, Access)
+  def self.without_authentication!
+    DppmRestApi::Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) do
+      @@mock_user
     end
+    yield
+  ensure
+    DppmRestApi::Actions.access_filter = ->DppmRestApi::Actions.default_access_filter(HTTP::Server::Context, DppmRestApi::Access)
   end
 end
 

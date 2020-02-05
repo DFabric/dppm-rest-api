@@ -14,39 +14,34 @@ module DppmRestApi::Actions
   API_DOCUMENT = Config::DEFAULT_DATA_DIR + "api-options.json"
   alias ConfigKeyError = DPPM::Prefix::Base::ConfigKeyError
 
-  include Pkg
-  include App
-  include Service
-  include Src
-  include User
-  include Groups
+  def self.encode(user_info)
+    JWT.encode(payload: user_info.to_h, key: @@secret_key, algorithm: @@algorithm)
+  end
 
   before_all do |context|
     context.response.content_type = "application/json"
   end
 
-  relative_post "/sign_in" do |context|
-    raise BadRequest.new(context) unless body = context.request.body
+  RelativeRoute.new "/" do
+    relative_post "sign_in" do |context|
+      raise BadRequest.new(context) unless body = context.request.body
 
-    if user_info = DppmRestApi.permissions_config.find_and_authenticate! body
-      data = {
-        token: encode user_info,
-      }
-      context.response.content_type = "application/json"
-      data.to_json context.response
-      context.response.flush
-    else
-      raise Unauthorized.new context
+      if user_info = DppmRestApi.permissions_config.find_and_authenticate! body
+        data = {
+          token: encode user_info,
+        }
+        context.response.content_type = "application/json"
+        data.to_json context.response
+        context.response.flush
+      else
+        raise Unauthorized.new context
+      end
     end
-  end
 
-  def self.encode(user_info)
-    JWT.encode(payload: user_info.to_h, key: @@secret_key, algorithm: @@algorithm)
-  end
-
-  relative_options "/" do |context|
-    File.open API_DOCUMENT do |file|
-      context.response << file
+    relative_options do |context|
+      File.open API_DOCUMENT do |file|
+        context.response << file
+      end
     end
   end
 
@@ -61,7 +56,7 @@ module DppmRestApi::Actions
   @@secret_key : String = Random::Secure.base64(32)
 
   # Returns the user if authorized.
-  def self.default_access_filter(context : HTTP::Server::Context, permission : Access) : Config::User
+  def default_access_filter(context : HTTP::Server::Context, permission : Access) : Config::User
     if token = (context.request.headers["X-Token"]? || context.params.query["auth"]?)
       payload, _ = JWT.decode token: token, key: @@secret_key, algorithm: @@algorithm
       user_hash = JWTCompatibleHash.new payload.size

@@ -35,50 +35,57 @@ module DppmRestApi::Actions::App
     context.response.puts json_text
   end
 
-  relative_get "/:app_name/config/:key" do |context|
-    app_name = context.params.url["app_name"]
-    key = context.params.url["key"]
-    app = Actions.prefix.new_app app_name
-    if key == "."
-      dump_config context, app
-    else
-      begin
-        {data: app.get_config key}.to_json context.response
-      rescue err : ConfigKeyError
-        raise NotFound.new context, cause: err
-      end
+  def valid_streams(app : DPPM::Prefix::App)
+    Array(String).new.tap do |streams|
+      app.each_log_stream { |stream| streams << stream }
     end
   end
 
-  relative_post "/:app_name/config/:key" do |context|
-    set_config context, context.params.url["key"], context.params.url["app_name"]
-  end
+  RelativeRoute.new "/app" do
+    relative_get "/:app_name/config/:key" do |context|
+      app_name = context.params.url["app_name"]
+      key = context.params.url["key"]
+      app = Actions.prefix.new_app app_name
+      if key == "."
+        dump_config context, app
+      else
+        begin
+          {data: app.get_config key}.to_json context.response
+        rescue err : ConfigKeyError
+          raise NotFound.new context, cause: err
+        end
+      end
+    end
 
-  relative_put "/:app_name/config/:key" do |context|
-    set_config context, context.params.url["key"], context.params.url["app_name"]
-  end
+    relative_post "/:app_name/config/:key" do |context|
+      set_config context, context.params.url["key"], context.params.url["app_name"]
+    end
 
-  relative_delete "/:app_name/config/:key" do |context|
-    Actions.prefix
-      .new_app(context.params.url["app_name"])
-      .del_config context.params.url["key"]
-  end
+    relative_put "/:app_name/config/:key" do |context|
+      set_config context, context.params.url["key"], context.params.url["app_name"]
+    end
 
-  # All keys, or all config options
-  relative_get "/:app_name/config" do |context|
-    app_name = context.params.url["app_name"]
-    dump_config context, Actions.prefix.new_app(app_name)
-  end
+    relative_delete "/:app_name/config/:key" do |context|
+      Actions.prefix
+        .new_app(context.params.url["app_name"])
+        .del_config context.params.url["key"]
+    end
 
-  # start the service associated with the given application
-  relative_put "/:app_name/service/boot" do |context|
-    app_name = context.params.url["app_name"]
-    app = Actions.prefix.new_app(app_name)
-    # TODO: rescue and raise an error if service does not exist
-    app.service.boot(parse_boolean_param "value", context)
-  end
+    # All keys, or all config options
+    relative_get "/:app_name/config" do |context|
+      app_name = context.params.url["app_name"]
+      dump_config context, Actions.prefix.new_app(app_name)
+    end
 
-  {% for action in %w(reload restart start stop) %}
+    # start the service associated with the given application
+    relative_put "/:app_name/service/boot" do |context|
+      app_name = context.params.url["app_name"]
+      app = Actions.prefix.new_app(app_name)
+      # TODO: rescue and raise an error if service does not exist
+      app.service.boot(parse_boolean_param "value", context)
+    end
+
+    {% for action in %w(reload restart start stop) %}
   # {[action.id]} the service associated with the given application
   relative_put "/:app_name/service/{{action.id}}" do |context|
     app_name = context.params.url["app_name"]
@@ -89,87 +96,76 @@ module DppmRestApi::Actions::App
 
   {% end %}
 
-  # get the status of the service associated with the given application
-  relative_get "/:app_name/service/status" do |context|
-    app_name = context.params.url["app_name"]
-    # TODO: get the status of the service
-  end
+    # get the status of the service associated with the given application
+    relative_get "/:app_name/service/status" do |context|
+      app_name = context.params.url["app_name"]
+      # TODO: get the status of the service
+    end
 
-  # lists dependent library packages
-  relative_get "/:app_name/libs" do |context|
-    # TODO: list dependencies
-  end
+    # lists dependent library packages
+    relative_get "/:app_name/libs" do |context|
+      # TODO: list dependencies
+    end
 
-  # return the base application package
-  relative_get "/:app_name/app" do |context|
-    app_name = context.params.url["app_name"]
-    build_json context.response do |builder|
-      builder.field(app_name) do
-        # Actions.prefix.new_app(app_name).to_json builder
+    # return the base application package
+    relative_get "/:app_name/app" do |context|
+      app_name = context.params.url["app_name"]
+      build_json context.response do |builder|
+        builder.field(app_name) do
+          # Actions.prefix.new_app(app_name).to_json builder
+        end
       end
     end
-  end
 
-  # returns information present in pkg.con as JSON
-  relative_get "/:app_name/pkg" do |context|
-    app_name = context.params.url["app_name"]
-    build_json context.response do |builder|
-      builder.field(app_name) do
-        # Actions.prefix.new_app(app_name).pkg.to_json builder
+    # returns information present in pkg.con as JSON
+    relative_get "/:app_name/pkg" do |context|
+      app_name = context.params.url["app_name"]
+      build_json context.response do |builder|
+        builder.field(app_name) do
+          # Actions.prefix.new_app(app_name).pkg.to_json builder
+        end
       end
     end
-  end
 
-  def valid_streams_for(app : DPPM::Prefix::App)
-    Array(String).new.tap do |streams|
-      app.each_log_stream { |stream| streams << stream }
-    end
-  end
-
-  relative_get "/:app_name/valid-log-streams" do |context|
-    build_json context.response do |builder|
-      builder.array do
-        Actions
-          .prefix
-          .new_app(context.params.url["app_name"])
-          .each_log_stream { |stream| builder.string stream }
+    relative_get "/:app_name/valid-log-streams" do |context|
+      build_json context.response do |builder|
+        builder.array do
+          Actions
+            .prefix
+            .new_app(context.params.url["app_name"])
+            .each_log_stream { |stream| builder.string stream }
+        end
       end
     end
-  end
 
-  # if the `"stream"` query parameter is set, attempt to upgrade to a websocket
-  # and stream the results. Otherwise return a JSON-formatted output of the
-  # current log data.
-  relative_get "/:app_name/logs" do |context|
-    app_name = context.params.url["app_name"]
-    app = Actions.prefix.new_app app_name
-    valid_streams = valid_streams_for app
-    stream_names = context.params.query.fetch_all("stream_type") || valid_streams
-    # filter irrellevant values
-    stream_names &= valid_streams
-    if context.params.query["stream"]?
-      raise BadRequest.new context, "\
+    # if the `"stream"` query parameter is set, attempt to upgrade to a websocket
+    # and stream the results. Otherwise return a JSON-formatted output of the
+    # current log data.
+    relative_get "/:app_name/logs" do |context|
+      app_name = context.params.url["app_name"]
+      app = Actions.prefix.new_app app_name
+      valid_streams = valid_streams app
+      stream_names = context.params.query.fetch_all("stream_type") || valid_streams
+      # filter irrellevant values
+      stream_names &= valid_streams
+      if context.params.query["stream"]?
+        raise BadRequest.new context, "\
         You must use separate requests to stream more than one log stream. A \
         stream can be selected using the query parameter stream_type." if stream_names.size != 1
-      context.response.upgrade do |socket|
-        app.get_logs(
-          stream_names.first,
-          follow: true,
-          lines: context.params.query["lines"]?.try &.to_i
-        ) { |line| socket.puts line }
-      end
-    else
-      JSON.build context.response do |builder|
-        builder.object do
-          builder.field "data" do
-            builder.object do
-              stream_names.each do |stream|
-                builder.field stream do
-                  builder.array do
-                    app.get_logs stream, follow: false, lines: context.params.query["lines"]?.try(&.to_i) do |line|
-                      builder.string line
-                    end
-                  end
+        context.response.upgrade do |socket|
+          app.get_logs(
+            stream_names.first,
+            follow: true,
+            lines: context.params.query["lines"]?.try &.to_i
+          ) { |line| socket.puts line }
+        end
+      else
+        build_json context.response do |builder|
+          stream_names.each do |stream|
+            builder.field stream do
+              builder.array do
+                app.get_logs stream, follow: false, lines: context.params.query["lines"]?.try(&.to_i) do |line|
+                  builder.string line
                 end
               end
             end
@@ -177,21 +173,21 @@ module DppmRestApi::Actions::App
         end
       end
     end
-  end
 
-  # Install the given package
-  relative_post "/:app_name" do |context|
-    # TODO: install the package and return its name
-  end
+    # Install the given package
+    relative_post "/:app_name" do |context|
+      # TODO: install the package and return its name
+    end
 
-  # Delete the given application
-  relative_delete "/:app_name" do |context|
-    app_name = context.params.url["app_name"]
-    Actions.prefix
-      .new_app(app_name)
-      .delete(
-        false,
-        parse_boolean_param("preserve_database", from: context),
-        parse_boolean_param("keep_user_group", from: context)) { true }
+    # Delete the given application
+    relative_delete "/:app_name" do |context|
+      app_name = context.params.url["app_name"]
+      Actions.prefix
+        .new_app(app_name)
+        .delete(
+          false,
+          parse_boolean_param("preserve_database", from: context),
+          parse_boolean_param("keep_user_group", from: context)) { true }
+    end
   end
 end

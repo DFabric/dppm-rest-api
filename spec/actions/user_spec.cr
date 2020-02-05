@@ -1,65 +1,68 @@
 require "../spec_helper"
 
-module DppmRestApi::Actions::User
-  struct UserAddResponse
+struct UserAddResponse
+  include JSON::Serializable
+  getter name : String
+  getter group_ids : Set(Int32)
+end
+
+struct UserDeleteResponse
+  struct Status
     include JSON::Serializable
-    getter name : String
-    getter group_ids : Set(Int32)
+    getter status : String
   end
 
-  struct UserDeleteResponse
-    struct Status
-      include JSON::Serializable
-      getter status : String
-    end
+  include JSON::Serializable
+  getter data : Status
+end
 
+struct UserGetResponse
+  struct Data
     include JSON::Serializable
-    getter data : Status
-  end
+    getter users : Array(User)
 
-  struct UserGetResponse
-    struct Data
+    struct User
       include JSON::Serializable
-      getter users : Array(User)
+      getter name : String
+      @[JSON::Field(ignore: true)]
+      getter config_user : DppmRestApi::Config::User do
+        DppmRestApi.permissions_config.users.find do |user|
+          user.name == name
+        end || fail "no user found in #{DppmRestApi.permissions_config.users} with the name #{name}"
+      end
 
-      struct User
-        include JSON::Serializable
-        getter name : String
-        @[JSON::Field(ignore: true)]
-        getter config_user : DppmRestApi::Config::User do
-          DppmRestApi.permissions_config.users.find do |user|
-            user.name == name
-          end || fail "no user found in #{DppmRestApi.permissions_config.users} with the name #{name}"
-        end
-
-        def which_should_be_in_groups(groups : Enumerable(Int32))
-          groups.each do |group|
-            unless config_user.group_ids.includes? group
-              fail "user #{config_user} is not a member of the group #{group}"
-            end
+      def which_should_be_in_groups(groups : Enumerable(Int32))
+        groups.each do |group|
+          unless config_user.group_ids.includes? group
+            fail "user #{config_user} is not a member of the group #{group}"
           end
         end
       end
     end
-
-    include JSON::Serializable
-    getter data : Data
-
-    def should_contain_user_named(name : String)
-      user = data.users.find &.name.== name
-      fail "user named #{name} was not found in #{data.users}" if user.nil?
-      user
-    end
   end
 
-  describe "POST #{fmt_route nil}" do
+  include JSON::Serializable
+  getter data : Data
+
+  def should_contain_user_named(name : String)
+    user = data.users.find &.name.== name
+    fail "user named #{name} was not found in #{data.users}" if user.nil?
+    user
+  end
+end
+
+describe DppmRestApi::Actions::User do
+  route = DppmRestApi::Actions::RelativeRoute.new "/user"
+
+  describe "POST #{route.root_path}" do
     it "responds with 401 Forbidden" do
-      post fmt_route nil
+      post route.root_path
       assert_unauthorized response
     end
+
     it "adds a user" do
       SpecHelper.without_authentication! do
-        post fmt_route(nil), body: Fixtures::USER_BODY.to_json
+        post route.root_path, body: Fixtures::USER_BODY.to_json
         assert_no_error in: response
         key, user = nil, nil
         json = JSON::PullParser.new response.body
@@ -86,29 +89,33 @@ module DppmRestApi::Actions::User
       end
     end
   end
-  describe "DELETE #{fmt_route nil}" do
+
+  describe "DELETE #{route.root_path}" do
     it "responds with 401 Forbidden" do
-      delete fmt_route '/' + UUID.random.to_s
+      delete route.root_path + '/' + UUID.random.to_s
       assert_unauthorized response
     end
+
     it "successfully deletes a user from the configuration" do
       SpecHelper.without_authentication! do
         user_id = DppmRestApi.permissions_config.users.find { |user| user.name == "Jim Oliver" }.try &.id
-        delete fmt_route '/' + user_id.to_s
+        delete route.root_path + '/' + user_id.to_s
         assert_no_error in: response
         UserDeleteResponse.from_json(response.body).data.status.should eq "success"
         DppmRestApi.permissions_config.users.find { |user| user.name == "Jim Oliver" }.should be_nil
       end
     end
   end
-  describe "GET #{fmt_route}" do
+
+  describe "GET #{route.root_path}" do
     it "responds with 401 Forbidden" do
-      get fmt_route
+      get route.root_path
       assert_unauthorized response
     end
+
     it "lists the currently present users" do
       SpecHelper.without_authentication! do
-        get fmt_route
+        get route.root_path
         assert_no_error in: response
         data = UserGetResponse.from_json(response.body)
         data.should_contain_user_named("Administrator").which_should_be_in_groups({0})
@@ -116,18 +123,20 @@ module DppmRestApi::Actions::User
       end
     end
   end
-  describe "GET #{fmt_route "/me"}" do
+
+  describe "GET #{route.root_path + "/me"}" do
     it "responds with 401 Forbidden" do
-      get fmt_route "/me"
+      get route.root_path + "/me"
       assert_unauthorized response
     end
+
     it "returns information about the user defined in the JWT" do
       jim = DppmRestApi.permissions_config.users.find &.name.starts_with? "Jim"
       fail "didn't find 'Jim' in config" if jim.nil?
-      jwt = Actions.encode jim
+      jwt = DppmRestApi::Actions.encode jim
       headers = HTTP::Headers.new
       headers.add "X-Token", jwt
-      get fmt_route("/me"), headers
+      get route.root_path + "/me", headers
       assert_no_error in: response
       data = JSON.parse(response.body)["data"]
       data["currentUser"]["name"].as_s.should eq "Jim Oliver"

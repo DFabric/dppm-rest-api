@@ -1,24 +1,25 @@
 require "../spec_helper"
 
-module DppmRestApi::Actions::Groups
-  struct AddGroupResponse
-    property data : NamedTuple(successfullyAddedGroup: Config::Group)
-    include JSON::Serializable
-  end
+struct AddGroupResponse
+  property data : NamedTuple(successfullyAddedGroup: DppmRestApi::Config::Group)
+  include JSON::Serializable
+end
 
-  SPEC_FAKE_PATH         = "/fake/path"
-  SPEC_FAKE_ENCODED_PATH = URI.encode_www_form SPEC_FAKE_PATH
+describe DppmRestApi::Actions::Groups do
+  spec_fake_path = "/fake/path"
+  spec_fake_encoded_path = URI.encode_www_form spec_fake_path
+  route = DppmRestApi::Actions::RelativeRoute.new "/groups"
 
-  describe "post #{self}" do
+  describe "post" do
     it "responds with 401 Forbidden" do
-      post fmt_route
+      post route.root_path
       assert_unauthorized response
     end
 
     it "returns BAD REQUEST when there is no request body" do
       SpecHelper.without_authentication! do
-        post fmt_route
-        err = ErrorResponse.from_json response.body
+        post route.root_path
+        err = DppmRestApi::Actions::ErrorResponse.from_json response.body
         err.errors.first.type.should eq "DppmRestApi::Actions::BadRequest"
         err.errors.first.message.should eq "One must specify a group to add."
       end
@@ -26,76 +27,76 @@ module DppmRestApi::Actions::Groups
 
     it "adds a group" do
       SpecHelper.without_authentication! do
-        test_group = Config::Group.new id: 789, name: "Test group",
-          permissions: {"/**" => Config::Route.new Access.deny, {"test" => ["param"]}}
-        post fmt_route, body: test_group.to_json
+        test_group = DppmRestApi::Config::Group.new id: 789, name: "Test group",
+          permissions: {"/**" => DppmRestApi::Config::Route.new DppmRestApi::Access.deny, {"test" => ["param"]}}
+        post route.root_path, body: test_group.to_json
         assert_no_error in: response
         DppmRestApi.permissions_config.groups.find(&.id.== 789).should eq test_group
       end
     end
   end
 
-  describe "put #{fmt_route "/:id/route/:path/:access_level"}" do
+  describe "put #{route.root_path + "/:id/route/:path/:access_level"}" do
     it "responds with 401 Forbidden" do
-      put fmt_route "/1234/route/#{SPEC_FAKE_ENCODED_PATH}/all"
+      put route.root_path + "/1234/route/#{spec_fake_encoded_path}/all"
       assert_unauthorized response
     end
 
     it "adds a new path and changes the group's name." do
       SpecHelper.without_authentication! do
-        put fmt_route("/1000/route/#{SPEC_FAKE_ENCODED_PATH}/create?name=test%20group"),
+        put route.root_path + "/1000/route/" + spec_fake_encoded_path + "/create?name=test%20group",
           body: {"q" => ["param"]}.to_json
         assert_no_error in: response
         new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
         fail "group with ID 1000 not found" if new_grp.nil?
-        new_grp.permissions[SPEC_FAKE_PATH].permissions.should eq Access::Create
-        new_grp.permissions[SPEC_FAKE_PATH].query_parameters["q"].should eq ["param"]
+        new_grp.permissions[spec_fake_path].permissions.should eq DppmRestApi::Access::Create
+        new_grp.permissions[spec_fake_path].query_parameters["q"].should eq ["param"]
         new_grp.name.should eq "test group"
       end
     end
 
     it "adds a query parameter to an existing path" do
       SpecHelper.without_authentication! do
-        put fmt_route("/1000/route/#{SPEC_FAKE_ENCODED_PATH}/create?name=test%20group")
+        put route.root_path + "/1000/route/" + spec_fake_encoded_path + "/create?name=test%20group"
         assert_no_error in: response
         new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
         fail "group with ID 1000 not found" if new_grp.nil?
-        new_grp.permissions["/fake/path"].permissions.should eq Access::Create
-        new_grp.permissions[SPEC_FAKE_PATH].query_parameters.empty?.should be_true
-        put fmt_route("/1000/route/#{SPEC_FAKE_ENCODED_PATH}/create?name=test%20group"),
+        new_grp.permissions["/fake/path"].permissions.should eq DppmRestApi::Access::Create
+        new_grp.permissions[spec_fake_path].query_parameters.empty?.should be_true
+        put route.root_path + "/1000/route/" + spec_fake_encoded_path + "/create?name=test%20group",
           body: {"q" => ["param"]}.to_json
         assert_no_error in: response
         new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
         fail "group with ID 1000 not found" if new_grp.nil?
-        new_grp.permissions[SPEC_FAKE_PATH].permissions.should eq Access::Create
-        new_grp.permissions[SPEC_FAKE_PATH].query_parameters["q"].should eq ["param"]
+        new_grp.permissions[spec_fake_path].permissions.should eq DppmRestApi::Access::Create
+        new_grp.permissions[spec_fake_path].query_parameters["q"].should eq ["param"]
       end
     end
 
     it "adds a second query parameter to the available ones on an existing route/query set" do
       SpecHelper.without_authentication! do
-        put fmt_route("/1000/route/#{SPEC_FAKE_ENCODED_PATH}/create?name=test%20group"),
+        put route.root_path + "/1000/route/" + spec_fake_encoded_path + "/create?name=test%20group",
           body: {"q" => ["param"]}.to_json
         assert_no_error in: response
         new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
         fail "group with ID 1000 not found" if new_grp.nil?
-        new_grp.permissions[SPEC_FAKE_PATH].permissions.should eq Access::Create
-        new_grp.permissions[SPEC_FAKE_PATH].query_parameters["q"].should eq ["param"]
-        put fmt_route("/1000/route/#{SPEC_FAKE_ENCODED_PATH}/create?name=test%20group"),
+        new_grp.permissions[spec_fake_path].permissions.should eq DppmRestApi::Access::Create
+        new_grp.permissions[spec_fake_path].query_parameters["q"].should eq ["param"]
+        put route.root_path + "/1000/route/" + spec_fake_encoded_path + "/create?name=test%20group",
           body: {"q" => ["another-param"]}.to_json
         assert_no_error in: response
         new_grp = DppmRestApi.permissions_config.groups.find(&.id.== 1000)
         fail "group with ID 1000 not found" if new_grp.nil?
-        new_grp.permissions[SPEC_FAKE_PATH].permissions.should eq Access::Create
-        new_grp.permissions[SPEC_FAKE_PATH].query_parameters["q"].should eq ["param", "another-param"]
+        new_grp.permissions[spec_fake_path].permissions.should eq DppmRestApi::Access::Create
+        new_grp.permissions[spec_fake_path].query_parameters["q"].should eq ["param", "another-param"]
       end
     end
 
     it "raises an error if the group doesn't already exist" do
       SpecHelper.without_authentication! do
-        put fmt_route "/1234/route/#{SPEC_FAKE_ENCODED_PATH}/read"
+        put route.root_path + "/1234/route/#{spec_fake_encoded_path}/read"
         response.status_code.should eq 404
-        errors = ErrorResponse.from_json(response.body).errors
+        errors = DppmRestApi::Actions::ErrorResponse.from_json(response.body).errors
         error = errors.find { |e| e.type == "DppmRestApi::Actions::Groups::NoSuchGroup" }
         fail "\
           Expected #{errors.to_pretty_json} to include an error of type \
@@ -105,9 +106,9 @@ module DppmRestApi::Actions::Groups
     end
   end
 
-  describe "delete #{fmt_route "/:id/route/:path"}" do
+  describe "delete #{route.root_path + "/:id/route/:path"}" do
     it "responds with 401 Forbidden" do
-      delete fmt_route "/123/route/" + SPEC_FAKE_ENCODED_PATH
+      delete route.root_path + "/123/route/" + spec_fake_encoded_path
       assert_unauthorized response
     end
 
@@ -117,30 +118,31 @@ module DppmRestApi::Actions::Groups
           .groups
           .find { |grp| grp.id == 499 }
           .not_nil!
-          .permissions[SPEC_FAKE_PATH] = DppmRestApi::Config::Route.new Access::Read
-        delete fmt_route "/499/route/" + SPEC_FAKE_ENCODED_PATH
+          .permissions[spec_fake_path] = DppmRestApi::Config::Route.new DppmRestApi::Access::Read
+        delete route.root_path + "/499/route/" + spec_fake_encoded_path
         assert_no_error in: response
         DppmRestApi.permissions_config
           .groups
           .find { |grp| grp.id == 499 }
           .not_nil!
-          .permissions[SPEC_FAKE_PATH]?.should be_nil
+          .permissions[spec_fake_path]?.should be_nil
       end
     end
 
     it "responds with NOT FOUND when the path has already been deleted" do
       SpecHelper.without_authentication! do
-        delete fmt_route "/499/route/" + SPEC_FAKE_ENCODED_PATH
-        errors = ErrorResponse.from_json(response.body).errors
+        delete route.root_path + "/499/route/" + spec_fake_encoded_path
+        errors = DppmRestApi::Actions::ErrorResponse.from_json(response.body).errors
         errors.map(&.type).should contain "DppmRestApi::Actions::NotFound"
         errors.map(&.message).first.as(String).should contain "permissions"
         response.status_code.should eq HTTP::Status::NOT_FOUND.value
       end
     end
   end
-  describe "delete #{fmt_route "/:id/param/:path"}" do
+
+  describe "delete #{route.root_path + "/:id/param/:path"}" do
     it "responds with 401 Forbidden" do
-      delete fmt_route "/1234/param/" + SPEC_FAKE_ENCODED_PATH
+      delete route.root_path + "/1234/param/" + spec_fake_encoded_path
       assert_unauthorized response
     end
 
@@ -151,14 +153,14 @@ module DppmRestApi::Actions::Groups
           Group with full access to the default namespace not found when \
           searching by ID #499" if default_group_idx.nil?
         default_group = DppmRestApi.permissions_config.groups[default_group_idx]
-        default_group.permissions[SPEC_FAKE_PATH] = Config::Route.new Access::Read, {"test" => ["param"]}
+        default_group.permissions[spec_fake_path] = DppmRestApi::Config::Route.new DppmRestApi::Access::Read, {"test" => ["param"]}
         DppmRestApi.permissions_config.groups[default_group_idx] = default_group
         DppmRestApi.permissions_config.sync_to_disk
-        delete fmt_route("/499/param/#{SPEC_FAKE_ENCODED_PATH}"), body: {queryParameters: nil}.to_json
+        delete route.root_path + "/499/param/" + spec_fake_encoded_path, body: {queryParameters: nil}.to_json
         assert_no_error in: response
         DppmRestApi.permissions_config
           .groups[default_group_idx]
-          .permissions[SPEC_FAKE_PATH]
+          .permissions[spec_fake_path]
           .query_parameters
           .empty?
           .should be_true
@@ -172,15 +174,15 @@ module DppmRestApi::Actions::Groups
           Group with full access to the default namespace not found when \
           searching by ID #499" if default_group_idx.nil?
         default_group = DppmRestApi.permissions_config.groups[default_group_idx]
-        default_group.permissions[SPEC_FAKE_PATH] = Config::Route.new Access::Read,
+        default_group.permissions[spec_fake_path] = DppmRestApi::Config::Route.new DppmRestApi::Access::Read,
           {"test1" => ["param1", "param2"], "test2" => ["param1", "param2"]}
         DppmRestApi.permissions_config.groups[default_group_idx] = default_group
         DppmRestApi.permissions_config.sync_to_disk
-        delete fmt_route "/499/param/#{SPEC_FAKE_ENCODED_PATH}?test1"
+        delete route.root_path + "/499/param/" + spec_fake_encoded_path + "?test1"
         assert_no_error in: response
         DppmRestApi.permissions_config
           .groups[default_group_idx]
-          .permissions[SPEC_FAKE_PATH]
+          .permissions[spec_fake_path]
           .query_parameters["test1"]?.should be_nil
       end
     end
@@ -192,29 +194,29 @@ module DppmRestApi::Actions::Groups
         Group with full access to the default namespace not found when \
         searching by ID #499" if default_group_idx.nil?
         default_group = DppmRestApi.permissions_config.groups[default_group_idx]
-        default_group.permissions[SPEC_FAKE_PATH] = Config::Route.new Access::Read,
+        default_group.permissions[spec_fake_path] = DppmRestApi::Config::Route.new DppmRestApi::Access::Read,
           {"test1" => ["param1", "param2"], "test2" => ["param1", "param2"]}
         DppmRestApi.permissions_config.groups[default_group_idx] = default_group
         DppmRestApi.permissions_config.sync_to_disk
-        delete fmt_route "/499/param/#{SPEC_FAKE_ENCODED_PATH}?test1=param1"
+        delete route.root_path + "/499/param/" + spec_fake_encoded_path + "?test1=param1"
         assert_no_error in: response
         DppmRestApi.permissions_config
           .groups[default_group_idx]
-          .permissions[SPEC_FAKE_PATH]
+          .permissions[spec_fake_path]
           .query_parameters["test1"]?.should eq ["param2"]
       end
     end
   end
 
-  describe "delete #{fmt_route "/:id"}" do
+  describe "delete #{route.root_path + "/:id"}" do
     it "responds with 401 Forbidden" do
-      delete fmt_route "/123"
+      delete route.root_path + "/123"
       assert_unauthorized response
     end
 
     it "deletes a whole group" do
       SpecHelper.without_authentication! do
-        delete fmt_route "/499"
+        delete route.root_path + "/499"
         assert_no_error in: response
         DppmRestApi.permissions_config.groups.find { |grp| grp.id == 499 }.should be_nil
       end
