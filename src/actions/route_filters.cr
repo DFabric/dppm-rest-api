@@ -1,7 +1,7 @@
 # A series of filters, which may be parsed from the current context. They
 # currently allow filtering the #pkg_file attributes of DPPM::Prefix's Pkg,
 # App, and Src.
-class DppmRestApi::Actions::RouteHelpers::Filters
+class DppmRestApi::Actions::RouteFilters
   @data = Hash(String, Set(String)).new
 
   # Add a single value to the filters on the given key. If there are already

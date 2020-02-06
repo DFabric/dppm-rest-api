@@ -55,5 +55,3 @@ module DppmRestApi::Actions::Route
     end
   end
 end
-
-require "./route_helpers/*"
