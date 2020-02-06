@@ -22,26 +22,24 @@ module DppmRestApi::Actions
     context.response.content_type = "application/json"
   end
 
-  RelativeRoute.new "/" do
-    relative_post "sign_in" do |context|
-      raise BadRequest.new(context) unless body = context.request.body
+  post "/sign_in" do |context|
+    raise BadRequest.new(context) unless body = context.request.body
 
-      if user_info = DppmRestApi.permissions_config.find_and_authenticate! body
-        data = {
-          token: encode user_info,
-        }
-        context.response.content_type = "application/json"
-        data.to_json context.response
-        context.response.flush
-      else
-        raise Unauthorized.new context
-      end
+    if user_info = DppmRestApi.permissions_config.find_and_authenticate! body
+      data = {
+        token: encode user_info,
+      }
+      context.response.content_type = "application/json"
+      data.to_json context.response
+      context.response.flush
+    else
+      raise Unauthorized.new context
     end
+  end
 
-    relative_options do |context|
-      File.open API_DOCUMENT do |file|
-        context.response << file
-      end
+  options "/" do |context|
+    File.open API_DOCUMENT do |file|
+      context.response << file
     end
   end
 
