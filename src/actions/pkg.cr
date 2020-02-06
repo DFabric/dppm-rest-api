@@ -18,18 +18,9 @@ module DppmRestApi::Actions::Pkg
     # TODO optional pagination
     relative_get "/:source_name" do |context|
       prefix = Route.get_prefix_with_source_name context
-      JSON.build context.response do |json|
-        json.object do
-          json.field "data" do
-            json.array do
-              prefix.each_pkg do |package|
-                json.object do
-                  json.field "package", package.package
-                  json.field "version", package.version
-                end
-              end
-            end
-          end
+      build_json context.response do |json|
+        json.array do
+          prefix.each_pkg &.to_json json
         end
       end
     end

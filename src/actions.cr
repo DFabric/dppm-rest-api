@@ -1,7 +1,7 @@
 require "kemal"
 require "jwt"
 require "./ext/path"
-require "./ext/dppm_prefix_pkg_file"
+require "./ext/dppm/*"
 require "./access"
 require "./actions/route"
 require "./actions/relative_route"

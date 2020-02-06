@@ -1,6 +1,6 @@
 require "dppm/prefix"
 
-struct ::DPPM::Prefix::PkgFile
+struct DPPM::Prefix::PkgFile
   # Yield each instance variable to the block
   def each_ivar
     {% for ivar in @type.instance_vars %}
@@ -19,7 +19,7 @@ struct ::DPPM::Prefix::PkgFile
   # Build a JSON response of the config keys mapped to their values, but only
   # if they're specified in the *keys* list. If *keys* is empty, all values
   # are forwarded
-  def to_json(builder : JSON::Builder, keys : Enumerable(String)) # : Nil
+  def to_json(builder : JSON::Builder, keys : Enumerable(String)) : Nil
     return to_json builder if keys.empty?
     builder.object do
       each_serializable_ivar do |key, value|
