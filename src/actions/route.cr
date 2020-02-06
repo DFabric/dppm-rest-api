@@ -26,6 +26,14 @@ module DppmRestApi::Actions::Route
     false
   end
 
+  private def build_json(response : IO, & : JSON::Builder ->)
+    JSON.build response do |json|
+      json.object do
+        json.field("data") { yield json }
+      end
+    end
+  end
+
   # Build JSON directly to the HTTP response IO. This yields inside of an
   # object labelled "data", like
   # ```
@@ -38,7 +46,7 @@ module DppmRestApi::Actions::Route
   # this would result in invalid JSON being output as the response body. For
   # example...
   # ```
-  # build_json do
+  # build_json_object do
   #   raise InternalServerError.new "Oh no!"
   # end
   # ```
@@ -47,11 +55,16 @@ module DppmRestApi::Actions::Route
   # {"data":{"errors": [{"type": "InternalServerError", "status_code": 500, "message": "oh no!"}]}
   # ```
   # ...which is not valid JSON due to the unclosed object written at the beginning.
-  def build_json(response : IO, & : JSON::Builder ->)
-    JSON.build response do |json|
-      json.object do
-        json.field("data") { json.object { yield json } }
-      end
+  def build_json_object(response : IO, & : JSON::Builder ->)
+    build_json response do |json|
+      json.object { yield json }
+    end
+  end
+
+  # Like `#build_json_object`, but builds an array instead of an object
+  def build_json_array(response : IO, & : JSON::Builder ->)
+    build_json response do |json|
+      json.array { yield json }
     end
   end
 end

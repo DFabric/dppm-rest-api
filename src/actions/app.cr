@@ -22,7 +22,7 @@ module DppmRestApi::Actions::App
     # sacrifice in performance, but is necessary to protect against
     # potential issues.
     json_text = String.build do |io|
-      build_json io do |json|
+      build_json_object io do |json|
         app.each_config_key do |key|
           json.field name: key, value: app.get_config key
         rescue error : ConfigKeyError
@@ -110,7 +110,7 @@ module DppmRestApi::Actions::App
     # return the base application package
     relative_get "/:app_name/app" do |context|
       app_name = context.params.url["app_name"]
-      build_json context.response do |builder|
+      build_json_object context.response do |builder|
         builder.field(app_name) do
           # Route.prefix.new_app(app_name).to_json builder
         end
@@ -120,7 +120,7 @@ module DppmRestApi::Actions::App
     # returns information present in pkg.con as JSON
     relative_get "/:app_name/pkg" do |context|
       app_name = context.params.url["app_name"]
-      build_json context.response do |builder|
+      build_json_object context.response do |builder|
         builder.field(app_name) do
           # Route.prefix.new_app(app_name).pkg.to_json builder
         end
@@ -128,7 +128,7 @@ module DppmRestApi::Actions::App
     end
 
     relative_get "/:app_name/valid-log-streams" do |context|
-      build_json context.response do |builder|
+      build_json_object context.response do |builder|
         builder.array do
           Route
             .prefix
@@ -160,7 +160,7 @@ module DppmRestApi::Actions::App
           ) { |line| socket.puts line }
         end
       else
-        build_json context.response do |builder|
+        build_json_object context.response do |builder|
           stream_names.each do |stream|
             builder.field stream do
               builder.array do

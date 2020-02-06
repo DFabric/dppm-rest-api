@@ -45,7 +45,7 @@ module DppmRestApi::Actions::User
       config_key, user = Config::User.create userdata.groups, userdata.name
       DppmRestApi.permissions_config.users << user
       DppmRestApi.permissions_config.sync_to_disk
-      build_json context.response do |resp|
+      build_json_object context.response do |resp|
         resp.field "SuccessfullyAddedUser" do
           user.to_json resp, except: :api_key_hash
         end
@@ -57,13 +57,13 @@ module DppmRestApi::Actions::User
       user_id = UUID.new context.params.url["id"]
       DppmRestApi.permissions_config.users.reject! { |user| user.id == user_id }
       DppmRestApi.permissions_config.sync_to_disk
-      build_json context.response do |json|
+      build_json_object context.response do |json|
         json.field "status", "success"
       end
     end
 
     relative_get do |context|
-      build_json context.response do |response|
+      build_json_object context.response do |response|
         response.field "users" do
           selected_users_from_query(context).to_json response
         end
@@ -71,7 +71,7 @@ module DppmRestApi::Actions::User
     end
 
     relative_get "/me" do |context, user|
-      build_json context.response do |response|
+      build_json_object context.response do |response|
         response.field "currentUser" do
           user.to_json response, except: :api_key_hash
         end

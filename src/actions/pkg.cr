@@ -18,10 +18,8 @@ module DppmRestApi::Actions::Pkg
     # TODO optional pagination
     relative_get "/:source_name" do |context|
       prefix = Route.get_prefix_with_source_name context
-      build_json context.response do |json|
-        json.array do
-          prefix.each_pkg &.to_json json
-        end
+      build_json_array context.response do |json|
+        prefix.each_pkg &.to_json json
       end
     end
 
@@ -51,7 +49,7 @@ module DppmRestApi::Actions::Pkg
         config_value = selected_pkg.get_config? key
         raise ConfigKeyNotFound.new context, key, package_name if config_value.nil?
         # A key was specified by the &get query parameter
-        build_json context.response do |json|
+        build_json_object context.response do |json|
           json.field package_name do
             json.object do
               json.field key, value: config_value
@@ -64,7 +62,7 @@ module DppmRestApi::Actions::Pkg
         # options for this package. Additionally, respond with all
         # dependent packages if the "libraries" boolean query parameter
         # is specified.
-        build_json context.response do |builder|
+        build_json_object context.response do |builder|
           build_config_response selected_pkg, builder
           if parse_boolean_param("libraries", from: context) &&
              (libs = selected_pkg.libs)
@@ -83,7 +81,7 @@ module DppmRestApi::Actions::Pkg
         context.params.query["version"]?.try { |v| URI.decode v }
       raise NoSuchPackage.new context, package_name if selected_pkg.nil?
       selected_pkg.delete confirmation: false { }
-      build_json context.response do |json|
+      build_json_object context.response do |json|
         json.field "status", "successfully deleted '#{package_name}'"
       end
     end
@@ -106,7 +104,7 @@ module DppmRestApi::Actions::Pkg
         raise InternalServerError.new context, cause: ex if init_done
         raise BadRequest.new context, cause: ex
       end
-      build_json context.response do |json|
+      build_json_object context.response do |json|
         json.field "status", "built package #{pkg.package}:#{pkg.version} successfully"
       end
     end
