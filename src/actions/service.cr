@@ -1,5 +1,5 @@
 module DppmRestApi::Actions::Service
-  include RouteHelpers
+  include Route
 
   RelativeRoute.new "/service" do
     # List the managed services. The `system` query parameter may be specified to

@@ -133,7 +133,7 @@ describe DppmRestApi::Actions::User do
     it "returns information about the user defined in the JWT" do
       jim = DppmRestApi.permissions_config.users.find &.name.starts_with? "Jim"
       fail "didn't find 'Jim' in config" if jim.nil?
-      jwt = DppmRestApi::Actions.encode jim
+      jwt = DppmRestApi::Actions::RelativeRoute.encode jim
       headers = HTTP::Headers.new
       headers.add "X-Token", jwt
       get route.root_path + "/me", headers

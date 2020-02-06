@@ -47,7 +47,7 @@ class DppmRestApi::Actions::RouteHelpers::Filters
   # that pass the filters.
   def {{type.id}}s_json(builder : JSON::Builder, keys : Enumerable(String))
     builder.array do
-      Actions.prefix.each_{{type.id}} do |{{type.id}}|
+      Route.prefix.each_{{type.id}} do |{{type.id}}|
         {{type.id}}.pkg_file.to_json builder, keys if filters_allow? {{type.id}}.pkg_file
       end
     end

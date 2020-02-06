@@ -45,7 +45,7 @@ struct CleanResponse
 end
 
 def build_test_package
-  pkg = DppmRestApi::Actions.prefix.new_pkg "testapp"
+  pkg = DppmRestApi::Actions::Route.prefix.new_pkg "testapp"
   pkg.build confirmation: false { }
 end
 
@@ -101,7 +101,7 @@ describe DppmRestApi::Actions::Pkg do
         delete test_source_package_path + "/clean"
         assert_no_error in: response
         CleanResponse.from_json(response.body).should_contain_value_matching /^testapp_\d+\.\d+\.\d+$/
-        DppmRestApi::Actions.prefix.each_pkg do |pkg|
+        DppmRestApi::Actions::Route.prefix.each_pkg do |pkg|
           # There shouldn't be any packages
           fail "found package #{pkg.name} after cleaning"
         end

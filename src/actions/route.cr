@@ -1,7 +1,19 @@
 require "./errors/*"
 
 # A series of route utilities functions that are useful to all of the Action blocks.
-module DppmRestApi::Actions::RouteHelpers
+module DppmRestApi::Actions::Route
+  class_property prefix : DPPM::Prefix { raise "No prefix set" }
+
+  # Get a prefix from a context, which has a source name.
+  def self.get_prefix_with_source_name(context : HTTP::Server::Context) : DPPM::Prefix
+    DPPM::Prefix.new(
+      path: prefix.path.to_s,
+      group: prefix.group,
+      source_name: URI.decode(context.params.url["source_name"]),
+      source_path: prefix.source_path
+    )
+  end
+
   # This method parses a boolean value from a query parameter. It returns
   # true when the query parameter is specified, but empty; false when the
   # parameter is not specified (null); and otherwise raises a BadRequest
@@ -41,16 +53,6 @@ module DppmRestApi::Actions::RouteHelpers
         json.field("data") { json.object { yield json } }
       end
     end
-  end
-
-  # Get a prefix from a context, which has a source name.
-  def get_prefix_with_source_name(context : HTTP::Server::Context) : DPPM::Prefix
-    DPPM::Prefix.new(
-      path: Actions.prefix.path.to_s,
-      group: Actions.prefix.group,
-      source_name: URI.decode(context.params.url["source_name"]),
-      source_path: Actions.prefix.source_path
-    ).tap &.ensure_pkg_dir
   end
 end
 

@@ -4,13 +4,13 @@ require "dppm/prefix"
 
 module DppmRestApi::Actions::App
   extend self
-  include RouteHelpers
+  include Route
 
   # gather the appropriate configuration option from the context and set it to
   # the app named `app_name`
   private def set_config(context, key, app_name)
     if posted = context.request.body
-      Actions.prefix.new_app(app_name).set_config key, posted.gets_to_end
+      Route.prefix.new_app(app_name).set_config key, posted.gets_to_end
     else
       raise UnprocessableEntity.new context, "setting config data requires a request body"
     end
@@ -45,7 +45,7 @@ module DppmRestApi::Actions::App
     relative_get "/:app_name/config/:key" do |context|
       app_name = context.params.url["app_name"]
       key = context.params.url["key"]
-      app = Actions.prefix.new_app app_name
+      app = Route.prefix.new_app app_name
       if key == "."
         dump_config context, app
       else
@@ -66,7 +66,7 @@ module DppmRestApi::Actions::App
     end
 
     relative_delete "/:app_name/config/:key" do |context|
-      Actions.prefix
+      Route.prefix
         .new_app(context.params.url["app_name"])
         .del_config context.params.url["key"]
     end
@@ -74,13 +74,13 @@ module DppmRestApi::Actions::App
     # All keys, or all config options
     relative_get "/:app_name/config" do |context|
       app_name = context.params.url["app_name"]
-      dump_config context, Actions.prefix.new_app(app_name)
+      dump_config context, Route.prefix.new_app(app_name)
     end
 
     # start the service associated with the given application
     relative_put "/:app_name/service/boot" do |context|
       app_name = context.params.url["app_name"]
-      app = Actions.prefix.new_app(app_name)
+      app = Route.prefix.new_app(app_name)
       # TODO: rescue and raise an error if service does not exist
       app.service.boot(parse_boolean_param "value", context)
     end
@@ -89,7 +89,7 @@ module DppmRestApi::Actions::App
   # {[action.id]} the service associated with the given application
   relative_put "/:app_name/service/{{action.id}}" do |context|
     app_name = context.params.url["app_name"]
-    app = Actions.prefix.new_app(app_name)
+    app = Route.prefix.new_app(app_name)
     # TODO: rescue and raise an error if service does not exist
     app.service.{{action.id}}
   end
@@ -112,7 +112,7 @@ module DppmRestApi::Actions::App
       app_name = context.params.url["app_name"]
       build_json context.response do |builder|
         builder.field(app_name) do
-          # Actions.prefix.new_app(app_name).to_json builder
+          # Route.prefix.new_app(app_name).to_json builder
         end
       end
     end
@@ -122,7 +122,7 @@ module DppmRestApi::Actions::App
       app_name = context.params.url["app_name"]
       build_json context.response do |builder|
         builder.field(app_name) do
-          # Actions.prefix.new_app(app_name).pkg.to_json builder
+          # Route.prefix.new_app(app_name).pkg.to_json builder
         end
       end
     end
@@ -130,7 +130,7 @@ module DppmRestApi::Actions::App
     relative_get "/:app_name/valid-log-streams" do |context|
       build_json context.response do |builder|
         builder.array do
-          Actions
+          Route
             .prefix
             .new_app(context.params.url["app_name"])
             .each_log_stream { |stream| builder.string stream }
@@ -143,7 +143,7 @@ module DppmRestApi::Actions::App
     # current log data.
     relative_get "/:app_name/logs" do |context|
       app_name = context.params.url["app_name"]
-      app = Actions.prefix.new_app app_name
+      app = Route.prefix.new_app app_name
       valid_streams = valid_streams app
       stream_names = context.params.query.fetch_all("stream_type") || valid_streams
       # filter irrellevant values
@@ -182,7 +182,7 @@ module DppmRestApi::Actions::App
     # Delete the given application
     relative_delete "/:app_name" do |context|
       app_name = context.params.url["app_name"]
-      Actions.prefix
+      Route.prefix
         .new_app(app_name)
         .delete(
           false,

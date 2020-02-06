@@ -1,6 +1,6 @@
 module DppmRestApi::Actions::Groups
   extend self
-  include RouteHelpers
+  include Route
 
   class NoSuchGroup < NotFound
     def initialize(context : HTTP::Server::Context, id : String, cause : Exception? = nil)

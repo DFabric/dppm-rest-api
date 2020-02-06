@@ -32,8 +32,12 @@ def assert_no_error(in response : HTTP::Client::Response) : Nil
   fail response_errors
 end
 
-module DppmRestApi
-  def Actions.access_filter=(@@access_filter)
+struct DppmRestApi::Actions::RelativeRoute
+  def self.access_filter=(@@access_filter)
+  end
+
+  def self.set_default_access_filter
+    @@access_filter = ->default_access_filter(HTTP::Server::Context, DppmRestApi::Access)
   end
 end
 
@@ -41,12 +45,12 @@ module SpecHelper
   @@mock_user = DppmRestApi::Config::User.new Scrypt::Password.new("password"), Set(Int32).new, "mock user", UUID.random
 
   def self.without_authentication!
-    DppmRestApi::Actions.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) do
+    DppmRestApi::Actions::RelativeRoute.access_filter = ->(_context : HTTP::Server::Context, _permissions : DppmRestApi::Access) do
       @@mock_user
     end
     yield
   ensure
-    DppmRestApi::Actions.access_filter = ->DppmRestApi::Actions.default_access_filter(HTTP::Server::Context, DppmRestApi::Access)
+    DppmRestApi::Actions::RelativeRoute.set_default_access_filter
   end
 end
 
@@ -60,7 +64,7 @@ Spec.before_suite do
   DppmRestApi.run Socket::IPAddress::LOOPBACK,
     DPPM::Prefix.default_dppm_config.port,
     Fixtures::DIR,
-    DPPM::Prefix.new(Fixtures::PREFIX_PATH.to_s).tap &.create
+    DPPM::Prefix.new Fixtures::PREFIX_PATH.to_s
 end
 
 Spec.after_suite do
@@ -77,11 +81,11 @@ Spec.before_each do
   FileUtils.mkdir_p Fixtures::DIR.to_s
   Fixtures.new.itself.reset_config
   FileUtils.mkdir_p Fixtures::PREFIX_PATH.to_s
-  DppmRestApi::Actions.prefix.create
-  FileUtils.cp_r "./lib/dppm/spec/samples", DppmRestApi::Actions.prefix.src.to_s
+  DppmRestApi::Actions::Route.prefix.create
+  FileUtils.cp_r "./lib/dppm/spec/samples", DppmRestApi::Actions::Route.prefix.src.to_s
 end
 # Clean up after ourselves
 Spec.after_each do
   FileUtils.rm_rf Fixtures::DIR
-  FileUtils.rm_rf DppmRestApi::Actions.prefix.path.to_s
+  FileUtils.rm_rf DppmRestApi::Actions::Route.prefix.path.to_s
 end

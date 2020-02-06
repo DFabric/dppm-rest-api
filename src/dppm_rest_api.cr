@@ -30,7 +30,7 @@ module DppmRestApi
   )
     @@permissions_config = Config.read data_dir
 
-    Actions.prefix = prefix
+    Actions::Route.prefix = prefix
 
     # Add error handlers
     HTTP::Status.each do |status|

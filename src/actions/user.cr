@@ -2,7 +2,7 @@ require "../config/helpers"
 
 module DppmRestApi::Actions::User
   extend self
-  include RouteHelpers
+  include Route
   include Config::Helpers
 
   struct AddUserBody

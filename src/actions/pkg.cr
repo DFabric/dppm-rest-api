@@ -1,6 +1,6 @@
 module DppmRestApi::Actions::Pkg
   extend self
-  include RouteHelpers
+  include Route
 
   def build_config_response(package, builder)
     builder.field package.package do
@@ -17,7 +17,7 @@ module DppmRestApi::Actions::Pkg
     #
     # TODO optional pagination
     relative_get "/:source_name" do |context|
-      prefix = get_prefix_with_source_name context
+      prefix = Route.get_prefix_with_source_name context
       JSON.build context.response do |json|
         json.object do
           json.field "data" do
@@ -36,7 +36,7 @@ module DppmRestApi::Actions::Pkg
 
     # Clean unused built packages
     relative_delete "/:source_name/clean" do |context|
-      prefix = get_prefix_with_source_name context
+      prefix = Route.get_prefix_with_source_name context
       result = prefix.clean_unused_packages(confirmation: false) { }
       if result.empty?
         raise NoPkgsToClean.new context
@@ -47,7 +47,7 @@ module DppmRestApi::Actions::Pkg
     end
     # Query information about a given package
     relative_get "/:source_name/:package_name/query" do |context|
-      prefix = get_prefix_with_source_name context
+      prefix = Route.get_prefix_with_source_name context
       package_name = URI.decode context.params.url["package_name"]
 
       version = context.params.query["version"]?.try { |v| URI.decode v }
@@ -86,7 +86,7 @@ module DppmRestApi::Actions::Pkg
     end
     # Delete a given package
     relative_delete "/:source_name/:package_name/delete" do |context|
-      prefix = get_prefix_with_source_name context
+      prefix = Route.get_prefix_with_source_name context
       package_name = URI.decode context.params.url["package_name"]
       selected_pkg = prefix.new_pkg package_name,
         context.params.query["version"]?.try { |v| URI.decode v }
@@ -105,7 +105,7 @@ module DppmRestApi::Actions::Pkg
     # This route takes the optional query parameters "version" and "tag".
     relative_post "/:source_name/:package_name/build" do |context|
       package_name = URI.decode context.params.url["package_name"]
-      prefix = get_prefix_with_source_name context
+      prefix = Route.get_prefix_with_source_name context
 
       init_done = false
       begin

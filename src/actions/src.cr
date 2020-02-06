@@ -1,6 +1,6 @@
 module DppmRestApi::Actions::Src
   extend self
-  include RouteHelpers
+  include Route
 
   # Lists available sources.
   RelativeRoute.new "/src" do
