@@ -26,7 +26,7 @@ shards:
 
   dppm:
     github: DFabric/dppm
-    commit: 5dc21da9962ea5e7568725ef16eec89d9c50b618
+    commit: eb5282ccc77251cfd9e8cd6e04dfd854925777f5
 
   dynany:
     github: j8r/dynany
