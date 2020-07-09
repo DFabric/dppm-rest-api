@@ -8,6 +8,7 @@ authors:
 dependencies:
   kemal:
     github: kemalcr/kemal
+    branch: master
   spec-kemal:
     github: kemalcr/spec-kemal
   scrypt:

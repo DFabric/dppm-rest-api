@@ -2,11 +2,11 @@ version: 1.0
 shards:
   ameba:
     github: crystal-ameba/ameba
-    version: 0.11.0
+    version: 0.13.0
 
   bindata:
     github: spider-gazelle/bindata
-    version: 1.2.0
+    version: 1.5.5
 
   clicr:
     github: j8r/clicr
@@ -16,17 +16,13 @@ shards:
     github: j8r/con
     version: 0.2.2
 
-  cossack:
-    github: crystal-community/cossack
-    version: 0.1.4
-
   db:
     github: crystal-lang/crystal-db
-    version: 0.8.0
+    version: 0.9.0
 
   dppm:
     github: DFabric/dppm
-    commit: eb5282ccc77251cfd9e8cd6e04dfd854925777f5
+    commit: 4a1bc37bc6872377dbc36759a4d46e84ec35bbb5
 
   dynany:
     github: j8r/dynany
@@ -34,7 +30,7 @@ shards:
 
   exception_page:
     github: crystal-loot/exception_page
-    version: 0.1.2
+    version: 0.1.4
 
   exec:
     github: j8r/exec.cr
@@ -42,15 +38,15 @@ shards:
 
   inotify:
     github: petoem/inotify.cr
-    version: 1.0.1
+    commit: 4dffddb30533814b520a1412a9501c3c3ac8ff27
 
   jwt:
     github: crystal-community/jwt
-    version: 1.4.0
+    version: 1.4.2
 
   kemal:
     github: kemalcr/kemal
-    version: 0.26.1
+    commit: dfe7dca08f4c9a9456d6132af5f6b59fcd6865e4
 
   kilt:
     github: jeromegn/kilt
@@ -62,11 +58,11 @@ shards:
 
   mysql:
     github: crystal-lang/crystal-mysql
-    version: 0.10.0
+    version: 0.11.2
 
   openssl_ext:
     github: stakach/openssl_ext
-    version: 1.2.0
+    version: 1.2.2
 
   radix:
     github: luislavena/radix
@@ -78,7 +74,7 @@ shards:
 
   semantic_compare:
     github: j8r/semantic_compare
-    version: 0.5.0
+    version: 0.5.1
 
   spec-kemal:
     github: kemalcr/spec-kemal
@@ -86,5 +82,5 @@ shards:
 
   tail:
     github: j8r/tail.cr
-    version: 0.3.0
+    version: 0.3.1
 

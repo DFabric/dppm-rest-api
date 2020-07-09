@@ -60,7 +60,7 @@ struct DppmRestApi::Config
   ensure
     begin
       tmp_file.try &.delete
-    rescue Errno
+    rescue File::NotFoundError
     end
   end
 
