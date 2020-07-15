@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 0.34.0">
+<meta name="crystal_docs.project_version" content="master">
+<meta name="crystal_docs.project_name" content="dppm_rest_api">
+
+
+<link href="../../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../js/doc.js"></script>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+
+  <meta id="repository-name" content="dppm_rest_api">
+  <title>DppmRestApi::Actions::InternalServerError - dppm_rest_api master</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../../";
+  </script>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../../index.html">
+          dppm_rest_api
+        </a>
+      </h1>
+
+      <span class="project-version">
+        master
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results" class="hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class=" " data-id="dppm_rest_api/toplevel" data-name="top level namespace">
+      <a href="../../toplevel.html">Top Level Namespace</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="dppm_rest_api/DppmRestApi" data-name="dppmrestapi">
+      <a href="../../DppmRestApi.html">DppmRestApi</a>
+      
+        <ul>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Access" data-name="dppmrestapi::access">
+      <a href="../../DppmRestApi/Access.html">Access</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="dppm_rest_api/DppmRestApi/Actions" data-name="dppmrestapi::actions">
+      <a href="../../DppmRestApi/Actions.html">Actions</a>
+      
+        <ul>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Accepted" data-name="dppmrestapi::actions::accepted">
+      <a href="../../DppmRestApi/Actions/Accepted.html">Accepted</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/AlreadyReported" data-name="dppmrestapi::actions::alreadyreported">
+      <a href="../../DppmRestApi/Actions/AlreadyReported.html">AlreadyReported</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/App" data-name="dppmrestapi::actions::app">
+      <a href="../../DppmRestApi/Actions/App.html">App</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/BadGateway" data-name="dppmrestapi::actions::badgateway">
+      <a href="../../DppmRestApi/Actions/BadGateway.html">BadGateway</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/BadRequest" data-name="dppmrestapi::actions::badrequest">
+      <a href="../../DppmRestApi/Actions/BadRequest.html">BadRequest</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/BooleanParamHasValue" data-name="dppmrestapi::actions::booleanparamhasvalue">
+      <a href="../../DppmRestApi/Actions/BooleanParamHasValue.html">BooleanParamHasValue</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ConfigKeyError" data-name="dppmrestapi::actions::configkeyerror">
+      <a href="../../DppmRestApi/Actions/ConfigKeyError.html">ConfigKeyError</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ConfigKeyNotFound" data-name="dppmrestapi::actions::configkeynotfound">
+      <a href="../../DppmRestApi/Actions/ConfigKeyNotFound.html">ConfigKeyNotFound</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Conflict" data-name="dppmrestapi::actions::conflict">
+      <a href="../../DppmRestApi/Actions/Conflict.html">Conflict</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Continue" data-name="dppmrestapi::actions::continue">
+      <a href="../../DppmRestApi/Actions/Continue.html">Continue</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Created" data-name="dppmrestapi::actions::created">
+      <a href="../../DppmRestApi/Actions/Created.html">Created</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/EarlyHints" data-name="dppmrestapi::actions::earlyhints">
+      <a href="../../DppmRestApi/Actions/EarlyHints.html">EarlyHints</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ErrorData" data-name="dppmrestapi::actions::errordata">
+      <a href="../../DppmRestApi/Actions/ErrorData.html">ErrorData</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ErrorResponse" data-name="dppmrestapi::actions::errorresponse">
+      <a href="../../DppmRestApi/Actions/ErrorResponse.html">ErrorResponse</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Exception" data-name="dppmrestapi::actions::exception">
+      <a href="../../DppmRestApi/Actions/Exception.html">Exception</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ExpectationFailed" data-name="dppmrestapi::actions::expectationfailed">
+      <a href="../../DppmRestApi/Actions/ExpectationFailed.html">ExpectationFailed</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/FailedDependency" data-name="dppmrestapi::actions::faileddependency">
+      <a href="../../DppmRestApi/Actions/FailedDependency.html">FailedDependency</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Forbidden" data-name="dppmrestapi::actions::forbidden">
+      <a href="../../DppmRestApi/Actions/Forbidden.html">Forbidden</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Found" data-name="dppmrestapi::actions::found">
+      <a href="../../DppmRestApi/Actions/Found.html">Found</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/GatewayTimeout" data-name="dppmrestapi::actions::gatewaytimeout">
+      <a href="../../DppmRestApi/Actions/GatewayTimeout.html">GatewayTimeout</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Gone" data-name="dppmrestapi::actions::gone">
+      <a href="../../DppmRestApi/Actions/Gone.html">Gone</a>
+      
+    </li>
+  
+  <li class="parent " data-id="dppm_rest_api/DppmRestApi/Actions/Groups" data-name="dppmrestapi::actions::groups">
+      <a href="../../DppmRestApi/Actions/Groups.html">Groups</a>
+      
+        <ul>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Groups/DuplicateGroup" data-name="dppmrestapi::actions::groups::duplicategroup">
+      <a href="../../DppmRestApi/Actions/Groups/DuplicateGroup.html">DuplicateGroup</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Groups/InvalidAccessLevel" data-name="dppmrestapi::actions::groups::invalidaccesslevel">
+      <a href="../../DppmRestApi/Actions/Groups/InvalidAccessLevel.html">InvalidAccessLevel</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Groups/NoSuchGroup" data-name="dppmrestapi::actions::groups::nosuchgroup">
+      <a href="../../DppmRestApi/Actions/Groups/NoSuchGroup.html">NoSuchGroup</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/HTTPStatusError" data-name="dppmrestapi::actions::httpstatuserror">
+      <a href="../../DppmRestApi/Actions/HTTPStatusError.html">HTTPStatusError</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/HttpVersionNotSupported" data-name="dppmrestapi::actions::httpversionnotsupported">
+      <a href="../../DppmRestApi/Actions/HttpVersionNotSupported.html">HttpVersionNotSupported</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ImATeapot" data-name="dppmrestapi::actions::imateapot">
+      <a href="../../DppmRestApi/Actions/ImATeapot.html">ImATeapot</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ImplementationError" data-name="dppmrestapi::actions::implementationerror">
+      <a href="../../DppmRestApi/Actions/ImplementationError.html">ImplementationError</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ImUsed" data-name="dppmrestapi::actions::imused">
+      <a href="../../DppmRestApi/Actions/ImUsed.html">ImUsed</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/InsufficientStorage" data-name="dppmrestapi::actions::insufficientstorage">
+      <a href="../../DppmRestApi/Actions/InsufficientStorage.html">InsufficientStorage</a>
+      
+    </li>
+  
+  <li class=" current" data-id="dppm_rest_api/DppmRestApi/Actions/InternalServerError" data-name="dppmrestapi::actions::internalservererror">
+      <a href="../../DppmRestApi/Actions/InternalServerError.html">InternalServerError</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/InvalidFilter" data-name="dppmrestapi::actions::invalidfilter">
+      <a href="../../DppmRestApi/Actions/InvalidFilter.html">InvalidFilter</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/InvalidInput" data-name="dppmrestapi::actions::invalidinput">
+      <a href="../../DppmRestApi/Actions/InvalidInput.html">InvalidInput</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/LengthRequired" data-name="dppmrestapi::actions::lengthrequired">
+      <a href="../../DppmRestApi/Actions/LengthRequired.html">LengthRequired</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Locked" data-name="dppmrestapi::actions::locked">
+      <a href="../../DppmRestApi/Actions/Locked.html">Locked</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/LoopDetected" data-name="dppmrestapi::actions::loopdetected">
+      <a href="../../DppmRestApi/Actions/LoopDetected.html">LoopDetected</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/MethodNotAllowed" data-name="dppmrestapi::actions::methodnotallowed">
+      <a href="../../DppmRestApi/Actions/MethodNotAllowed.html">MethodNotAllowed</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/MisdirectedRequest" data-name="dppmrestapi::actions::misdirectedrequest">
+      <a href="../../DppmRestApi/Actions/MisdirectedRequest.html">MisdirectedRequest</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/MovedPermanently" data-name="dppmrestapi::actions::movedpermanently">
+      <a href="../../DppmRestApi/Actions/MovedPermanently.html">MovedPermanently</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/MultipleChoices" data-name="dppmrestapi::actions::multiplechoices">
+      <a href="../../DppmRestApi/Actions/MultipleChoices.html">MultipleChoices</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/MultiStatus" data-name="dppmrestapi::actions::multistatus">
+      <a href="../../DppmRestApi/Actions/MultiStatus.html">MultiStatus</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NetworkAuthenticationRequired" data-name="dppmrestapi::actions::networkauthenticationrequired">
+      <a href="../../DppmRestApi/Actions/NetworkAuthenticationRequired.html">NetworkAuthenticationRequired</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NoContent" data-name="dppmrestapi::actions::nocontent">
+      <a href="../../DppmRestApi/Actions/NoContent.html">NoContent</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NonAuthoritativeInformation" data-name="dppmrestapi::actions::nonauthoritativeinformation">
+      <a href="../../DppmRestApi/Actions/NonAuthoritativeInformation.html">NonAuthoritativeInformation</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NoPkgsToClean" data-name="dppmrestapi::actions::nopkgstoclean">
+      <a href="../../DppmRestApi/Actions/NoPkgsToClean.html">NoPkgsToClean</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NoSuchPackage" data-name="dppmrestapi::actions::nosuchpackage">
+      <a href="../../DppmRestApi/Actions/NoSuchPackage.html">NoSuchPackage</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NotAcceptable" data-name="dppmrestapi::actions::notacceptable">
+      <a href="../../DppmRestApi/Actions/NotAcceptable.html">NotAcceptable</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NotExtended" data-name="dppmrestapi::actions::notextended">
+      <a href="../../DppmRestApi/Actions/NotExtended.html">NotExtended</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NotFound" data-name="dppmrestapi::actions::notfound">
+      <a href="../../DppmRestApi/Actions/NotFound.html">NotFound</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NotImplemented" data-name="dppmrestapi::actions::notimplemented">
+      <a href="../../DppmRestApi/Actions/NotImplemented.html">NotImplemented</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/NotModified" data-name="dppmrestapi::actions::notmodified">
+      <a href="../../DppmRestApi/Actions/NotModified.html">NotModified</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Ok" data-name="dppmrestapi::actions::ok">
+      <a href="../../DppmRestApi/Actions/Ok.html">Ok</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/PartialContent" data-name="dppmrestapi::actions::partialcontent">
+      <a href="../../DppmRestApi/Actions/PartialContent.html">PartialContent</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/PayloadTooLarge" data-name="dppmrestapi::actions::payloadtoolarge">
+      <a href="../../DppmRestApi/Actions/PayloadTooLarge.html">PayloadTooLarge</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/PaymentRequired" data-name="dppmrestapi::actions::paymentrequired">
+      <a href="../../DppmRestApi/Actions/PaymentRequired.html">PaymentRequired</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/PermanentRedirect" data-name="dppmrestapi::actions::permanentredirect">
+      <a href="../../DppmRestApi/Actions/PermanentRedirect.html">PermanentRedirect</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Pkg" data-name="dppmrestapi::actions::pkg">
+      <a href="../../DppmRestApi/Actions/Pkg.html">Pkg</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/PreconditionFailed" data-name="dppmrestapi::actions::preconditionfailed">
+      <a href="../../DppmRestApi/Actions/PreconditionFailed.html">PreconditionFailed</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/PreconditionRequired" data-name="dppmrestapi::actions::preconditionrequired">
+      <a href="../../DppmRestApi/Actions/PreconditionRequired.html">PreconditionRequired</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Processing" data-name="dppmrestapi::actions::processing">
+      <a href="../../DppmRestApi/Actions/Processing.html">Processing</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ProxyAuthenticationRequired" data-name="dppmrestapi::actions::proxyauthenticationrequired">
+      <a href="../../DppmRestApi/Actions/ProxyAuthenticationRequired.html">ProxyAuthenticationRequired</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/RangeNotSatisfiable" data-name="dppmrestapi::actions::rangenotsatisfiable">
+      <a href="../../DppmRestApi/Actions/RangeNotSatisfiable.html">RangeNotSatisfiable</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/RelativeRoute" data-name="dppmrestapi::actions::relativeroute">
+      <a href="../../DppmRestApi/Actions/RelativeRoute.html">RelativeRoute</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/RequestHeaderFieldsTooLarge" data-name="dppmrestapi::actions::requestheaderfieldstoolarge">
+      <a href="../../DppmRestApi/Actions/RequestHeaderFieldsTooLarge.html">RequestHeaderFieldsTooLarge</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/RequestTimeout" data-name="dppmrestapi::actions::requesttimeout">
+      <a href="../../DppmRestApi/Actions/RequestTimeout.html">RequestTimeout</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ResetContent" data-name="dppmrestapi::actions::resetcontent">
+      <a href="../../DppmRestApi/Actions/ResetContent.html">ResetContent</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Route" data-name="dppmrestapi::actions::route">
+      <a href="../../DppmRestApi/Actions/Route.html">Route</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/RouteFilters" data-name="dppmrestapi::actions::routefilters">
+      <a href="../../DppmRestApi/Actions/RouteFilters.html">RouteFilters</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/SeeOther" data-name="dppmrestapi::actions::seeother">
+      <a href="../../DppmRestApi/Actions/SeeOther.html">SeeOther</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Service" data-name="dppmrestapi::actions::service">
+      <a href="../../DppmRestApi/Actions/Service.html">Service</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/ServiceUnavailable" data-name="dppmrestapi::actions::serviceunavailable">
+      <a href="../../DppmRestApi/Actions/ServiceUnavailable.html">ServiceUnavailable</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Src" data-name="dppmrestapi::actions::src">
+      <a href="../../DppmRestApi/Actions/Src.html">Src</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/SwitchingProtocols" data-name="dppmrestapi::actions::switchingprotocols">
+      <a href="../../DppmRestApi/Actions/SwitchingProtocols.html">SwitchingProtocols</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/SwitchProxy" data-name="dppmrestapi::actions::switchproxy">
+      <a href="../../DppmRestApi/Actions/SwitchProxy.html">SwitchProxy</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/TemporaryRedirect" data-name="dppmrestapi::actions::temporaryredirect">
+      <a href="../../DppmRestApi/Actions/TemporaryRedirect.html">TemporaryRedirect</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/TooManyRequests" data-name="dppmrestapi::actions::toomanyrequests">
+      <a href="../../DppmRestApi/Actions/TooManyRequests.html">TooManyRequests</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/Unauthorized" data-name="dppmrestapi::actions::unauthorized">
+      <a href="../../DppmRestApi/Actions/Unauthorized.html">Unauthorized</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/UnavailableForLegalReasons" data-name="dppmrestapi::actions::unavailableforlegalreasons">
+      <a href="../../DppmRestApi/Actions/UnavailableForLegalReasons.html">UnavailableForLegalReasons</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/UnprocessableEntity" data-name="dppmrestapi::actions::unprocessableentity">
+      <a href="../../DppmRestApi/Actions/UnprocessableEntity.html">UnprocessableEntity</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/UnsupportedMediaType" data-name="dppmrestapi::actions::unsupportedmediatype">
+      <a href="../../DppmRestApi/Actions/UnsupportedMediaType.html">UnsupportedMediaType</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/UpgradeRequired" data-name="dppmrestapi::actions::upgraderequired">
+      <a href="../../DppmRestApi/Actions/UpgradeRequired.html">UpgradeRequired</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/UriTooLong" data-name="dppmrestapi::actions::uritoolong">
+      <a href="../../DppmRestApi/Actions/UriTooLong.html">UriTooLong</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/UseProxy" data-name="dppmrestapi::actions::useproxy">
+      <a href="../../DppmRestApi/Actions/UseProxy.html">UseProxy</a>
+      
+    </li>
+  
+  <li class="parent " data-id="dppm_rest_api/DppmRestApi/Actions/User" data-name="dppmrestapi::actions::user">
+      <a href="../../DppmRestApi/Actions/User.html">User</a>
+      
+        <ul>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/User/AddUserBody" data-name="dppmrestapi::actions::user::adduserbody">
+      <a href="../../DppmRestApi/Actions/User/AddUserBody.html">AddUserBody</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Actions/VariantAlsoNegotiates" data-name="dppmrestapi::actions::variantalsonegotiates">
+      <a href="../../DppmRestApi/Actions/VariantAlsoNegotiates.html">VariantAlsoNegotiates</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/CLI" data-name="dppmrestapi::cli">
+      <a href="../../DppmRestApi/CLI.html">CLI</a>
+      
+    </li>
+  
+  <li class="parent " data-id="dppm_rest_api/DppmRestApi/Config" data-name="dppmrestapi::config">
+      <a href="../../DppmRestApi/Config.html">Config</a>
+      
+        <ul>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Config/Group" data-name="dppmrestapi::config::group">
+      <a href="../../DppmRestApi/Config/Group.html">Group</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Config/GroupView" data-name="dppmrestapi::config::groupview">
+      <a href="../../DppmRestApi/Config/GroupView.html">GroupView</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Config/Helpers" data-name="dppmrestapi::config::helpers">
+      <a href="../../DppmRestApi/Config/Helpers.html">Helpers</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Config/Route" data-name="dppmrestapi::config::route">
+      <a href="../../DppmRestApi/Config/Route.html">Route</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/Config/User" data-name="dppmrestapi::config::user">
+      <a href="../../DppmRestApi/Config/User.html">User</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DppmRestApi/JWTCompatibleHash" data-name="dppmrestapi::jwtcompatiblehash">
+      <a href="../../DppmRestApi/JWTCompatibleHash.html">JWTCompatibleHash</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/DuplicateAPIKey" data-name="duplicateapikey">
+      <a href="../../DuplicateAPIKey.html">DuplicateAPIKey</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/GroupAlreadyExists" data-name="groupalreadyexists">
+      <a href="../../GroupAlreadyExists.html">GroupAlreadyExists</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/InvalidAccessParam" data-name="invalidaccessparam">
+      <a href="../../InvalidAccessParam.html">InvalidAccessParam</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/InvalidGroupID" data-name="invalidgroupid">
+      <a href="../../InvalidGroupID.html">InvalidGroupID</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/NoRouteMatchForThisGroup" data-name="noroutematchforthisgroup">
+      <a href="../../NoRouteMatchForThisGroup.html">NoRouteMatchForThisGroup</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/NoSuchGroup" data-name="nosuchgroup">
+      <a href="../../NoSuchGroup.html">NoSuchGroup</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/Path" data-name="path">
+      <a href="../../Path.html">Path</a>
+      
+    </li>
+  
+  <li class=" " data-id="dppm_rest_api/RequiredArgument" data-name="requiredargument">
+      <a href="../../RequiredArgument.html">RequiredArgument</a>
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">class</span> DppmRestApi::Actions::InternalServerError
+
+</h1>
+
+
+  <ul class="superclass-hierarchy"><li class="superclass"><a href="../../DppmRestApi/Actions/InternalServerError.html">DppmRestApi::Actions::InternalServerError</a></li><li class="superclass"><a href="../../DppmRestApi/Actions/HTTPStatusError.html">DppmRestApi::Actions::HTTPStatusError</a></li><li class="superclass"><a href="../../DppmRestApi/Actions/Exception.html">DppmRestApi::Actions::Exception</a></li><li class="superclass">Exception</li><li class="superclass">Reference</li><li class="superclass">Object</li></ul>
+
+
+
+
+  <h2>
+    <a id="overview" class="anchor" href="#overview">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Overview
+  </h2>
+
+  <p>An exception for the INTERNAL_SERVER_ERROR status</p>
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="direct-known-subclasses" class="anchor" href="#direct-known-subclasses">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Direct Known Subclasses
+  </h2>
+  <ul class="other-types-list">
+    
+      <li class="other-type"><a href="../../DppmRestApi/Actions/Groups/DuplicateGroup.html">DppmRestApi::Actions::Groups::DuplicateGroup</a></li>
+    
+  </ul>
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+    
+      <a href="https://github.com/DFabric/dppm-rest-api/blob/2d3526a63e23a9c9df80b14b77472d0b20c86729/src/actions/errors/http_status_errors.cr#L9" target="_blank">
+        actions/errors/http_status_errors.cr
+      </a>
+    
+    <br/>
+  
+
+
+
+  
+    <h2>
+      <a id="constant-summary" class="anchor" href="#constant-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Constant Summary
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="STATUS_CODE">
+        <strong>STATUS_CODE</strong> = <code><span class="t">HTTP</span><span class="t">::</span><span class="t">Status</span><span class="t">::</span><span class="t">INTERNAL_SERVER_ERROR</span></code>
+      </dt>
+      
+    
+  </dl>
+
+
+
+  <h2>
+    <a id="constructors" class="anchor" href="#constructors">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructors
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#new(context:HTTP::Server::Context,message:String?=nil,cause:::Exception?=nil)-class-method" class="signature"><strong>.new</strong>(context : HTTP::Server::Context, message : String? = <span class="n">nil</span>, cause : ::Exception? = <span class="n">nil</span>)</a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#context:HTTP::Server::Context-instance-method" class="signature"><strong>#context</strong> : HTTP::Server::Context</a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#status_code-instance-method" class="signature"><strong>#status_code</strong></a>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+  <h3>Instance methods inherited from class <code><a href="../../DppmRestApi/Actions/HTTPStatusError.html">DppmRestApi::Actions::HTTPStatusError</a></code></h3>
+  
+  
+    <a href="../../DppmRestApi/Actions/HTTPStatusError.html#status_code-instance-method" class="tooltip">
+      <span>status_code</span>
+    status_code</a>
+    
+  
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+  <h2>
+    <a id="constructor-detail" class="anchor" href="#constructor-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Constructor Detail
+  </h2>
+  
+    <div class="entry-detail" id="new(context:HTTP::Server::Context,message:String?=nil,cause:::Exception?=nil)-class-method">
+      <div class="signature">
+        
+        def self.<strong>new</strong>(context : HTTP::Server::Context, message : String? = <span class="n">nil</span>, cause : ::Exception? = <span class="n">nil</span>)
+
+        <a class="method-permalink" href="#new(context:HTTP::Server::Context,message:String?=nil,cause:::Exception?=nil)-class-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/DFabric/dppm-rest-api/blob/2d3526a63e23a9c9df80b14b77472d0b20c86729/src/actions/errors/http_status_errors.cr#L9" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="context:HTTP::Server::Context-instance-method">
+      <div class="signature">
+        
+        def <strong>context</strong> : HTTP::Server::Context
+
+        <a class="method-permalink" href="#context:HTTP::Server::Context-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="status_code-instance-method">
+      <div class="signature">
+        
+        def <strong>status_code</strong>
+
+        <a class="method-permalink" href="#status_code-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+          [<a href="https://github.com/DFabric/dppm-rest-api/blob/2d3526a63e23a9c9df80b14b77472d0b20c86729/src/actions/errors/http_status_errors.cr#L9" target="_blank">View source</a>]
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>
