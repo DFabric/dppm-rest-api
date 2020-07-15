@@ -1,86 +1,86 @@
-version: 1.0
+version: 2.0
 shards:
   ameba:
-    github: crystal-ameba/ameba
+    git: https://github.com/crystal-ameba/ameba.git
     version: 0.13.0
 
   bindata:
-    github: spider-gazelle/bindata
-    version: 1.5.5
+    git: https://github.com/spider-gazelle/bindata.git
+    version: 1.5.6
 
   clicr:
-    github: j8r/clicr
+    git: https://github.com/j8r/clicr.git
     version: 0.7.0
 
   con:
-    github: j8r/con
+    git: https://github.com/j8r/con.git
     version: 0.2.2
 
   db:
-    github: crystal-lang/crystal-db
+    git: https://github.com/crystal-lang/crystal-db.git
     version: 0.9.0
 
   dppm:
-    github: DFabric/dppm
-    commit: 4a1bc37bc6872377dbc36759a4d46e84ec35bbb5
+    git: https://github.com/DFabric/dppm.git
+    version: 0.0.1+git.commit.4a1bc37bc6872377dbc36759a4d46e84ec35bbb5
 
   dynany:
-    github: j8r/dynany
+    git: https://github.com/j8r/dynany.git
     version: 0.2.2
 
   exception_page:
-    github: crystal-loot/exception_page
+    git: https://github.com/crystal-loot/exception_page.git
     version: 0.1.4
 
   exec:
-    github: j8r/exec.cr
+    git: https://github.com/j8r/exec.cr.git
     version: 0.4.1
 
   inotify:
-    github: petoem/inotify.cr
-    commit: 4dffddb30533814b520a1412a9501c3c3ac8ff27
+    git: https://github.com/petoem/inotify.cr.git
+    version: 1.0.2+git.commit.4dffddb30533814b520a1412a9501c3c3ac8ff27
 
   jwt:
-    github: crystal-community/jwt
+    git: https://github.com/crystal-community/jwt.git
     version: 1.4.2
 
   kemal:
-    github: kemalcr/kemal
-    commit: dfe7dca08f4c9a9456d6132af5f6b59fcd6865e4
+    git: https://github.com/kemalcr/kemal.git
+    version: 0.26.1+git.commit.dfe7dca08f4c9a9456d6132af5f6b59fcd6865e4
 
   kilt:
-    github: jeromegn/kilt
+    git: https://github.com/jeromegn/kilt.git
     version: 0.4.0
 
   libcrown:
-    github: j8r/libcrown
+    git: https://github.com/j8r/libcrown.git
     version: 0.3.0
 
   mysql:
-    github: crystal-lang/crystal-mysql
+    git: https://github.com/crystal-lang/crystal-mysql.git
     version: 0.11.2
 
   openssl_ext:
-    github: stakach/openssl_ext
+    git: https://github.com/stakach/openssl_ext.git
     version: 1.2.2
 
   radix:
-    github: luislavena/radix
+    git: https://github.com/luislavena/radix.git
     version: 0.3.9
 
   scrypt:
-    github: ysbaddaden/scrypt-crystal
+    git: https://github.com/ysbaddaden/scrypt-crystal.git
     version: 0.3.1
 
   semantic_compare:
-    github: j8r/semantic_compare
+    git: https://github.com/j8r/semantic_compare.git
     version: 0.5.1
 
   spec-kemal:
-    github: kemalcr/spec-kemal
+    git: https://github.com/kemalcr/spec-kemal.git
     version: 0.5.0
 
   tail:
-    github: j8r/tail.cr
+    git: https://github.com/j8r/tail.cr.git
     version: 0.3.1
 
