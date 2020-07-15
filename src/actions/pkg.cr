@@ -56,7 +56,6 @@ module DppmRestApi::Actions::Pkg
             end
           end
         end
-        next context
       else
         # No specific key was requested, respond with all of the config
         # options for this package. Additionally, respond with all
